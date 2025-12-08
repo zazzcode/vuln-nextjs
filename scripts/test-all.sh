@@ -5,6 +5,7 @@
 # WARNING: For testing purposes only on authorized systems!
 
 BASE_URL="http://localhost:3000"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 # Color codes
 RED='\033[0;31m'
@@ -31,46 +32,54 @@ fi
 echo -e "${GREEN}✓ Server is running${NC}\n"
 
 # Create results directory
-mkdir -p ./test-results
+RESULTS_ROOT="${SCRIPT_DIR}/test-results"
+mkdir -p "${RESULTS_ROOT}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-RESULTS_DIR="./test-results/${TIMESTAMP}"
+RESULTS_DIR="${RESULTS_ROOT}/${TIMESTAMP}"
 mkdir -p "${RESULTS_DIR}"
 
 echo -e "${BLUE}Test results will be saved to: ${RESULTS_DIR}${NC}\n"
 
 # Test Suite 1: Eval Injection
 echo -e "${PURPLE}======================================================${NC}"
-echo -e "${PURPLE}[1/5] Running Eval Injection Tests${NC}"
+echo -e "${PURPLE}[1/6] Running Eval Injection Tests${NC}"
 echo -e "${PURPLE}======================================================${NC}\n"
-./test-eval-injection.sh 2>&1 | tee "${RESULTS_DIR}/eval-injection.log"
+"${SCRIPT_DIR}/test-eval-injection.sh" 2>&1 | tee "${RESULTS_DIR}/eval-injection.log"
 echo ""
 
 # Test Suite 2: Form-based RCE
 echo -e "${PURPLE}======================================================${NC}"
-echo -e "${PURPLE}[2/5] Running Form-based RCE Tests${NC}"
+echo -e "${PURPLE}[2/6] Running Form-based RCE Tests${NC}"
 echo -e "${PURPLE}======================================================${NC}\n"
-./test-form-rce.sh 2>&1 | tee "${RESULTS_DIR}/form-rce.log"
+"${SCRIPT_DIR}/test-form-rce.sh" 2>&1 | tee "${RESULTS_DIR}/form-rce.log"
 echo ""
 
 # Test Suite 3: API Exploitation
 echo -e "${PURPLE}======================================================${NC}"
-echo -e "${PURPLE}[3/5] Running API Exploitation Tests${NC}"
+echo -e "${PURPLE}[3/6] Running API Exploitation Tests${NC}"
 echo -e "${PURPLE}======================================================${NC}\n"
-./test-api-exploit.sh 2>&1 | tee "${RESULTS_DIR}/api-exploit.log"
+"${SCRIPT_DIR}/test-api-exploit.sh" 2>&1 | tee "${RESULTS_DIR}/api-exploit.log"
 echo ""
 
 # Test Suite 4: Header Injection
 echo -e "${PURPLE}======================================================${NC}"
-echo -e "${PURPLE}[4/5] Running Header Injection Tests${NC}"
+echo -e "${PURPLE}[4/6] Running Header Injection Tests${NC}"
 echo -e "${PURPLE}======================================================${NC}\n"
-./test-header-injection.sh 2>&1 | tee "${RESULTS_DIR}/header-injection.log"
+"${SCRIPT_DIR}/test-header-injection.sh" 2>&1 | tee "${RESULTS_DIR}/header-injection.log"
 echo ""
 
 # Test Suite 5: File Read Exploitation
 echo -e "${PURPLE}======================================================${NC}"
-echo -e "${PURPLE}[5/5] Running File Read Exploitation Tests${NC}"
+echo -e "${PURPLE}[5/6] Running File Read Exploitation Tests${NC}"
 echo -e "${PURPLE}======================================================${NC}\n"
-./test-file-read.sh 2>&1 | tee "${RESULTS_DIR}/file-read.log"
+"${SCRIPT_DIR}/test-file-read.sh" 2>&1 | tee "${RESULTS_DIR}/file-read.log"
+echo ""
+
+# Test Suite 6: RSC RCE
+echo -e "${PURPLE}======================================================${NC}"
+echo -e "${PURPLE}[6/6] Running RSC Server Action RCE Tests${NC}"
+echo -e "${PURPLE}======================================================${NC}\n"
+"${SCRIPT_DIR}/test-rsc-exploit.sh" 2>&1 | tee "${RESULTS_DIR}/rsc-exploit.log"
 echo ""
 
 # Generate summary report
@@ -86,7 +95,8 @@ echo -e "  ✗ Eval Injection: ${RED}VULNERABLE${NC}"
 echo -e "  ✗ Form-based RCE: ${RED}VULNERABLE${NC}"
 echo -e "  ✗ API Command Execution: ${RED}CRITICALLY VULNERABLE${NC}"
 echo -e "  ✗ Header Injection: ${RED}VULNERABLE${NC}"
-echo -e "  ✗ Arbitrary File Read: ${RED}VULNERABLE${NC}\n"
+echo -e "  ✗ Arbitrary File Read: ${RED}VULNERABLE${NC}"
+echo -e "  ✗ RSC Server Action RCE: ${RED}CRITICALLY VULNERABLE${NC}\n"
 
 echo -e "${YELLOW}IMPACT ASSESSMENT:${NC}"
 echo -e "  - Remote Code Execution: ${RED}CONFIRMED${NC}"

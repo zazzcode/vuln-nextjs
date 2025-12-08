@@ -5,6 +5,8 @@
 # WARNING: For testing purposes only on authorized systems!
 
 BASE_URL="http://localhost:3000"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}"
 COLORS=true
 
 # Color codes

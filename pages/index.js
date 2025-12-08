@@ -48,6 +48,11 @@ export default function Home() {
                   5. Dynamic Import Vulnerability
                 </Link>
               </li>
+              <li>
+                <Link href="/vulnerable/rsc-server-action">
+                  6. RSC Server Action RCE (CVE-2025-66478)
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -85,6 +90,7 @@ export default function Home() {
             <li><code>./test-eval-injection.sh</code> - Test eval injection attacks</li>
             <li><code>./test-form-rce.sh</code> - Test form-based RCE</li>
             <li><code>./test-api-exploit.sh</code> - Test API exploitation</li>
+            <li><code>./test-rsc-exploit.sh</code> - Test RSC RCE vulnerability</li>
             <li><code>./test-all.sh</code> - Run all tests</li>
           </ul>
         </div>
