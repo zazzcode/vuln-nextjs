@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests (Vitest, real PGlite)
+        run: pnpm test
+
+      - name: Audit ground truth (pnpm audit --prod vs snapshot)
+        run: pnpm audit:check
+
+      - name: Scenario integrity (route sources vs hash manifest)
+        run: pnpm scenario:check
+
+      - name: Build main lab app
+        run: pnpm build
+
+      - name: Build React2Shell fixture
+        run: pnpm build:react2shell
+
+      - name: Start main lab app
+        run: |
+          pnpm start &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:3000/ >/dev/null && echo "main app up" && exit 0
+            sleep 1
+          done
+          echo "main app failed to start" && exit 1
+
+      - name: HTTP integration probe
+        run: pnpm test:http
+
+      - name: Install Chromium for browser tests
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Browser XSS/eval execution tests
+        run: pnpm test:browser
+
+      - name: Start React2Shell fixture
+        run: |
+          pnpm start:react2shell &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:3001/ >/dev/null && echo "fixture up" && exit 0
+            sleep 1
+          done
+          echo "fixture failed to start" && exit 1
+
+      - name: React2Shell runtime probe
+        run: pnpm test:react2shell
+
+      - name: Raw audit visibility (expected findings, never blocking)
+        run: pnpm audit:lab || echo "::notice::pnpm audit reports the intentional vulnerable pins (see docs/vulnerabilities/react2shell.md)"

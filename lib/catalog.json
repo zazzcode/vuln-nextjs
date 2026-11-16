@@ -7,11 +7,11 @@
     "cwe": "CWE-95",
     "route": "/vulnerable/eval-injection",
     "source": "pages/vulnerable/eval-injection.js",
-    "flow": "query.input \u2192 useEffect \u2192 eval",
+    "flow": "query.input → useEffect → eval",
     "runtime": "browser",
-    "documentation": "doc/vulnerabilities/javascript.md",
+    "documentation": "docs/vulnerabilities/javascript.md",
     "expectedFinding": true,
-    "test": "manual browser verification"
+    "test": "tests/browser/xss.browser.test.mjs"
   },
   {
     "id": "JS-002",
@@ -21,11 +21,12 @@
     "cwe": "CWE-95",
     "route": "/vulnerable/form-submission",
     "source": "pages/api/vulnerable-submit.js",
-    "flow": "JSON name/message \u2192 eval",
+    "flow": "JSON name/message → eval",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/javascript.md",
+    "documentation": "docs/vulnerabilities/javascript.md",
     "expectedFinding": true,
-    "test": "scripts/test-http.mjs"
+    "safeControl": "pages/api/protected-example.js",
+    "test": "tests/unit/eval.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "OS-001",
@@ -35,11 +36,12 @@
     "cwe": "CWE-78",
     "route": "/vulnerable/api-route",
     "source": "pages/api/vulnerable-exec.js",
-    "flow": "JSON command \u2192 child_process.exec",
+    "flow": "JSON command → child_process.exec",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/system.md",
+    "documentation": "docs/vulnerabilities/system.md",
     "expectedFinding": true,
-    "test": "scripts/test-http.mjs"
+    "safeControl": "pages/api/secure/command.js",
+    "test": "tests/unit/command.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "FS-001",
@@ -49,11 +51,12 @@
     "cwe": "CWE-22",
     "route": "/vulnerable/file-read",
     "source": "pages/api/vulnerable-file-read.js",
-    "flow": "JSON filePath \u2192 fs.readFileSync",
+    "flow": "JSON filePath → fs.readFileSync",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/system.md",
+    "documentation": "docs/vulnerabilities/system.md",
     "expectedFinding": true,
-    "test": "scripts/test-http.mjs"
+    "safeControl": "pages/api/secure/file-read.js",
+    "test": "tests/unit/file-read.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "SQL-001",
@@ -63,12 +66,12 @@
     "cwe": "CWE-89",
     "route": "/sql/login",
     "source": "pages/api/sql/unsafe/login.js",
-    "flow": "JSON username/password \u2192 SQL interpolation \u2192 db.query",
+    "flow": "JSON username/password → SQL interpolation → db.query",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/sql.md",
+    "documentation": "docs/vulnerabilities/sql.md",
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/login.js",
-    "test": "tests/sql.test.cjs; scripts/test-http.mjs"
+    "test": "tests/unit/sql.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "SQL-002",
@@ -78,12 +81,12 @@
     "cwe": "CWE-89",
     "route": "/sql/products",
     "source": "pages/api/sql/unsafe/products.js",
-    "flow": "query.q \u2192 SQL interpolation \u2192 db.query",
+    "flow": "query.q → SQL interpolation → db.query",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/sql.md",
+    "documentation": "docs/vulnerabilities/sql.md",
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/products.js",
-    "test": "tests/sql.test.cjs; scripts/test-http.mjs"
+    "test": "tests/unit/sql.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "SQL-003",
@@ -93,26 +96,56 @@
     "cwe": "CWE-89",
     "route": "/sql/notes",
     "source": "pages/api/sql/unsafe/notes.js",
-    "flow": "JSON body \u2192 SQL interpolation \u2192 db.exec",
+    "flow": "JSON body → SQL interpolation → db.exec",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/sql.md",
+    "documentation": "docs/vulnerabilities/sql.md",
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/notes.js",
-    "test": "tests/sql.test.cjs; scripts/test-http.mjs"
+    "test": "tests/unit/sql.test.mjs; scripts/test-http.mjs"
+  },
+  {
+    "id": "XSS-001",
+    "title": "Reflected XSS through raw HTML rendering",
+    "status": "active",
+    "scanner": "SAST",
+    "cwe": "CWE-79",
+    "route": "/xss/unsafe/reflected",
+    "source": "pages/xss/unsafe/reflected.js",
+    "flow": "query.payload → dangerouslySetInnerHTML",
+    "runtime": "browser",
+    "documentation": "docs/vulnerabilities/xss.md",
+    "expectedFinding": true,
+    "safeControl": "pages/xss/safe/reflected.js",
+    "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
+  },
+  {
+    "id": "XSS-002",
+    "title": "Stored XSS through raw HTML rendering",
+    "status": "active",
+    "scanner": "SAST",
+    "cwe": "CWE-79",
+    "route": "/xss/unsafe/stored",
+    "source": "pages/xss/unsafe/stored.js",
+    "flow": "note body → dangerouslySetInnerHTML for every visitor",
+    "runtime": "browser",
+    "documentation": "docs/vulnerabilities/xss.md",
+    "expectedFinding": true,
+    "safeControl": "pages/xss/safe/stored.js",
+    "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "SCA-001",
-    "title": "React2Shell",
+    "title": "React2Shell (CVE-2025-66478)",
     "status": "active",
     "scanner": "SCA",
     "cwe": "CWE-502",
     "route": "/vulnerable/rsc-server-action",
     "source": "targets/react2shell/package.json",
-    "flow": "crafted RSC request \u2192 affected React Server Components decoder",
+    "flow": "crafted RSC request → affected React Server Components decoder",
     "runtime": "server",
-    "documentation": "doc/vulnerabilities/react2shell.md",
+    "documentation": "docs/vulnerabilities/react2shell.md",
     "expectedFinding": true,
-    "test": "scripts/test-sca.mjs; scripts/test-react2shell.mjs"
+    "test": "scripts/check-audit.mjs; scripts/test-react2shell.mjs"
   },
   {
     "id": "DEMO-001",
@@ -122,9 +155,9 @@
     "cwe": null,
     "route": "/vulnerable/header-injection",
     "source": "pages/vulnerable/header-injection.js",
-    "flow": "request headers \u2192 escaped React output",
+    "flow": "request headers → escaped React output",
     "runtime": "server/browser",
-    "documentation": "doc/vulnerabilities/demonstrations.md",
+    "documentation": "docs/vulnerabilities/demonstrations.md",
     "expectedFinding": false,
     "test": "manual browser verification"
   },
@@ -138,7 +171,7 @@
     "source": "pages/vulnerable/dynamic-import.js",
     "flow": "displayed code only; no dynamic loader",
     "runtime": "browser",
-    "documentation": "doc/vulnerabilities/demonstrations.md",
+    "documentation": "docs/vulnerabilities/demonstrations.md",
     "expectedFinding": false,
     "test": "manual browser verification"
   }

@@ -1,0 +1,22 @@
+{
+  "pages/api/protected-example.js": "308cd20c5126deb0dca9564f0ba9dae38487568aa27c1768017a2aa85dfd2670",
+  "pages/api/secure/command.js": "53705aa4cea7b326ce22af53f1c577c5c7586c30d9bbb29f96ebdd8e26a3d2ef",
+  "pages/api/secure/file-read.js": "3f9252bf4242dd8e6249035e272f59da34eb92239557a62ecae2e6f8da410257",
+  "pages/api/sql/safe/login.js": "d4b2cd7dbaf97c3ee0e89de9542c54f1d0d8fd8f488ad2628395e55478d29c2c",
+  "pages/api/sql/safe/notes.js": "154afd2e47be73118f1e83313c0b1cefd7cbde01794fc95c83c09b9b7b76e225",
+  "pages/api/sql/safe/products.js": "f731c1eda0dd07ecf6731dcbd3575118f6b90b6e6d3360ed97f2359857041bd6",
+  "pages/api/sql/unsafe/login.js": "6fe28f7471b883edf3e3f2f1e8220090049dfbd11557a2894f077ce2ad68c0c6",
+  "pages/api/sql/unsafe/notes.js": "c7dc61a3efd53df2309d9038a988a502d425b060a313cdabba2c90a82df25e5f",
+  "pages/api/sql/unsafe/products.js": "e2db48866d85c1ab466f9b0c806e91e7c2815e776298c79fb280a7ade61cf22c",
+  "pages/api/vulnerable-exec.js": "0e4440c31654f9ae15e1fc045e66026fa536dd4dfeb1ea3eb02ae2ad14f50ddf",
+  "pages/api/vulnerable-file-read.js": "bd5b946c1ad6fd5435564a92478e1dd77f6d40aeb8c3cf84675321e594fb8670",
+  "pages/api/vulnerable-submit.js": "ca3ab6ef35e0de757725adda617c55c3fb87931bab839956929d5ccf15127ee9",
+  "pages/vulnerable/dynamic-import.js": "20d2423581e5f7c1e725f885c9348c596822c80997239d13a18278e34fc3a67a",
+  "pages/vulnerable/eval-injection.js": "04e891450ad93700d2aa3de68bf7fe806b7618c2fa3b03255a08eed0e1777070",
+  "pages/vulnerable/header-injection.js": "43325b825c78d77c71b51f495f4c92aeb13a12a2e8049ce7b3fcde0ef1b05215",
+  "pages/xss/safe/reflected.js": "c257b907829c2ecba3e72e65d5249e4fc0030bedac2194a077ab707bfd26c0e6",
+  "pages/xss/safe/stored.js": "9f3d2dec85a6d8fe6e12d06897ae0926c123abb3d5298a7b196f4e22901ff789",
+  "pages/xss/unsafe/reflected.js": "bb2366dd4501b32e46d39c1ba5ce7d8ee87c3b90d62883dcde1746a1c8609d47",
+  "pages/xss/unsafe/stored.js": "c401cb254b7ee2d90df52d3f893f1c8600dd8a7b3669472e42ed4f663b66dc2c",
+  "targets/react2shell/package.json": "c2f9027a95fbfc7cbfd0012729973964017d8a3c568bae41d7853d916a38e2cb"
+}

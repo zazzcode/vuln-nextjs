@@ -1,462 +1,105 @@
-# React2Shell Vulnerability Test Site (CVE-2025-66478)
+# Zazzles vulnerability lab
 
-⚠️ **CRITICAL WARNING: This is a deliberately vulnerable application for security testing and educational purposes ONLY. NEVER deploy this to production or expose it to the internet!**
+A deliberately vulnerable Next.js testbed for validating **SAST and SCA tools**. Every scenario has a stable ID, a documented expected finding, an automated test proving the flaw is exploitable, and — where meaningful — a paired safe control that handles the identical payload without executing it.
 
-## Attribution and Project Origins
+> ⚠️ **This application is intentionally vulnerable.** Run it only in isolated local environments against synthetic data. Never deploy or expose it. Both apps bind `127.0.0.1` only.
 
-This app is an expansion of the original [nextjs-vulsite](https://github.com/e-tang/nextjs-vulsite) by [e-tang](https://github.com/e-tang) (Eric, credited as `eric` in the original Git history). Credit for the original vulnsite, its initial vulnerability examples, and its documentation belongs to the original author.
+## Attribution and license
 
-This version builds on that foundation as a customized vulnerability testing app for Zazzles, with additional vulnerability scenarios and testing capabilities planned.
+Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-vulsite) — credit for the original scenarios and documentation belongs to the original author (see Git history and the footer of every lab page). This fork adds SQL (PGlite), XSS scenarios, safe controls, the React2Shell SCA fixture, an automated test suite, CI, and full per-scenario documentation. MIT licensed — see [LICENSE](LICENSE).
 
-## Overview
+## Scenarios
 
-This Next.js application demonstrates the React2Shell vulnerability (CVE-2025-66478), a critical Remote Code Execution (RCE) flaw affecting Next.js applications. The project includes:
+| ID | Scenario | CWE | Type | Unsafe → safe |
+| --- | --- | --- | --- | --- |
+| JS-001 | Browser eval injection | CWE-95 | SAST | `/vulnerable/eval-injection` → `/secure/sanitized-input` |
+| JS-002 | Server-side eval injection | CWE-95 | SAST | `/api/vulnerable-submit` → `/api/protected-example` |
+| OS-001 | Shell command execution | CWE-78 | SAST | `/api/vulnerable-exec` → `/api/secure/command` |
+| FS-001 | Arbitrary file read | CWE-22 | SAST | `/api/vulnerable-file-read` → `/api/secure/file-read` |
+| SQL-001 | SQL login bypass | CWE-89 | SAST | `/api/sql/unsafe/login` → `/api/sql/safe/login` |
+| SQL-002 | SQL search injection | CWE-89 | SAST | `/api/sql/unsafe/products` → `/api/sql/safe/products` |
+| SQL-003 | SQL stacked statements | CWE-89 | SAST | `/api/sql/unsafe/notes` → `/api/sql/safe/notes` |
+| XSS-001 | Reflected XSS | CWE-79 | SAST | `/xss/unsafe/reflected` → `/xss/safe/reflected` |
+| XSS-002 | Stored XSS | CWE-79 | SAST | `/xss/unsafe/stored` → `/xss/safe/stored` |
+| SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | pinned `next@15.0.4` fixture in `targets/react2shell` |
 
-- **Vulnerable Examples**: Pages demonstrating various attack vectors
-- **Secure Examples**: Pages showing proper security implementations
-- **Test Scripts**: Automated curl-based tests with malicious payloads
-- **Documentation**: Detailed explanations of vulnerabilities and fixes
+Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners should not report them.
 
-## CVE-2025-66478 - React2Shell
+**Per-scenario details with exact exploit/reproduction commands live in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md).**
 
-The React2Shell vulnerability exploits flaws in Next.js's server-side rendering (SSR) mechanism, specifically in how it handles:
-- Dynamic imports and component hydration
-- User input in `getServerSideProps` functions
-- Unsanitized data passed to React components
+## Setup
 
-This can lead to:
-- ✗ Remote Code Execution (RCE)
-- ✗ System Command Execution
-- ✗ Arbitrary File Reading
-- ✗ Data Exfiltration
-- ✗ Complete Server Compromise
-
-## Installation
-
-1. Install dependencies:
-```bash
-cd /data/tyolab/web/nextjs/nextjs-vulsite
-npm install
-```
-
-2. Start the development server:
-```bash
-npm run dev
-```
-
-3. Access the application:
-```
-http://localhost:3000
-```
-
-## Project Structure
-
-```
-nextjs-vulsite/
-├── pages/
-│   ├── index.js                          # Home page with navigation
-│   ├── _app.js                           # Next.js app wrapper
-│   ├── vulnerable/                       # Vulnerable examples
-│   │   ├── eval-injection.js            # Eval injection via query params
-│   │   ├── form-submission.js           # Form-based RCE
-│   │   ├── api-route.js                 # API exploitation
-│   │   ├── header-injection.js          # HTTP header injection
-│   │   └── dynamic-import.js            # Dynamic import vulnerability
-│   ├── secure/                          # Secure examples
-│   │   ├── sanitized-input.js           # Proper input sanitization
-│   │   ├── validated-form.js            # Form validation
-│   │   ├── protected-api.js             # Secure API implementation
-│   │   └── csp-enabled.js               # Content Security Policy
-│   └── api/                             # API routes
-│       ├── vulnerable-submit.js         # Vulnerable form processor
-│       ├── vulnerable-exec.js           # Command execution endpoint
-│       ├── vulnerable-file-read.js      # Arbitrary file reading
-│       └── protected-example.js         # Secure API example
-├── scripts/                             # Test scripts
-│   ├── test-eval-injection.sh           # Eval injection tests
-│   ├── test-form-rce.sh                 # Form RCE tests
-│   ├── test-api-exploit.sh              # API exploitation tests
-│   ├── test-header-injection.sh         # Header injection tests
-│   ├── test-file-read.sh                # File read tests
-│   └── test-all.sh                      # Run all tests
-├── styles/                              # CSS files
-│   ├── globals.css                      # Global styles
-│   └── Home.module.css                  # Home page styles
-├── package.json                         # Dependencies
-├── next.config.js                       # Next.js configuration
-└── README.md                            # This file
-```
-
-## Vulnerable Pages
-
-### 1. Eval Injection (`/vulnerable/eval-injection`)
-Demonstrates code injection via query parameters using `eval()`.
-
-**Test URL:**
-```
-http://localhost:3000/vulnerable/eval-injection?input='); alert('XSS'); //
-```
-
-**Attack Vector:**
-```javascript
-eval(`setContent('${userInput}')`);  // DANGEROUS!
-```
-
-### 2. Form Submission RCE (`/vulnerable/form-submission`)
-Shows how form data can be exploited to execute code.
-
-**Malicious Payload:**
-```
-'); require('child_process').exec('whoami'); //
-```
-
-### 3. API Route Exploitation (`/vulnerable/api-route`)
-Demonstrates direct system command execution via API endpoint.
-
-**Test Command:**
-```bash
-curl -X POST http://localhost:3000/api/vulnerable-exec \
-  -H "Content-Type: application/json" \
-  -d '{"command": "whoami"}'
-```
-
-### 4. Header Injection (`/vulnerable/header-injection`)
-Shows how HTTP headers can be exploited.
-
-**Test:**
-```bash
-curl -H "X-Custom-Header: '); console.log('pwned'); //" \
-  http://localhost:3000/vulnerable/header-injection
-```
-
-### 5. Dynamic Import (`/vulnerable/dynamic-import`)
-Demonstrates path traversal via dynamic imports.
-
-**Test URL:**
-```
-http://localhost:3000/vulnerable/dynamic-import?module=../../../etc/passwd
-```
-
-## Secure Pages
-
-### 1. Sanitized Input (`/secure/sanitized-input`)
-Shows proper input validation and sanitization.
-
-**Features:**
-- Type validation
-- Length limits
-- Character whitelist
-- Pattern blocking
-
-### 2. Validated Form (`/secure/validated-form`)
-Demonstrates comprehensive form validation.
-
-**Features:**
-- Client-side validation
-- Server-side validation
-- Input sanitization
-- Error handling
-
-### 3. Protected API (`/secure/protected-api`)
-Shows secure API implementation.
-
-**Features:**
-- Type checking
-- Input sanitization
-- No eval/exec
-- Proper error handling
-
-### 4. CSP Enabled (`/secure/csp-enabled`)
-Demonstrates Content Security Policy protection.
-
-**Features:**
-- CSP headers
-- Multiple security headers
-- Defense in depth
-
-## Test Scripts
-
-All test scripts are located in the `/scripts` directory and require the server to be running.
-
-### Run Individual Tests
+Requires Node.js `>= 22.13.0`. pnpm is pinned via `packageManager` and supplied by corepack:
 
 ```bash
-cd /data/tyolab/web/nextjs/nextjs-vulsite/scripts
-
-# Test eval injection
-./test-eval-injection.sh
-
-# Test form RCE
-./test-form-rce.sh
-
-# Test API exploitation
-./test-api-exploit.sh
-
-# Test header injection
-./test-header-injection.sh
-
-# Test file reading
-./test-file-read.sh
+git clone https://github.com/zazzcode/vuln-nextjs.git
+cd vuln-nextjs
+corepack enable            # once, puts the pinned pnpm on PATH
+pnpm install
 ```
 
-### Run All Tests
+pnpm is project-scoped: packages live in a global content-addressable store and are hard-linked into this repository's `node_modules` only. Other projects on your machine are not affected — which is what makes it safe to keep deliberately vulnerable versions pinned here.
+
+## Run
 
 ```bash
-cd /data/tyolab/web/nextjs/nextjs-vulsite/scripts
-./test-all.sh
+pnpm dev                                 # main lab, http://127.0.0.1:3000
+pnpm build:react2shell && pnpm start:react2shell   # SCA fixture, http://127.0.0.1:3001
 ```
 
-This will:
-1. Run all vulnerability tests
-2. Generate detailed logs
-3. Create a summary report
-4. Save results to `./test-results/[timestamp]/`
+For production-mode testing (what CI does): `pnpm build && pnpm start`.
 
-## Understanding the Vulnerabilities
+## Tests
 
-### How React2Shell Works
+| Command | Proves |
+| --- | --- |
+| `pnpm test` | Vitest unit suite — handlers import directly against real in-memory PGlite; exploitable outcomes and safe rejections for identical payloads |
+| `pnpm test:http` | End-to-end HTTP against the running server — vulnerable/safe pairs, SSR raw-vs-escaped XSS markup, all page routes |
+| `pnpm test:browser` | Playwright/Chromium — XSS and eval payloads **actually execute** on unsafe pages and provably **do not** on safe pages |
+| `pnpm test:react2shell` | Server-side execution inside the affected RSC decoder, via a marker computed on the server |
+| `pnpm audit:check` | `pnpm audit --prod` output matches the committed ground truth `tests/expected-audit.json` |
+| `pnpm scenario:check` | Every catalog-registered route exists and its content hash matches `tests/expected-hashes.json` |
+| `pnpm lint` | ESLint across pages, components, lib, tests, scripts |
 
-1. **Unsafe Input Handling**: User input is passed to `getServerSideProps` without validation
-2. **Code Injection**: Input is used in dangerous functions like `eval()` or `exec()`
-3. **Server-Side Execution**: Code runs on the server during SSR, not in the browser
-4. **Full System Access**: Attacker gains access to Node.js runtime and system commands
+`pnpm audit --prod` itself exits nonzero **by design** — the vulnerable pins are the SCA scenario. `audit:check` turns that into a reviewable ground truth: drift fails until you inspect it and run `pnpm audit:update`. Likewise, scenario sources cannot silently change: run `pnpm scenario:update` only after reviewing a deliberate change.
 
-### Example Attack Flow
+Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
+
+## Documentation
+
+- [docs/README.md](docs/README.md) — documentation index
+- [docs/architecture.md](docs/architecture.md) — workspace, data layer, test layers
+- [docs/vulnerabilities/](docs/vulnerabilities/index.md) — per-scenario write-ups with exploit instructions
+- [docs/adding-scenarios.md](docs/adding-scenarios.md) — how to add a scenario
+
+## Repository layout
 
 ```
-1. Attacker crafts URL:
-   /vulnerable?input='); require('child_process').exec('whoami'); //
-
-2. Next.js processes request:
-   getServerSideProps({ query }) {
-     return { props: { userInput: query.input } }
-   }
-
-3. Component uses eval():
-   eval(`setContent('${userInput}')`)
-
-4. Malicious code executes:
-   setContent(''); require('child_process').exec('whoami'); //')
-
-5. Server executes: whoami
-6. Attacker gains RCE
+├── pages/                  # main lab (Pages Router, Next 13)
+│   ├── api/sql/{safe,unsafe}/   # SQL scenario pairs (PGlite)
+│   ├── api/secure/         # safe exec + allowlisted file read
+│   ├── xss/{safe,unsafe}/  # reflected/stored XSS pairs
+│   └── vulnerable/, secure/
+├── targets/react2shell/    # SCA-001: pinned next@15.0.4 App Router fixture
+├── lib/catalog.json        # scenario metadata (single source of truth)
+├── tests/unit/             # Vitest
+├── tests/browser/          # Playwright
+├── scripts/                # HTTP, RSC, audit + integrity checks
+└── docs/                   # this documentation
 ```
 
-## Security Best Practices
+## CI
 
-### 1. Input Validation
-
-```javascript
-// ALWAYS validate input
-if (typeof input !== 'string') {
-  return { error: 'Invalid input type' };
-}
-
-// Check length
-if (input.length > 200) {
-  return { error: 'Input too long' };
-}
-
-// Use whitelist
-const sanitized = input.replace(/[^a-zA-Z0-9\s\-_.]/g, '');
-```
-
-### 2. Never Use eval() or exec() with User Input
-
-```javascript
-// NEVER do this:
-eval(userInput);
-exec(userInput);
-
-// Instead, use safe alternatives:
-const result = JSON.parse(userInput);  // For JSON
-const allowed = ['option1', 'option2'];
-if (allowed.includes(userInput)) {
-  // Process safe input
-}
-```
-
-### 3. Implement Content Security Policy
-
-```javascript
-// next.config.js
-const securityHeaders = [
-  {
-    key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self'; object-src 'none';"
-  }
-];
-```
-
-### 4. Use Middleware Protection
-
-```javascript
-// middleware.js
-export function middleware(request) {
-  const suspiciousPatterns = [
-    /eval\(/,
-    /require\(/,
-    /child_process/
-  ];
-
-  const queryString = request.nextUrl.searchParams.toString();
-
-  for (const pattern of suspiciousPatterns) {
-    if (pattern.test(queryString)) {
-      return new NextResponse('Blocked', { status: 403 });
-    }
-  }
-
-  return NextResponse.next();
-}
-```
-
-## Fixing React2Shell
-
-### Official Fix Tool
-
-```bash
-npx fix-react2shell-next
-```
-
-This will:
-- Scan your project for vulnerabilities
-- Automatically patch known issues
-- Update dependencies
-- Generate a security report
-
-### Manual Fix Steps
-
-1. **Update Dependencies:**
-```bash
-npm update next react react-dom
-npm audit fix --force
-```
-
-2. **Add Input Validation:**
-- Validate all user inputs
-- Use type checking
-- Implement length limits
-- Use character whitelists
-
-3. **Remove Dangerous Functions:**
-- Eliminate all `eval()` usage
-- Avoid `exec()` with user input
-- Use safe alternatives
-
-4. **Implement Security Headers:**
-- Add CSP
-- Enable X-Frame-Options
-- Set X-Content-Type-Options
-
-5. **Add Middleware Protection:**
-- Block suspicious patterns
-- Rate limit requests
-- Log security events
-
-## Testing Checklist
-
-- [ ] Install dependencies
-- [ ] Start development server
-- [ ] Access home page (http://localhost:3000)
-- [ ] Test vulnerable eval injection page
-- [ ] Test vulnerable form submission
-- [ ] Test vulnerable API route
-- [ ] Test header injection
-- [ ] Test dynamic import
-- [ ] Run eval injection test script
-- [ ] Run form RCE test script
-- [ ] Run API exploit test script
-- [ ] Run header injection test script
-- [ ] Run file read test script
-- [ ] Run complete test suite
-- [ ] Review secure page implementations
-- [ ] Test secure input sanitization
-- [ ] Test secure form validation
-- [ ] Test protected API
-- [ ] Verify CSP implementation
-
-## Important Notes
-
-### ⚠️ Security Warnings
-
-1. **DO NOT** deploy this application to production
-2. **DO NOT** expose this application to the internet
-3. **DO NOT** use this code in real applications
-4. **ONLY** use in isolated testing environments
-5. **ALWAYS** use with explicit authorization
-
-### Educational Use
-
-This project is designed for:
-- Security training and education
-- Vulnerability research
-- Penetration testing practice
-- Understanding web security
-- Learning secure coding practices
-
-### Legal Considerations
-
-- Only test on systems you own or have written permission to test
-- Unauthorized access to computer systems is illegal
-- This tool is for ethical security testing only
-- Users are responsible for how they use this code
-
-## Troubleshooting
-
-### Server won't start
-```bash
-# Clear Next.js cache
-rm -rf .next
-
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Test scripts not executable
-```bash
-chmod +x scripts/*.sh
-```
-
-### Dependencies not found
-```bash
-npm install
-```
-
-### Port 3000 already in use
-```bash
-# Kill process on port 3000
-lsof -ti:3000 | xargs kill -9
-
-# Or use a different port
-npm run dev -- -p 3001
-```
-
-## Resources
-
-- [Next.js Security Best Practices](https://nextjs.org/docs/advanced-features/security-headers)
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security/)
-- [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and PR: frozen install → lint → unit tests → ground-truth checks → builds → HTTP probe → browser tests → React2Shell runtime probe, plus a non-blocking raw audit for visibility. All required checks are expected green.
 
 ## Contributing
 
-This is an educational project. If you find additional vulnerabilities or want to contribute:
+Contributions that add or refine scenarios are welcome. The lab's value is its **stable ground truth**, so the process centers on keeping it deliberate:
 
-1. Document the vulnerability clearly
-2. Provide both vulnerable and secure examples
-3. Include test cases
-4. Add to documentation
+1. **Branch** — work on a feature branch; `main` stays reproducible.
+2. **Follow the checklist** — [docs/adding-scenarios.md](docs/adding-scenarios.md): flaw + safe control in separate files, catalog entry, documentation with reproduction steps, and tests asserting both the exploitable and the safe path (unit + HTTP, browser for client-side execution).
+3. **Never upgrade pinned vulnerable dependencies** — the pins are the scenarios. If one must retire, do it in a dedicated change that updates the catalog, docs, and audit snapshot together.
+4. **Re-snapshot ground truth deliberately** — after a reviewed change, run `pnpm scenario:update` and/or `pnpm audit:update`, and commit the manifest changes together with the source change that justifies them. A snapshot update on its own, with no corresponding source change, will not pass review.
+5. **Verify locally before opening a PR** — `pnpm lint && pnpm test && pnpm scenario:check && pnpm audit:check`, then the build/server probes (`pnpm build && pnpm start &`, `pnpm test:http && pnpm test:browser`, and the fixture probe). CI runs the same set.
 
-## License
-
-This project is for educational purposes only. Use at your own risk.
-
-## Disclaimer
-
-The authors and contributors of this project are not responsible for any misuse or damage caused by this software. This tool is provided for educational and ethical testing purposes only. Users must obtain proper authorization before testing any systems.
-
----
-
-**Remember: With great power comes great responsibility. Use this knowledge to build secure applications, not to attack systems you don't own.**
+Issues documenting scanner false positives/negatives against the catalog (with tool name and version) are especially useful — they drive the next scenarios.

@@ -10,12 +10,17 @@
     "dev:react2shell": "pnpm --filter @zazzles/react2shell dev",
     "build:react2shell": "pnpm --filter @zazzles/react2shell build",
     "start:react2shell": "pnpm --filter @zazzles/react2shell start",
-    "lint": "eslint pages components lib tests scripts/*.mjs next.config.js targets/react2shell/app",
-    "test": "node --test tests/*.test.cjs",
+    "lint": "eslint --ext .js,.mjs,.cjs pages components lib tests scripts next.config.js vitest.config.mjs playwright.config.mjs targets/react2shell/app",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "playwright test",
     "test:http": "node scripts/test-http.mjs",
     "test:react2shell": "node scripts/test-react2shell.mjs",
-    "test:sca": "node scripts/test-sca.mjs",
-    "audit:lab": "pnpm audit --prod"
+    "audit:check": "node scripts/check-audit.mjs",
+    "audit:update": "node scripts/check-audit.mjs --update",
+    "audit:lab": "pnpm audit --prod",
+    "scenario:check": "node scripts/check-scenarios.mjs",
+    "scenario:update": "node scripts/check-scenarios.mjs --update"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.16",
@@ -24,8 +29,10 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.1",
     "eslint": "8.48.0",
-    "eslint-config-next": "13.4.19"
+    "eslint-config-next": "13.4.19",
+    "vitest": "5.1.0"
   },
   "packageManager": "pnpm@11.25.0",
   "engines": {

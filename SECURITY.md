@@ -1,309 +1,39 @@
-# Security Policy
+# Security policy
 
-## ⚠️ WARNING: Deliberately Vulnerable Application
+## What this repository is
 
-This application is **INTENTIONALLY VULNERABLE** and designed for security testing, education, and research purposes ONLY.
+A **deliberately vulnerable** Next.js laboratory for testing SAST and SCA tools, with a documented expected-finding catalog. The vulnerabilities listed below are intentional features, shipped with tests that assert they remain exploitable and safe controls that assert identical payloads stay inert.
 
-## DO NOT
+## Scope of intentional vulnerabilities
 
-- ❌ Deploy to production
-- ❌ Expose to the internet
-- ❌ Use in real applications
-- ❌ Test on systems you don't own
-- ❌ Use without authorization
+The authoritative list is [`lib/catalog.json`](lib/catalog.json), rendered at `/vulnerabilities` and documented per scenario in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md):
 
-## DO
+- **Application flaws (SAST targets)** — eval injection (browser and server), shell command execution, arbitrary file read, SQL injection (login bypass, search disclosure, stacked statements), reflected and stored XSS. Each has a paired safe control.
+- **Dependency vulnerability (SCA target)** — `targets/react2shell` pins `next@15.0.4` / React 19.0.0 for [CVE-2025-66478 / GHSA-9qr9-h5gf-34mp](https://nextjs.org/blog/CVE-2025-66478) (React flight protocol RCE, App Router only).
 
-- ✅ Use in isolated environments
-- ✅ Use for learning and education
-- ✅ Use for authorized penetration testing
-- ✅ Use for security research
-- ✅ Learn from the secure examples
+The **main app (Next.js 13, Pages Router) is not affected by CVE-2025-66478**; only the separate pinned fixture is, and it must stay pinned.
 
-## Vulnerabilities (By Design)
+Two pages (`/vulnerable/header-injection`, `/vulnerable/dynamic-import`) are demonstrations with **no exploitable sink** — reports against them are scanner false positives.
 
-This application contains the following **INTENTIONAL** vulnerabilities:
+## Operational constraints
 
-### 1. CVE-2025-66478 - React2Shell (CRITICAL)
+- Run only on loopback (`127.0.0.1`) in isolated environments; both apps are configured to bind nothing else.
+- All data is synthetic and in-memory (PGlite, no persistence, no database service). Credentials like `admin-lab-only` exist only for the SQL scenarios.
+- `POST /api/lab/reset` is intentionally unauthenticated lab tooling.
+- Exploit documentation uses harmless markers only (`42`, `zazzles-*-marker`, computed arithmetic).
+- Never deploy, expose, or point these endpoints at real data or systems you do not own.
 
-**Severity:** CRITICAL (CVSS 10.0)
+## Guarding the ground truth
 
-**Description:** Remote Code Execution via unsanitized user input in Next.js SSR
+So the lab's expected findings cannot silently drift:
 
-**Affected Components:**
-- `/pages/vulnerable/eval-injection.js`
-- `/pages/vulnerable/form-submission.js`
-- `/pages/api/vulnerable-submit.js`
+- `pnpm scenario:check` — every catalog-registered route must exist and match the committed SHA-256 manifest (`tests/expected-hashes.json`).
+- `pnpm audit:check` — `pnpm audit --prod --json` must match the committed snapshot (`tests/expected-audit.json`).
 
-**Impact:**
-- Complete server compromise
-- Arbitrary code execution
-- System command execution
-- Data exfiltration
+Both fail on drift and are re-snapshotted (`pnpm scenario:update` / `pnpm audit:update`) only after review, in the same change that justifies them. CI enforces this on every push and PR.
 
-### 2. Command Injection (CRITICAL)
+## Reporting
 
-**Severity:** CRITICAL (CVSS 10.0)
-
-**Description:** Direct system command execution via API endpoint
-
-**Affected Components:**
-- `/pages/vulnerable/api-route.js`
-- `/pages/api/vulnerable-exec.js`
-
-**Impact:**
-- Full system access
-- Arbitrary command execution
-- Server takeover
-
-### 3. Arbitrary File Read (HIGH)
-
-**Severity:** HIGH (CVSS 8.6)
-
-**Description:** Read any file on the system via API endpoint
-
-**Affected Components:**
-- `/pages/api/vulnerable-file-read.js`
-
-**Impact:**
-- Read sensitive files
-- Access credentials
-- Enumerate system
-
-### 4. Header Injection (MEDIUM)
-
-**Severity:** MEDIUM (CVSS 6.5)
-
-**Description:** Malicious header processing without validation
-
-**Affected Components:**
-- `/pages/vulnerable/header-injection.js`
-
-**Impact:**
-- Code injection
-- Response manipulation
-- Information disclosure
-
-### 5. Path Traversal (HIGH)
-
-**Severity:** HIGH (CVSS 8.2)
-
-**Description:** Directory traversal via dynamic imports
-
-**Affected Components:**
-- `/pages/vulnerable/dynamic-import.js`
-
-**Impact:**
-- File system access
-- Module loading
-- Code execution
-
-## Secure Examples
-
-For **SECURE** implementations, refer to:
-
-- `/pages/secure/sanitized-input.js` - Proper input validation
-- `/pages/secure/validated-form.js` - Form validation
-- `/pages/secure/protected-api.js` - Secure API design
-- `/pages/secure/csp-enabled.js` - Content Security Policy
-- `/pages/api/protected-example.js` - Safe API implementation
-
-## Security Best Practices
-
-### Input Validation
-
-```javascript
-// ALWAYS validate and sanitize
-function sanitizeInput(input) {
-  // Type check
-  if (typeof input !== 'string') {
-    throw new Error('Invalid input type');
-  }
-
-  // Length check
-  if (input.length > 200) {
-    throw new Error('Input too long');
-  }
-
-  // Character whitelist
-  return input.replace(/[^a-zA-Z0-9\s\-_.]/g, '');
-}
-```
-
-### Never Use These with User Input
-
-```javascript
-// DANGEROUS - NEVER USE:
-eval(userInput)
-Function(userInput)
-exec(userInput)
-execSync(userInput)
-spawn(userInput)
-require(userInput)
-import(userInput)
-```
-
-### Content Security Policy
-
-```javascript
-// Implement strict CSP
-const csp = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'"
-].join('; ');
-```
-
-### Defense in Depth
-
-Implement multiple layers:
-
-1. **Input Validation** - First line of defense
-2. **Middleware** - Block suspicious patterns
-3. **API Validation** - Server-side checks
-4. **CSP** - Browser-level protection
-5. **Rate Limiting** - Prevent abuse
-6. **Logging** - Detect attacks
-
-## Reporting Issues
-
-If you discover **NEW** vulnerabilities (beyond the intentional ones) or have suggestions for improving the secure examples:
-
-1. Document the issue clearly
-2. Provide reproduction steps
-3. Suggest a fix
-4. Submit via appropriate channels
-
-## Responsible Disclosure
-
-When conducting security testing:
-
-1. **Get Authorization** - Always have written permission
-2. **Use Isolated Environments** - Never test production systems
-3. **Respect Scope** - Stay within agreed boundaries
-4. **Document Findings** - Keep detailed records
-5. **Report Responsibly** - Follow disclosure guidelines
-
-## Legal Notice
-
-### Disclaimer
-
-This application is provided "AS IS" for educational purposes. The authors and contributors:
-
-- Are NOT responsible for misuse
-- Do NOT encourage unauthorized testing
-- Do NOT endorse illegal activities
-- STRONGLY discourage attacking systems without permission
-
-### Legal Compliance
-
-Users must:
-
-- Comply with all applicable laws
-- Obtain proper authorization
-- Respect computer fraud and abuse laws
-- Follow ethical hacking guidelines
-
-### Unauthorized Access
-
-Unauthorized access to computer systems is **ILLEGAL** in most jurisdictions:
-
-- **USA:** Computer Fraud and Abuse Act (CFAA)
-- **UK:** Computer Misuse Act 1990
-- **EU:** Cybercrime Directive
-- **International:** Budapest Convention
-
-Violations can result in:
-- Criminal prosecution
-- Civil liability
-- Fines and imprisonment
-- Professional consequences
-
-## Educational Purpose
-
-This project teaches:
-
-- How vulnerabilities work
-- Impact of insecure code
-- Exploitation techniques
-- Secure coding practices
-- Defense strategies
-
-Use this knowledge to:
-
-- Build secure applications
-- Conduct authorized testing
-- Improve security awareness
-- Educate others responsibly
-
-## Ethical Guidelines
-
-### Do's
-
-✅ Use for learning and education
-✅ Practice on your own systems
-✅ Conduct authorized penetration tests
-✅ Research security vulnerabilities
-✅ Build secure applications
-✅ Share knowledge responsibly
-
-### Don'ts
-
-❌ Attack systems without permission
-❌ Cause damage or disruption
-❌ Steal or expose data
-❌ Deploy to production
-❌ Share exploits maliciously
-❌ Violate laws or ethics
-
-## Contact
-
-For questions about:
-
-- **Educational Use:** Refer to README.md
-- **Security Issues:** Document and report appropriately
-- **Legal Concerns:** Consult with legal counsel
-
-## Updates
-
-This security policy may be updated to reflect:
-
-- New vulnerabilities discovered
-- Updated security practices
-- Changed legal requirements
-- Community feedback
-
-## Acknowledgments
-
-This project is inspired by:
-
-- OWASP vulnerable applications
-- Security research community
-- Ethical hacking education
-- Real-world vulnerability disclosures
-
-## Final Warning
-
-🚨 **This is a weapon in the hands of the wrong person.** 🚨
-
-Use it **ONLY** for:
-- Learning
-- Education
-- Authorized testing
-- Security research
-- Building better defenses
-
-**NOT** for:
-- Unauthorized access
-- Malicious attacks
-- Data theft
-- System damage
-- Illegal activities
-
-**Remember: Just because you CAN do something doesn't mean you SHOULD.**
-
----
-
-**Security is everyone's responsibility. Be part of the solution, not the problem.**
+- **Non-intentional vulnerabilities** (something exploitable that is not in the catalog, or a flaw in a *safe control*) — please open an issue or contact the maintainer privately; do not test beyond your own checkout.
+- **Scanner behavior** — false positives/negatives against the catalog are useful issues; include the tool, version, and scenario ID.
+- **Do not** open issues asking to upgrade the pinned vulnerable dependencies; retiring a scenario is a deliberate, documented change.

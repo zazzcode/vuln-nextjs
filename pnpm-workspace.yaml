@@ -1,7 +1,8 @@
 packages:
   - targets/*
+
+saveExact: true
+
+# This lab does no image optimization, so sharp's install hooks are unnecessary.
 allowBuilds:
-  sharp: set this to true or false
-# No image optimization in this lab; sharp install hooks are unnecessary.
-ignoredBuiltDependencies:
-  - sharp
+  sharp: false
