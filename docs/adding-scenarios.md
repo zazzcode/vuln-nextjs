@@ -50,6 +50,8 @@ Every scenario needs positive *and* negative assertions:
 - **HTTP** (`tests/api/lab.api.test.mjs`): repeat the pair against the running server; add page routes to the status sweep.
 - **Browser** (only for runtime `browser`): extend `tests/browser/xss.browser.test.mjs` — assert a marker property is set on the unsafe page and provably unset on the safe page.
 
+The Playwright coverage is **enforced by `tests/unit/catalog.test.mjs`**: an active SAST scenario whose runtime-appropriate suite is missing from its catalog `test` references (or no longer names the scenario ID) fails the unit suite and CI. A new vuln or safe route without its matching Playwright pair cannot land green.
+
 ## 6. Dependency scenarios (SCA)
 
 Pin the vulnerable version exactly in the target package and keep the lockfile frozen. Detection is plain `pnpm audit --prod` (expected to report the pin and exit nonzero) — document the expected advisory ID and finding path in the scenario doc. Never upgrade a pinned vulnerable dependency; retire the scenario in a dedicated change instead.
