@@ -36,7 +36,7 @@ export default function SqlLab({ operation }) {
     {operation === 'login' && <p>This checks a demo identity; it creates no session. Credentials: alice / alice-lab-only or admin / admin-lab-only.</p>}
     {operation === 'products' && <p>Two public products should be visible. The unsafe payload also reveals Internal prototype.</p>}
     {operation === 'notes' && <p>The unsafe sample makes the private product public through a second SQL statement. Check product search afterward, then reset the database.</p>}
-    <form onSubmit={request}><label>Query mode<select value={mode} onChange={(e) => setMode(e.target.value)}><option value="unsafe">Unsafe · intentional SQL injection</option><option value="safe">Safe · parameterized SQL</option></select></label>
+    <form onSubmit={request}><label>Query mode<select value={mode} onChange={(e) => setMode(e.target.value)}><option value="unsafe">Unsafe · intentional SQL injection</option><option value="safe">Safe · parameterized SQL</option><option value="zod">Safe · Zod schema validation + parameters</option></select></label>
       {Object.entries(values).map(([key, value]) => <label key={key}>{key}<input value={value} autoComplete="off" onChange={(e) => setValues({ ...values, [key]: e.target.value })} /></label>)}
       <div className="actions"><button disabled={busy}>Run {mode} example</button><button type="button" onClick={() => setValues(example.payload)}>Load injection example</button><button type="button" onClick={() => setValues(example.defaults)}>Normal input</button><button type="button" disabled={busy} onClick={reset}>Reset SQL data</button></div>
     </form><p>Endpoint: <code>/api/sql/{mode}/{operation}</code></p>{result && <pre aria-live="polite">{JSON.stringify(result, null, 2)}</pre>}

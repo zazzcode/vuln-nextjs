@@ -10,22 +10,26 @@ Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-
 
 ## Scenarios
 
-| ID | Scenario | CWE | Type | Unsafe → safe |
+| ID | Scenario | CWE | Type | Unsafe → protected |
 | --- | --- | --- | --- | --- |
 | JS-001 | Browser eval injection | CWE-95 | SAST | `/vulnerable/eval-injection` → `/secure/sanitized-input` |
 | JS-002 | Server-side eval injection | CWE-95 | SAST | `/api/vulnerable-submit` → `/api/protected-example` |
 | OS-001 | Shell command execution | CWE-78 | SAST | `/api/vulnerable-exec` → `/api/secure/command` |
 | FS-001 | Arbitrary file read | CWE-22 | SAST | `/api/vulnerable-file-read` → `/api/secure/file-read` |
-| SQL-001 | SQL login bypass | CWE-89 | SAST | `/api/sql/unsafe/login` → `/api/sql/safe/login` |
-| SQL-002 | SQL search injection | CWE-89 | SAST | `/api/sql/unsafe/products` → `/api/sql/safe/products` |
-| SQL-003 | SQL stacked statements | CWE-89 | SAST | `/api/sql/unsafe/notes` → `/api/sql/safe/notes` |
-| XSS-001 | Reflected XSS | CWE-79 | SAST | `/xss/unsafe/reflected` → `/xss/safe/reflected` |
-| XSS-002 | Stored XSS | CWE-79 | SAST | `/xss/unsafe/stored` → `/xss/safe/stored` |
+| SQL-001 | SQL login bypass | CWE-89 | SAST | `/api/sql/unsafe/login` → `/api/sql/safe/login` + `/api/sql/zod/login` (Zod) |
+| SQL-002 | SQL search injection | CWE-89 | SAST | `/api/sql/unsafe/products` → `/api/sql/safe/products` + `/api/sql/zod/products` (Zod) |
+| SQL-003 | SQL stacked statements | CWE-89 | SAST | `/api/sql/unsafe/notes` → `/api/sql/safe/notes` + `/api/sql/zod/notes` (Zod) |
+| XSS-001 | Reflected XSS | CWE-79 | SAST | `/xss/unsafe/reflected` → `/xss/safe/reflected` (text) + `/xss/sanitized/reflected` (DOMPurify) |
+| XSS-002 | Stored XSS (notes) | CWE-79 | SAST | `/xss/unsafe/stored` → `/xss/safe/stored` (text) |
+| XSS-003 | Script-context injection (SSR) | CWE-79 | SAST | `/xss/unsafe/script-context` → `/xss/safe/script-context` (`\u003c` escaping) |
+| XSS-004 | Stored guestbook XSS (SSR) | CWE-79 | SAST | `/xss/unsafe/comments` → `/xss/sanitized/comments` (DOMPurify) |
+| SSRF-001 | SSRF during rendering | CWE-918 | SAST | `/vulnerable/ssrf` → `/secure/ssrf` (origin + path allowlist) |
+| REDIR-001 | Open redirect during rendering | CWE-601 | SAST | `/vulnerable/redirect` → `/secure/redirect` (relative-path only) |
 | SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | pinned `next@15.0.4` fixture in `targets/react2shell` |
 
 Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners should not report them.
 
-**Per-scenario details with exact exploit/reproduction commands live in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md).**
+**Per-scenario training modules with exact Burp Suite / Postman / curl exploit commands live in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md)** — each scenario has a linkable compact agent reference (`#<id>-agent`), a student guide, an exploit lab, and a vulnerable-vs-protected comparison explaining *why* the control works.
 
 ## Setup
 

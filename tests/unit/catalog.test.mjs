@@ -12,7 +12,8 @@ test('catalog IDs and routes are unique', () => {
 
 test('source, safe control and documentation paths exist', () => {
   for (const entry of catalog) {
-    for (const file of [entry.source, entry.safeControl, entry.documentation].filter(Boolean)) {
+    const controls = entry.safeControls ?? (entry.safeControl ? [entry.safeControl] : []);
+    for (const file of [entry.source, ...controls, entry.documentation].filter(Boolean)) {
       expect(existsSync(path.join(root, file)), `${entry.id}: ${file}`).toBe(true);
     }
   }
@@ -46,6 +47,9 @@ test('documentation covers every scenario and referenced test files exist', () =
 test('active SAST scenarios with a safe control document the comparison', () => {
   for (const entry of catalog.filter((entry) => entry.status === 'active' && entry.scanner === 'SAST')) {
     const doc = readFileSync(path.join(root, entry.documentation), 'utf8');
-    expect(doc, `${entry.id} should describe its safe control`).toContain(entry.safeControl ?? entry.source);
+    const controls = entry.safeControls ?? (entry.safeControl ? [entry.safeControl] : []);
+    for (const control of controls.length ? controls : [entry.source]) {
+      expect(doc, `${entry.id} should document ${control}`).toContain(control);
+    }
   }
 });

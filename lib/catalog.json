@@ -71,7 +71,8 @@
     "documentation": "docs/vulnerabilities/sql.md",
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/login.js",
-    "test": "tests/unit/sql.test.mjs; scripts/test-http.mjs"
+    "safeControls": ["pages/api/sql/zod/login.js"],
+    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "SQL-002",
@@ -86,7 +87,8 @@
     "documentation": "docs/vulnerabilities/sql.md",
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/products.js",
-    "test": "tests/unit/sql.test.mjs; scripts/test-http.mjs"
+    "safeControls": ["pages/api/sql/zod/products.js"],
+    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "SQL-003",
@@ -101,7 +103,8 @@
     "documentation": "docs/vulnerabilities/sql.md",
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/notes.js",
-    "test": "tests/unit/sql.test.mjs; scripts/test-http.mjs"
+    "safeControls": ["pages/api/sql/zod/notes.js"],
+    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; scripts/test-http.mjs"
   },
   {
     "id": "XSS-001",
@@ -116,6 +119,7 @@
     "documentation": "docs/vulnerabilities/xss.md",
     "expectedFinding": true,
     "safeControl": "pages/xss/safe/reflected.js",
+    "safeControls": ["pages/xss/sanitized/reflected.js"],
     "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
   },
   {
@@ -132,6 +136,66 @@
     "expectedFinding": true,
     "safeControl": "pages/xss/safe/stored.js",
     "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
+  },
+  {
+    "id": "XSS-003",
+    "title": "Script-context injection in server-rendered JSON",
+    "status": "active",
+    "scanner": "SAST",
+    "cwe": "CWE-79",
+    "route": "/xss/unsafe/script-context",
+    "source": "pages/xss/unsafe/script-context.js",
+    "flow": "query.data → JSON.stringify → inline <script> element",
+    "runtime": "browser",
+    "documentation": "docs/vulnerabilities/xss.md",
+    "expectedFinding": true,
+    "safeControl": "pages/xss/safe/script-context.js",
+    "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
+  },
+  {
+    "id": "XSS-004",
+    "title": "Stored XSS in the server-rendered guestbook",
+    "status": "active",
+    "scanner": "SAST",
+    "cwe": "CWE-79",
+    "route": "/xss/unsafe/comments",
+    "source": "pages/xss/unsafe/comments.js",
+    "flow": "comment body → parameterized INSERT → dangerouslySetInnerHTML for every visitor",
+    "runtime": "browser",
+    "documentation": "docs/vulnerabilities/xss.md",
+    "expectedFinding": true,
+    "safeControl": "pages/xss/sanitized/comments.js",
+    "test": "tests/browser/xss.browser.test.mjs; tests/unit/comments.test.mjs; scripts/test-http.mjs"
+  },
+  {
+    "id": "SSRF-001",
+    "title": "Server-side request forgery during rendering",
+    "status": "active",
+    "scanner": "SAST",
+    "cwe": "CWE-918",
+    "route": "/vulnerable/ssrf",
+    "source": "pages/vulnerable/ssrf.js",
+    "flow": "query.fetch → getServerSideProps → fetch(attacker URL)",
+    "runtime": "server",
+    "documentation": "docs/vulnerabilities/ssr.md",
+    "expectedFinding": true,
+    "safeControl": "pages/secure/ssrf.js",
+    "test": "scripts/test-http.mjs"
+  },
+  {
+    "id": "REDIR-001",
+    "title": "Open redirect during rendering",
+    "status": "active",
+    "scanner": "SAST",
+    "cwe": "CWE-601",
+    "route": "/vulnerable/redirect",
+    "source": "pages/vulnerable/redirect.js",
+    "flow": "query.to → getServerSideProps redirect destination",
+    "runtime": "server",
+    "documentation": "docs/vulnerabilities/ssr.md",
+    "expectedFinding": true,
+    "safeControl": "pages/secure/redirect.js",
+    "test": "scripts/test-http.mjs"
   },
   {
     "id": "SCA-001",

