@@ -60,10 +60,12 @@ Scenario and audit snapshots exist so the lab's expected findings cannot drift s
 
 ```bash
 corepack pnpm scenario:update   # after any reviewed change to a scenario source
+                                # (refreshes tests/expected-hashes.json AND
+                                #  tests/expected-scanner-findings.json)
 corepack pnpm audit:update      # after any reviewed dependency change
 ```
 
-Commit the updated manifests together with the source change that justifies them.
+Commit the updated manifests together with the source change that justifies them. `tests/expected-scanner-findings.json` is the per-source ground truth for scanner evaluations (must-find / must-not-flag + CWE); it is generated from the catalog, never hand-edited.
 
 ## 8. Verify locally, then open a PR
 

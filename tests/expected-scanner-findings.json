@@ -1,0 +1,246 @@
+{
+  "generatedFrom": "lib/catalog.json",
+  "scopeNote": "Per-source expectations for scanner evaluations. expectedFinding=true rows must be flagged (a miss is a false negative). expectedFinding=false rows are scoped claims: the file should NOT be flagged for the listed CWE — the flaw it is the registered safe control for; findings for unrelated issues are out of scope for this lab. Regenerate with: pnpm scenario:update",
+  "sources": [
+    {
+      "id": "DEMO-001",
+      "source": "pages/vulnerable/header-injection.js",
+      "expectedFinding": false,
+      "cwe": null,
+      "scanner": "none"
+    },
+    {
+      "id": "DEMO-002",
+      "source": "pages/vulnerable/dynamic-import.js",
+      "expectedFinding": false,
+      "cwe": null,
+      "scanner": "none"
+    },
+    {
+      "id": "FS-001",
+      "source": "pages/api/vulnerable-file-read.js",
+      "expectedFinding": true,
+      "cwe": "CWE-22",
+      "scanner": "SAST"
+    },
+    {
+      "id": "FS-001-safeControl",
+      "controlFor": "FS-001",
+      "source": "pages/api/secure/file-read.js",
+      "expectedFinding": false,
+      "cwe": "CWE-22",
+      "scanner": "SAST"
+    },
+    {
+      "id": "JS-001",
+      "source": "pages/vulnerable/eval-injection.js",
+      "expectedFinding": true,
+      "cwe": "CWE-95",
+      "scanner": "SAST"
+    },
+    {
+      "id": "JS-002",
+      "source": "pages/api/vulnerable-submit.js",
+      "expectedFinding": true,
+      "cwe": "CWE-95",
+      "scanner": "SAST"
+    },
+    {
+      "id": "JS-002-safeControl",
+      "controlFor": "JS-002",
+      "source": "pages/api/protected-example.js",
+      "expectedFinding": false,
+      "cwe": "CWE-95",
+      "scanner": "SAST"
+    },
+    {
+      "id": "OS-001",
+      "source": "pages/api/vulnerable-exec.js",
+      "expectedFinding": true,
+      "cwe": "CWE-78",
+      "scanner": "SAST"
+    },
+    {
+      "id": "OS-001-safeControl",
+      "controlFor": "OS-001",
+      "source": "pages/api/secure/command.js",
+      "expectedFinding": false,
+      "cwe": "CWE-78",
+      "scanner": "SAST"
+    },
+    {
+      "id": "REDIR-001",
+      "source": "pages/vulnerable/redirect.js",
+      "expectedFinding": true,
+      "cwe": "CWE-601",
+      "scanner": "SAST"
+    },
+    {
+      "id": "REDIR-001-safeControl",
+      "controlFor": "REDIR-001",
+      "source": "pages/secure/redirect.js",
+      "expectedFinding": false,
+      "cwe": "CWE-601",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SCA-001",
+      "source": "targets/react2shell/package.json",
+      "expectedFinding": true,
+      "cwe": "CWE-502",
+      "scanner": "SCA"
+    },
+    {
+      "id": "SQL-001",
+      "source": "pages/api/sql/unsafe/login.js",
+      "expectedFinding": true,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-001-safeControl",
+      "controlFor": "SQL-001",
+      "source": "pages/api/sql/safe/login.js",
+      "expectedFinding": false,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-001-safeControl",
+      "controlFor": "SQL-001",
+      "source": "pages/api/sql/zod/login.js",
+      "expectedFinding": false,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-002",
+      "source": "pages/api/sql/unsafe/products.js",
+      "expectedFinding": true,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-002-safeControl",
+      "controlFor": "SQL-002",
+      "source": "pages/api/sql/safe/products.js",
+      "expectedFinding": false,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-002-safeControl",
+      "controlFor": "SQL-002",
+      "source": "pages/api/sql/zod/products.js",
+      "expectedFinding": false,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-003",
+      "source": "pages/api/sql/unsafe/notes.js",
+      "expectedFinding": true,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-003-safeControl",
+      "controlFor": "SQL-003",
+      "source": "pages/api/sql/safe/notes.js",
+      "expectedFinding": false,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SQL-003-safeControl",
+      "controlFor": "SQL-003",
+      "source": "pages/api/sql/zod/notes.js",
+      "expectedFinding": false,
+      "cwe": "CWE-89",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SSRF-001",
+      "source": "pages/vulnerable/ssrf.js",
+      "expectedFinding": true,
+      "cwe": "CWE-918",
+      "scanner": "SAST"
+    },
+    {
+      "id": "SSRF-001-safeControl",
+      "controlFor": "SSRF-001",
+      "source": "pages/secure/ssrf.js",
+      "expectedFinding": false,
+      "cwe": "CWE-918",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-001",
+      "source": "pages/xss/unsafe/reflected.js",
+      "expectedFinding": true,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-001-safeControl",
+      "controlFor": "XSS-001",
+      "source": "pages/xss/safe/reflected.js",
+      "expectedFinding": false,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-001-safeControl",
+      "controlFor": "XSS-001",
+      "source": "pages/xss/sanitized/reflected.js",
+      "expectedFinding": false,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-002",
+      "source": "pages/xss/unsafe/stored.js",
+      "expectedFinding": true,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-002-safeControl",
+      "controlFor": "XSS-002",
+      "source": "pages/xss/safe/stored.js",
+      "expectedFinding": false,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-003",
+      "source": "pages/xss/unsafe/script-context.js",
+      "expectedFinding": true,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-003-safeControl",
+      "controlFor": "XSS-003",
+      "source": "pages/xss/safe/script-context.js",
+      "expectedFinding": false,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-004",
+      "source": "pages/xss/unsafe/comments.js",
+      "expectedFinding": true,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    },
+    {
+      "id": "XSS-004-safeControl",
+      "controlFor": "XSS-004",
+      "source": "pages/xss/sanitized/comments.js",
+      "expectedFinding": false,
+      "cwe": "CWE-79",
+      "scanner": "SAST"
+    }
+  ]
+}

@@ -52,8 +52,8 @@ Both bind `127.0.0.1` only. Browse the scenario index at `http://127.0.0.1:3000/
 | `corepack pnpm test:react2shell` | built + started fixture | Server-side execution inside the affected RSC decoder via a computed marker |
 | `corepack pnpm audit:check` | install only | `pnpm audit --prod --json` output matches the committed snapshot `tests/expected-audit.json` — the SCA ground truth |
 | `corepack pnpm audit:update` | install only | Re-snapshot the audit ground truth after reviewing a deliberate change |
-| `corepack pnpm scenario:check` | install only | Every catalog-registered vulnerable/safe route exists and its content hash matches `tests/expected-hashes.json` — scenario sources cannot silently change |
-| `corepack pnpm scenario:update` | install only | Re-snapshot the source hashes after a reviewed scenario change |
+| `corepack pnpm scenario:check` | install only | Every catalog-registered vulnerable/safe route exists and its content hash matches `tests/expected-hashes.json`, and `tests/expected-scanner-findings.json` matches the catalog — scenario ground truth cannot silently change |
+| `corepack pnpm scenario:update` | install only | Re-snapshot the hashes and the scanner-expectations export after a reviewed scenario change |
 | `corepack pnpm audit:lab` | install only | Raw human-readable audit (expected nonzero exit) |
 
 First browser-test run needs the Chromium binary:

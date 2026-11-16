@@ -1,6 +1,6 @@
 # Scenario quick reference
 
-Machine-readable source of truth: [`lib/catalog.json`](../../lib/catalog.json). Live index: `/vulnerabilities`.
+Machine-readable source of truth: [`lib/catalog.json`](../../lib/catalog.json). Live index: `/vulnerabilities`. Scanner evaluation ground truth (per-source must-find / must-not-flag + CWE): [`tests/expected-scanner-findings.json`](../../tests/expected-scanner-findings.json), generated from the catalog and kept in sync by `pnpm scenario:check`.
 
 Agents: each row links directly to the scenario's compact [expected-finding block](../README.md#anchor-contract) — `docs/vulnerabilities/<module>.md#<id>-agent` — no need to read the full module.
 

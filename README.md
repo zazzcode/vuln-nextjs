@@ -62,7 +62,7 @@ For production-mode testing (what CI does): `pnpm build && pnpm start`.
 | `pnpm test:browser` | Playwright/Chromium — XSS and eval payloads **actually execute** on unsafe pages and provably **do not** on safe pages |
 | `pnpm test:react2shell` | Server-side execution inside the affected RSC decoder, via a marker computed on the server |
 | `pnpm audit:check` | `pnpm audit --prod` output matches the committed ground truth `tests/expected-audit.json` |
-| `pnpm scenario:check` | Every catalog-registered route exists and its content hash matches `tests/expected-hashes.json` |
+| `pnpm scenario:check` | Every catalog-registered route matches the committed hash manifest `tests/expected-hashes.json`, and the scanner ground truth `tests/expected-scanner-findings.json` (per-source must-find/must-not-flag + CWE, for SAST/SCA evaluation harnesses) is in sync with the catalog |
 | `pnpm lint` | ESLint across pages, components, lib, tests, scripts |
 
 `pnpm audit --prod` itself exits nonzero **by design** — the vulnerable pins are the SCA scenario. `audit:check` turns that into a reviewable ground truth: drift fails until you inspect it and run `pnpm audit:update`. Likewise, scenario sources cannot silently change: run `pnpm scenario:update` only after reviewing a deliberate change.
