@@ -20,6 +20,7 @@ Suggested reading order — each module is self-contained:
 
 Quick-reference table with agent links: [vulnerabilities/index.md](vulnerabilities/index.md).
 Defense patterns used by every protected route: [validation-and-sanitization.md](validation-and-sanitization.md).
+New to the vocabulary? Start with the [glossary](#glossary).
 
 ## Reference documents
 
@@ -48,10 +49,33 @@ Agent URL pattern: `docs/vulnerabilities/<module>.md#<id>-agent` (IDs lowercased
 
 All exploit steps are safe: harmless markers (`42`, `zazzles-*-marker`, computed arithmetic), synthetic data, loopback addresses only.
 
-## Reading a scenario for the first time (students)
+**Studying a scenario:** read the **Student guide**, run the **Exploit lab** with your tool of choice, send the identical payload to the protected route from the comparison table and watch the difference, then read **Vuln vs protected — and why** to internalize the property that separates them. The **Tests** section shows how the lab asserts both directions automatically on every push.
 
-1. Start with the **Student guide** to understand the mechanism.
-2. Run the **Exploit lab** with your preferred tool and observe the proof.
-3. Run the identical payload against the protected route from the comparison table and observe the difference.
-4. Read **Vuln vs protected — and why** to internalize the security property that separates them.
-5. Check the **Tests** section — the lab asserts both directions automatically, in CI on every push.
+<a id="glossary"></a>
+## Glossary (plain-language)
+
+Terms used across the modules, defined once here; modules link or use them freely.
+
+| Term | Meaning |
+| --- | --- |
+| SAST | *Static Application Security Testing* — a tool that reads source code and flags dangerous patterns |
+| SCA | *Software Composition Analysis* — a tool that checks your dependency list against published vulnerability databases |
+| CWE / CVE / GHSA | Dictionaries: weakness **types** (CWE-89 = SQL injection), publicly **disclosed vulnerabilities** (CVE numbers), and GitHub **advisory** IDs |
+| source / sink / taint | The **source** is where attacker-controlled data enters; the **sink** is the dangerous operation it must not reach; the **taint path** is everything between them |
+| payload | The input an attacker sends to trigger a flaw |
+| marker | A harmless proof-of-execution value this lab uses (`42`, `zazzles-*-marker`) — if it appears, code ran |
+| SSR | *Server-side rendering* — the server builds the finished HTML; the browser receives it ready-made |
+| Pages Router / App Router | The two ways Next.js organizes an app. The main lab uses the older Pages Router; the React2Shell fixture uses the newer App Router |
+| RSC / Server Action / flight protocol | App Router features: components and form-handler functions that **run on the server**, and the stream format React uses to ship their output to the browser |
+| parameterized query / bound parameter | SQL sent with placeholders (`$1`) and the values traveling separately, so data can never be read as SQL code |
+| stacked statements | More than one SQL statement executed in a single call |
+| reflected vs stored XSS | *Reflected*: the payload comes back immediately in the same response. *Stored*: it is saved and runs for later visitors |
+| innerHTML | The browser API that sets an element's content **as raw HTML** (the browser parses it) — unlike setting text, which never interprets markup |
+| CSP | *Content-Security-Policy* — a response header the browser enforces, allowlisting what a page may load or execute |
+| SSRF | *Server-side request forgery* — making the server fetch a URL of the attacker's choosing |
+| open redirect | Sending visitors to an attacker-chosen destination through a link on your trusted site |
+| scrypt | A deliberately slow, salted password-hashing function — verification is cheap for one password, expensive for mass guessing |
+| allowlist vs blocklist | Permitting only known-good entries vs trying to enumerate every bad one; allowlists fail safer |
+| PGlite | PostgreSQL compiled to WebAssembly, running inside the Node process — no database server, no persistence |
+| hydration | React attaching event behavior to server-rendered HTML once it reaches the browser |
+| multipart body | A request-body format carrying multiple form fields (used for file uploads and Server Action posts) |

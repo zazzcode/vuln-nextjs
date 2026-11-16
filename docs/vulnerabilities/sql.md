@@ -40,7 +40,7 @@ Lab credentials: `alice / alice-lab-only`, `admin / admin-lab-only`. Login endpo
 `SELECT id, username, role FROM users WHERE username = '${username}' AND password_demo = '${password}' LIMIT 1`
 ```
 
-The comment payload `admin' --` closes the username string and comments out the password check; a tautology in the password field (`' OR true --`) bypasses equally. The unsafe login compares the lab-only `password_demo` column so the classic payload works; the protected logins verify a salted scrypt hash instead.
+The comment payload `admin' --` closes the username string and comments out the password check; a tautology in the password field (`' OR true --`) bypasses equally. The unsafe login compares the lab-only `password_demo` column so the classic payload works; the protected logins verify a salted **scrypt** hash instead (a deliberately slow password-hashing function — cheap to verify once, expensive to guess millions of times).
 
 <a id="sql-001-exploit"></a>
 ### Exploit lab
@@ -121,7 +121,7 @@ curl -s -w '\n%{http_code}\n' http://127.0.0.1:3000/api/sql/safe/login \
 `SELECT ... WHERE public = true AND name ILIKE '%${q}%' ORDER BY id`
 ```
 
-The intended predicate lists public products only. `' OR true --` rewrites the WHERE clause to match everything, disclosing the hidden `Internal prototype` row — an authorization boundary crossed through data, without changing any code.
+The intended predicate lists public products only. `' OR true --` rewrites the WHERE clause into a **tautology** (a condition that is always true), disclosing the hidden `Internal prototype` row — an authorization boundary crossed through data, without changing any code. (`ILIKE` is PostgreSQL's case-insensitive text pattern match.)
 
 <a id="sql-002-exploit"></a>
 ### Exploit lab

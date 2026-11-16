@@ -36,7 +36,7 @@ const { command } = req.body;
 exec(command, { timeout: 5000, ... }, (error, stdout) => { ... });
 ```
 
-`exec` spawns `/bin/sh -c <string>`, so metacharacters (`;`, `&&`, `|`, `$()`, backticks) are interpreted by a shell with the server process's permissions. The two-command marker payload below is the gentlest proof that a *shell* is parsing the string.
+`exec` spawns `/bin/sh -c <string>`, so metacharacters — characters a shell treats as instructions rather than data (`;`, `&&`, `|`, `$()`, backticks) — are interpreted by a shell running with the server process's permissions. The two-command marker payload below is the gentlest proof that a *shell* is parsing the string.
 
 <a id="os-001-exploit"></a>
 ### Exploit lab
@@ -84,7 +84,7 @@ curl -s http://127.0.0.1:3000/api/secure/command \
 | Mechanism | `exec(command)` — one shell string | `execFile('/bin/echo', [text], { shell: false })` — fixed binary + argument vector |
 | Same metacharacter string → | both commands execute | echoed as literal data |
 
-**Why the control works:** injection needs a parser that re-interprets data as code. `execFile` with an argument vector and `shell: false` removes the shell parser entirely — the text can only ever be `echo`'s single argument, so `; | && $( )` have no special meaning. Scoping note: this control defeats command injection; it is not a claim that the endpoint is "secure" in general.
+**Why the control works:** injection needs a parser that re-interprets data as code. `execFile` with an **argument vector** (the plain list of arguments passed to a program — no shell involved) and `shell: false` removes the shell parser entirely: the text can only ever be `echo`'s single argument, so `; | && $( )` have no special meaning. Scoping note: this control defeats command injection; it is not a claim that the endpoint is "secure" in general.
 
 <a id="os-001-tests"></a>
 ### Automated tests

@@ -1,6 +1,6 @@
 # Module: Server-side rendering abuse (CWE-918, CWE-601)
 
-These flaws live in `getServerSideProps` — code that runs on the server **before** any HTML exists. SSR is the feature that makes them possible: the page's own rendering step performs network requests and redirects with attacker-influenced parameters.
+These flaws live in `getServerSideProps` — the Pages Router function that runs **on the server before the page renders**. SSR is the feature that makes them possible: the page's own rendering step performs network requests and redirects with attacker-influenced parameters. (Vocabulary: see the [glossary](../README.md#glossary).)
 
 ## Contents
 

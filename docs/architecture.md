@@ -17,7 +17,7 @@ Both apps bind `127.0.0.1` only. The lab is for local, isolated testing.
 
 - SQL scenarios use [PGlite](https://github.com/electric-sql/electric-pglite) (`@electric-sql/pglite`, WASM, in-process, **no persistence**, no database service).
 - `lib/database.cjs` owns one global initialization promise per server process (survives dev reloads). Each test process gets its own instance.
-- Seeded synthetic data: users `admin / admin-lab-only` and `alice / alice-lab-only`, two public products, one hidden `Internal prototype`, one note.
+- Seeded synthetic data: users `admin / admin-lab-only` and `alice / alice-lab-only`, two public products, one hidden `Internal prototype`, one note, and two guestbook comments.
 - The `password_demo` plaintext column exists **only** so SQL-001's unsafe login can interpolate it; the safe login verifies a salted scrypt hash instead. This is a lab-only comparison, not production authentication. No sessions or cookies are created.
 - `POST /api/lab/reset` drops and re-seeds all tables on the same instance. It is intentionally unauthenticated lab tooling.
 
@@ -36,7 +36,7 @@ Both apps bind `127.0.0.1` only. The lab is for local, isolated testing.
 | Browser execution | Playwright | `tests/browser/xss.browser.test.mjs` | XSS/eval payloads actually execute JavaScript in a real browser on unsafe pages, and provably do not execute on safe pages |
 | SCA visibility | `pnpm audit --prod` | — (informational) | The raw audit reports the intentional vulnerable pins; its nonzero exit is the scenario working, so it never gates CI |
 | Runtime RSC | Node | `scripts/test-react2shell.mjs` | The React2Shell fixture executes server-side arithmetic from a crafted RSC request (marker absent from the literal request) |
-| Ground-truth snapshots | Node | `scripts/check-audit.mjs`, `scripts/check-scenarios.mjs` | The audit findings and the exact content of every catalog-registered route match committed manifests (`tests/expected-audit.json`, `tests/expected-hashes.json`); drift fails until reviewed and re-snapshotted |
+| Ground-truth snapshots | Node | `scripts/check-audit.mjs`, `scripts/check-scenarios.mjs` | The audit findings and the exact content of every catalog-registered route match committed manifests (`tests/expected-audit.json`, `tests/expected-hashes.json`, `tests/expected-scanner-findings.json`); drift fails until reviewed and re-snapshotted |
 | Lint | ESLint | `pnpm lint` | Style and import health across pages, components, lib, tests, scripts |
 
 ## Upstream

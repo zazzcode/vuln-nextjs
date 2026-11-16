@@ -117,7 +117,7 @@ const result = eval(`({
 })`);
 ```
 
-Both body fields are interpolated into an object expression that `eval` compiles and runs **in the server process**. Because the expression is an object literal, the breakout must respect that grammar — close the string, close nothing else, splice an expression, reopen the string: `' + (6 * 7) + '` in either field.
+Both body fields are interpolated into an **object literal** (the `{ key: value }` syntax) that `eval` compiles and runs **in the server process**. Because the expression is an object literal, the breakout must respect that grammar — close the string, close nothing else, splice an expression, reopen the string: `' + (6 * 7) + '` in either field.
 
 <a id="js-002-exploit"></a>
 ### Exploit lab

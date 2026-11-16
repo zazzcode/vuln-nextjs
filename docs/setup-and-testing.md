@@ -12,7 +12,7 @@ corepack pnpm --version      # → 11.25.0
 
 Every command below is written as `corepack pnpm …`; substitute `pnpm` if it is already on your PATH at the pinned version.
 
-> pnpm is isolated to this repository. It installs into a global content-addressable store and hard-links packages into this project's `node_modules`; other projects and package managers on your machine are not modified. That isolation is what makes it safe to keep deliberately vulnerable versions pinned here.
+> pnpm is isolated to this repository — other projects on your machine are not modified (details in the [README](../README.md#setup)), which is what makes it safe to keep vulnerable versions pinned here.
 
 ## Install
 

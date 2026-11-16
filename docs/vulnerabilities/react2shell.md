@@ -32,9 +32,9 @@ This is the lab's **SCA** scenario: the flaw is in a pinned third-party runtime,
 <a id="sca-001-student"></a>
 ### Student guide
 
-The React flight protocol serializes server components as a stream of references and models; the affected decoder reconstructs objects from that stream with insufficient validation. A crafted multipart request to any Server Action endpoint can make the **server** evaluate expressions during decoding — this lab's probe makes it compute arithmetic and surface the result in a redirect digest.
+The React **flight protocol** (the stream format React uses to send server-rendered UI to the browser) serializes server components as a stream of references and models; the affected decoder reconstructs objects from that stream with insufficient validation. A crafted **multipart** request (a body format carrying multiple form fields) to any **Server Action** endpoint (a form-handler function that runs on the server in App Router) can make the **server** evaluate expressions during decoding — this lab's probe makes it compute arithmetic and surface the result in a redirect **digest** (the short marker string Next.js uses to identify redirect results).
 
-The fixture's application code is ordinary and benign (a plain Server Action that logs a truncated message). The vulnerability is entirely in the pinned RSC runtime, which is what makes it an SCA target rather than a SAST one: nothing in the application source is wrong.
+The fixture's application code is ordinary and benign — a plain Server Action that logs a truncated message. The vulnerability is entirely in the pinned RSC runtime, which is what makes it an SCA target rather than a SAST one: nothing in the application source is wrong.
 
 Why a separate fixture: the upstream application is Next 13 / Pages Router, which the advisory does not affect, and simulating the flaw with a hand-written `eval` would test nothing about dependency detection.
 
