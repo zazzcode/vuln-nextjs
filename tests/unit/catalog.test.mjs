@@ -53,3 +53,26 @@ test('active SAST scenarios with a safe control document the comparison', () => 
     }
   }
 });
+
+// Playwright coverage contract (AGENTS.md): every active SAST scenario must
+// carry its runtime-appropriate Playwright suite — the API suite for
+// server-runtime scenarios, a tests/browser/ spec for client-side ones —
+// and the scenario ID must actually appear in that spec's source. A new
+// vuln or safe route committed without the matching Playwright pair fails
+// here, and therefore fails CI.
+const API_SUITE = 'tests/api/lab.api.test.mjs';
+test('Playwright coverage contract: runtime-appropriate suite exists and names every active SAST scenario', () => {
+  for (const entry of catalog.filter((e) => e.status === 'active' && e.scanner === 'SAST')) {
+    const references = entry.test.split(';').map((s) => s.trim());
+    if (entry.runtime === 'browser') {
+      const browserSpecs = references.filter((r) => r.startsWith('tests/browser/'));
+      expect(browserSpecs.length, `${entry.id} (client-side vuln) must reference a tests/browser/ spec`).toBeGreaterThan(0);
+      for (const spec of browserSpecs) {
+        expect(readFileSync(path.join(root, spec), 'utf8'), `${entry.id} missing from ${spec}`).toContain(entry.id);
+      }
+    } else {
+      expect(references, `${entry.id} must reference ${API_SUITE}`).toContain(API_SUITE);
+      expect(readFileSync(path.join(root, API_SUITE), 'utf8'), `${entry.id} missing from the Playwright API suite`).toContain(entry.id);
+    }
+  }
+});

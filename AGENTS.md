@@ -55,7 +55,7 @@ Expanded checklist: [docs/adding-scenarios.md](docs/adding-scenarios.md). The me
    - **Playwright API test (always):** every new vulnerable route **and every safe control** gets a pair in `tests/api/lab.api.test.mjs` — one identical payload sent to both routes via the `request` fixture, asserting the exploit succeeds on the vulnerable side and stays inert on the protected side. Add new pages to the 200-sweep. No browser needed for this suite.
    - **Playwright browser test (when the vuln executes client-side / FE):** add to `tests/browser/` — marker property **set** on the unsafe page, **provably unset** on the safe page after a settle window.
    - **Unit test (when there is an API handler):** `tests/unit/<name>.test.mjs`, import the handler directly, use `request()` from `helpers.mjs`; same both-directions shape.
-   A scenario without its Playwright coverage is incomplete — do not commit it.
+   A scenario without its Playwright coverage is incomplete — do not commit it. **This is enforced mechanically**: `tests/unit/catalog.test.mjs` fails (and so does CI) if an active SAST scenario's runtime-appropriate Playwright suite is missing from its catalog `test` references or no longer names the scenario ID.
 6. **Re-snapshot** (`pnpm scenario:update`) in the same commit.
 
 ## Creating a safe example (protected route)
