@@ -100,7 +100,7 @@ curl -s 'http://127.0.0.1:3000/vulnerable/eval-injection?input=%27%20%2B%20(6%20
 | Endpoint | `POST /api/vulnerable-submit` |
 | Sink | server-side `eval` of an object-literal template |
 | Flow | JSON `name`/`message` → string interpolation → `eval` in Node |
-| Tests | `tests/unit/eval.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/eval.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports unsafe `eval` of request-body input (CWE-95) — RCE-grade because it executes in the server process.
 
@@ -163,4 +163,4 @@ curl -s http://127.0.0.1:3000/api/vulnerable-submit \
 ### Automated tests
 
 - `tests/unit/eval.test.mjs`: unsafe handler returns `42`; safe handler returns the payload inert; method/type validation.
-- `scripts/test-http.mjs` repeats both over HTTP.
+- `tests/api/lab.api.test.mjs` repeats both over HTTP.

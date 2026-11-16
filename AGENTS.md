@@ -19,7 +19,7 @@ Deep references when needed: [docs/adding-scenarios.md](docs/adding-scenarios.md
 | You changed… | Minimum before commit | Why |
 | --- | --- | --- |
 | API handlers / lib | `pnpm test` (unit suite imports handlers directly against real PGlite — no server needed) | Exploitable outcome + safe rejection per scenario |
-| Pages / UI | `pnpm build`, then against a running `pnpm start`: `pnpm test:http` (+ `pnpm test:browser` for anything executing client-side) | SSR markup pairs, real-browser execution/non-execution |
+| API routes / pages | `pnpm build`, then against a running `pnpm start`: `pnpm test:api` (Playwright `request` fixture — no browser needed); `pnpm test:browser` for anything executing client-side | Vulnerable/protected pairs over real HTTP; real-browser execution/non-execution |
 | `lib/catalog.json` or any scenario source | `pnpm scenario:check` — expect it to fail until you re-snapshot (below) | Ground truth must move with the change |
 | Dependencies / lockfile | `pnpm audit:check` — expect drift until `pnpm audit:update` | Audit snapshot is the SCA scenario |
 | Anything | `pnpm lint` | Style/import health |
@@ -53,7 +53,7 @@ Expanded checklist: [docs/adding-scenarios.md](docs/adding-scenarios.md). The me
 4. **Docs section** in `docs/vulnerabilities/<module>.md` following the anchor contract (`#<id>`, `#<id>-agent` compact + self-contained, `#<id>-student`, `#<id>-exploit` with **verified** Burp Suite + Postman + curl commands, `#<id>-safe` vulnerable-vs-protected table *and why*, `#<id>-tests`), plus the Contents row and `docs/vulnerabilities/index.md` entry. Never document an unverified command — run it first.
 5. **Tests, both directions** — the non-negotiable shape of this lab:
    - unit: `tests/unit/<name>.test.mjs`, import the handler directly, use `request()` from `helpers.mjs`; assert the exploitable outcome (positive) *and* the safe outcome for the **identical payload** (negative).
-   - HTTP: pairs in `scripts/test-http.mjs` + add routes to the 200-sweep.
+   - API: pairs in `tests/api/lab.api.test.mjs` (Playwright `request` fixture) + add routes to the 200-sweep.
    - browser (client-side execution only): marker **set** on the unsafe page, **provably unset** on the safe page after a settle window.
 6. **Re-snapshot** (`pnpm scenario:update`) in the same commit.
 
@@ -77,7 +77,7 @@ Expanded checklist: [docs/adding-scenarios.md](docs/adding-scenarios.md). The me
 
 ```bash
 pnpm lint && pnpm test && pnpm scenario:check && pnpm audit:check
-pnpm build && (pnpm start &)          # pnpm test:http && pnpm test:browser
+pnpm build && (pnpm start &)          # pnpm test:api && pnpm test:browser
 pnpm build:react2shell && (pnpm start:react2shell &)   # pnpm test:react2shell
 ```
 

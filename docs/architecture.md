@@ -32,7 +32,7 @@ Both apps bind `127.0.0.1` only. The lab is for local, isolated testing.
 | Layer | Runner | Files | Proves |
 | --- | --- | --- | --- |
 | Unit (API handlers, real PGlite) | Vitest | `tests/unit/*.test.mjs` | Handlers import directly — no server, no VM transform. Exploitable outcomes (bypass, stacked SQL, shell execution) and safe-control outcomes for identical payloads |
-| HTTP integration | Node | `scripts/test-http.mjs` | Running production server: full request/response cycles, SSR output of unsafe vs safe XSS rendering, all page routes |
+| API integration | Playwright (`request` fixture, no browser) | `tests/api/lab.api.test.mjs` | Running production server: full request/response cycles for every vulnerable/protected pair, SSR output of unsafe vs safe XSS rendering, redirect headers, route sweep |
 | Browser execution | Playwright | `tests/browser/xss.browser.test.mjs` | XSS/eval payloads actually execute JavaScript in a real browser on unsafe pages, and provably do not execute on safe pages |
 | SCA visibility | `pnpm audit --prod` | — (informational) | The raw audit reports the intentional vulnerable pins; its nonzero exit is the scenario working, so it never gates CI |
 | Runtime RSC | Node | `scripts/test-react2shell.mjs` | The React2Shell fixture executes server-side arithmetic from a crafted RSC request (marker absent from the literal request) |

@@ -1,7 +1,12 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: 'tests/browser',
+  // Two suites, kept separate for clarity:
+  //   tests/api/     — API-only specs (request fixture, no browser launched,
+  //                    runs without `playwright install`): pnpm test:api
+  //   tests/browser/ — real-Chromium execution specs (needs the browser
+  //                    binary): pnpm test:browser
+  testDir: 'tests',
   timeout: 60000,
   fullyParallel: false,
   reporter: [['list']],

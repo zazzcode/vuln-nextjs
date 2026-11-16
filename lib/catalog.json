@@ -26,7 +26,7 @@
     "documentation": "docs/vulnerabilities/javascript.md",
     "expectedFinding": true,
     "safeControl": "pages/api/protected-example.js",
-    "test": "tests/unit/eval.test.mjs; scripts/test-http.mjs"
+    "test": "tests/unit/eval.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "OS-001",
@@ -41,7 +41,7 @@
     "documentation": "docs/vulnerabilities/system.md",
     "expectedFinding": true,
     "safeControl": "pages/api/secure/command.js",
-    "test": "tests/unit/command.test.mjs; scripts/test-http.mjs"
+    "test": "tests/unit/command.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "FS-001",
@@ -56,7 +56,7 @@
     "documentation": "docs/vulnerabilities/system.md",
     "expectedFinding": true,
     "safeControl": "pages/api/secure/file-read.js",
-    "test": "tests/unit/file-read.test.mjs; scripts/test-http.mjs"
+    "test": "tests/unit/file-read.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "SQL-001",
@@ -72,7 +72,7 @@
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/login.js",
     "safeControls": ["pages/api/sql/zod/login.js"],
-    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; scripts/test-http.mjs"
+    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "SQL-002",
@@ -88,7 +88,7 @@
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/products.js",
     "safeControls": ["pages/api/sql/zod/products.js"],
-    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; scripts/test-http.mjs"
+    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "SQL-003",
@@ -104,7 +104,7 @@
     "expectedFinding": true,
     "safeControl": "pages/api/sql/safe/notes.js",
     "safeControls": ["pages/api/sql/zod/notes.js"],
-    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; scripts/test-http.mjs"
+    "test": "tests/unit/sql.test.mjs; tests/unit/zod.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "XSS-001",
@@ -120,7 +120,7 @@
     "expectedFinding": true,
     "safeControl": "pages/xss/safe/reflected.js",
     "safeControls": ["pages/xss/sanitized/reflected.js"],
-    "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
+    "test": "tests/browser/xss.browser.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "XSS-002",
@@ -135,7 +135,7 @@
     "documentation": "docs/vulnerabilities/xss.md",
     "expectedFinding": true,
     "safeControl": "pages/xss/safe/stored.js",
-    "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
+    "test": "tests/browser/xss.browser.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "XSS-003",
@@ -150,7 +150,7 @@
     "documentation": "docs/vulnerabilities/xss.md",
     "expectedFinding": true,
     "safeControl": "pages/xss/safe/script-context.js",
-    "test": "tests/browser/xss.browser.test.mjs; scripts/test-http.mjs"
+    "test": "tests/browser/xss.browser.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "XSS-004",
@@ -165,7 +165,7 @@
     "documentation": "docs/vulnerabilities/xss.md",
     "expectedFinding": true,
     "safeControl": "pages/xss/sanitized/comments.js",
-    "test": "tests/browser/xss.browser.test.mjs; tests/unit/comments.test.mjs; scripts/test-http.mjs"
+    "test": "tests/browser/xss.browser.test.mjs; tests/unit/comments.test.mjs; tests/api/lab.api.test.mjs"
   },
   {
     "id": "SSRF-001",
@@ -180,7 +180,7 @@
     "documentation": "docs/vulnerabilities/ssr.md",
     "expectedFinding": true,
     "safeControl": "pages/secure/ssrf.js",
-    "test": "scripts/test-http.mjs"
+    "test": "tests/api/lab.api.test.mjs"
   },
   {
     "id": "REDIR-001",
@@ -195,7 +195,7 @@
     "documentation": "docs/vulnerabilities/ssr.md",
     "expectedFinding": true,
     "safeControl": "pages/secure/redirect.js",
-    "test": "scripts/test-http.mjs"
+    "test": "tests/api/lab.api.test.mjs"
   },
   {
     "id": "SCA-001",

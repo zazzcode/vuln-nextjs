@@ -27,8 +27,9 @@ pnpm scenario:check   # scenario sources match the committed hash manifest
 pnpm audit:check      # pnpm audit --prod matches the committed snapshot
 
 pnpm build && pnpm start &          # then:
-pnpm test:http                      # end-to-end HTTP pairs
-pnpm exec playwright install chromium   # once
+pnpm test:api                      # Playwright API pairs (request fixture — no browser needed)
+
+pnpm exec playwright install chromium   # once, only for the browser suite
 pnpm test:browser                   # real browser execution / non-execution
 
 pnpm build:react2shell && pnpm start:react2shell &   # then:

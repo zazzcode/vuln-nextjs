@@ -33,7 +33,7 @@ Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners
 
 ## Setup
 
-Requires Node.js `>= 22.13.0` (see `engines`). pnpm is pinned via `packageManager` and supplied by corepack:
+Requires Node.js `>= 24.0.0` (24 LTS) (see `engines`). pnpm is pinned via `packageManager` and supplied by corepack:
 
 ```bash
 git clone https://github.com/zazzcode/vuln-nextjs.git
@@ -59,8 +59,8 @@ For production-mode testing (what CI does): `pnpm build && pnpm start`. Both app
 | Command | Proves |
 | --- | --- |
 | `pnpm test` | Vitest unit suite — handlers import directly against real in-memory PGlite; exploitable outcomes and safe rejections for identical payloads |
-| `pnpm test:http` | End-to-end HTTP against the running server — vulnerable/safe pairs, SSR raw-vs-escaped XSS markup, all page routes |
-| `pnpm test:browser` | Playwright/Chromium — XSS and eval payloads **actually execute** on unsafe pages and provably **do not** on safe pages |
+| `pnpm test:api` | Playwright **API** suite (`request` fixture — no browser needed) against the running server: every vulnerable/safe pair, SSR markup, redirect headers, route sweep |
+| `pnpm test:browser` | Playwright/Chromium (separate suite, needs `playwright install chromium` once) — XSS and eval payloads **actually execute** on unsafe pages and provably **do not** on safe pages |
 | `pnpm test:react2shell` | Server-side execution inside the affected RSC decoder, via a marker computed on the server |
 | `pnpm audit:check` | `pnpm audit --prod` output matches the committed ground truth `tests/expected-audit.json` |
 | `pnpm scenario:check` | Every catalog-registered route matches the committed hash manifest `tests/expected-hashes.json`, and the scanner ground truth `tests/expected-scanner-findings.json` (per-source must-find/must-not-flag + CWE, for SAST/SCA evaluation harnesses) is in sync with the catalog |
@@ -114,6 +114,6 @@ Contributions that add or refine scenarios are welcome. The lab's value is its *
 3. **Build the scenario** — follow [docs/adding-scenarios.md](docs/adding-scenarios.md): flaw and safe control in separate files, catalog entry, documentation with reproduction steps (Burp Suite / Postman / curl), and tests asserting **both** the exploitable and the safe path (unit + HTTP; browser for client-side execution).
 4. **Never upgrade pinned vulnerable dependencies** — the pins are the scenarios. Retiring one is a dedicated change that updates catalog, docs, and audit snapshot together.
 5. **Move the ground truth with your change** — `pnpm scenario:update` and/or `pnpm audit:update` after review, committed together with the source change that justifies them. A manifest update with no corresponding source change will not pass review.
-6. **Verify locally before opening a PR** — `pnpm lint && pnpm test && pnpm scenario:check && pnpm audit:check`, then the server probes (`pnpm build && pnpm start &`, `pnpm test:http && pnpm test:browser`, and the fixture probe). CI runs the same set.
+6. **Verify locally before opening a PR** — `pnpm lint && pnpm test && pnpm scenario:check && pnpm audit:check`, then the server probes (`pnpm build && pnpm start &`, `pnpm test:api && pnpm test:browser`, and the fixture probe). CI runs the same set.
 
 Issues documenting scanner false positives/negatives against the catalog (with tool name and version) are especially useful — they drive the next scenarios.

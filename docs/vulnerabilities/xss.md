@@ -32,7 +32,7 @@ Payload shape note: markup inserted via `innerHTML` does not run `<script>` elem
 | Route | `/xss/{unsafe,safe,sanitized}/reflected?payload=…` |
 | Sink | `dangerouslySetInnerHTML={{ __html: payload }}` |
 | Flow | `query.payload` → `getServerSideProps` prop → raw HTML emission |
-| Tests | `tests/browser/xss.browser.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/browser/xss.browser.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports unsafe raw-HTML rendering of user input (CWE-79). The markup ships in the SSR HTML and executes on load; the attack is carried entirely in the URL (link-shareable).
 
@@ -93,7 +93,7 @@ curl -s 'http://127.0.0.1:3000/xss/safe/reflected?payload=%3Cimg%20src%3Dx%20one
 ### Automated tests
 
 - `tests/browser/xss.browser.test.mjs`: marker executes on unsafe; stays undefined with visible text on safe; undefined on sanitized.
-- `scripts/test-http.mjs`: SSR HTML contains raw markup (unsafe) vs `&lt;` escaped (safe).
+- `tests/api/lab.api.test.mjs`: SSR HTML contains raw markup (unsafe) vs `&lt;` escaped (safe).
 
 ---
 
@@ -110,7 +110,7 @@ curl -s 'http://127.0.0.1:3000/xss/safe/reflected?payload=%3Cimg%20src%3Dx%20one
 | Route | `/xss/{unsafe,safe}/stored` |
 | Sink | `dangerouslySetInnerHTML` per note body, client-fetched list |
 | Flow | note `body` → parameterized INSERT → `GET /api/sql/safe/notes` → raw HTML per note |
-| Tests | `tests/browser/xss.browser.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/browser/xss.browser.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports unsafe raw-HTML rendering of stored data (CWE-79) — executes for every visitor of the list (second-order XSS).
 
@@ -183,7 +183,7 @@ curl -s -X POST http://127.0.0.1:3000/api/lab/reset -H 'Content-Type: applicatio
 | Route | `/xss/{unsafe,safe}/script-context?data=…` |
 | Sink | `<script dangerouslySetInnerHTML>` fed by `JSON.stringify` |
 | Flow | `query.data` → `JSON.stringify({ data })` → inline script element |
-| Tests | `tests/browser/xss.browser.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/browser/xss.browser.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports unsafe inline-script construction (CWE-79). Distinct from XSS-001/002: the payload breaks out of a `<script>` *element* via the literal characters `</script>`, which JSON escaping does not neutralize.
 
@@ -246,7 +246,7 @@ curl -s 'http://127.0.0.1:3000/xss/safe/script-context?data=%3C%2Fscript%3E%3Cim
 ### Automated tests
 
 - `tests/browser/xss.browser.test.mjs`: breakout executes (unsafe); safe page keeps `__labData.data` verbatim with no execution.
-- `scripts/test-http.mjs`: SSR HTML contains the raw breakout sequence (unsafe) vs `\u003c` escaping (safe).
+- `tests/api/lab.api.test.mjs`: SSR HTML contains the raw breakout sequence (unsafe) vs `\u003c` escaping (safe).
 
 ---
 
@@ -264,7 +264,7 @@ curl -s 'http://127.0.0.1:3000/xss/safe/script-context?data=%3C%2Fscript%3E%3Cim
 | Storage | `pages/api/xss/comments.js` — parameterized INSERT, deliberately safe |
 | Sink | `dangerouslySetInnerHTML` per comment body, **server-rendered** |
 | Flow | comment `body` → parameterized INSERT → `getServerSideProps` query → raw HTML for every visitor |
-| Tests | `tests/unit/comments.test.mjs`; `tests/browser/xss.browser.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/comments.test.mjs`; `tests/browser/xss.browser.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports unsafe raw-HTML rendering of stored data (CWE-79) in a fully server-rendered list — the classic guestbook shape: one stored payload, every visitor, visible even in `curl` output.
 
@@ -329,4 +329,4 @@ curl -s -X POST http://127.0.0.1:3000/api/lab/reset -H 'Content-Type: applicatio
 
 - `tests/unit/comments.test.mjs`: comments round-trip verbatim through the storage API; method/field validation.
 - `tests/browser/xss.browser.test.mjs`: resets, stores the payload via the API, asserts execution on unsafe and non-execution with surviving benign markup on sanitized.
-- `scripts/test-http.mjs`: SSR HTML raw vs sanitized markup for the identical stored comment.
+- `tests/api/lab.api.test.mjs`: SSR HTML raw vs sanitized markup for the identical stored comment.

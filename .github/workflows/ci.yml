@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Enable pinned pnpm
         run: |
@@ -56,13 +56,16 @@ jobs:
           done
           echo "main app failed to start" && exit 1
 
-      - name: HTTP integration probe
-        run: pnpm test:http
+      # API-only Playwright suite: request fixture, no browser launched, so it
+      # runs before the Chromium download and isolates API failures.
+      - name: API tests (Playwright, no browser)
+        run: pnpm test:api
 
       - name: Install Chromium for browser tests
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Browser XSS/eval execution tests
+      # Separate step so browser failures never conflate with API failures.
+      - name: Browser execution tests (Playwright)
         run: pnpm test:browser
 
       - name: Start React2Shell fixture

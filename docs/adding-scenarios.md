@@ -32,7 +32,7 @@ Add an entry to `lib/catalog.json`:
   "documentation": "docs/vulnerabilities/xss.md",
   "expectedFinding": true,
   "safeControl": "pages/xss/safe/….js",
-  "test": "tests/unit/….test.mjs; scripts/test-http.mjs"
+  "test": "tests/unit/….test.mjs; tests/api/lab.api.test.mjs"
 }
 ```
 
@@ -47,7 +47,7 @@ Append a section to the category document in `docs/vulnerabilities/` (or create 
 Every scenario needs positive *and* negative assertions:
 
 - **Unit** (`tests/unit/*.test.mjs`): import handlers directly; assert the exploitable outcome on the unsafe side and inert handling of the same payload on the safe side.
-- **HTTP** (`scripts/test-http.mjs`): repeat the pair against the running server; add page routes to the status sweep.
+- **HTTP** (`tests/api/lab.api.test.mjs`): repeat the pair against the running server; add page routes to the status sweep.
 - **Browser** (only for runtime `browser`): extend `tests/browser/xss.browser.test.mjs` — assert a marker property is set on the unsafe page and provably unset on the safe page.
 
 ## 6. Dependency scenarios (SCA)
@@ -72,7 +72,7 @@ Commit the updated manifests together with the source change that justifies them
 ```bash
 corepack pnpm lint && corepack pnpm test && corepack pnpm scenario:check && corepack pnpm audit:check
 corepack pnpm build && corepack pnpm start &   # then:
-corepack pnpm test:http && corepack pnpm test:browser
+corepack pnpm test:api && corepack pnpm test:browser
 ```
 
 CI runs the same set. Feature branches for reviewed work; the lab's own CI must stay green.

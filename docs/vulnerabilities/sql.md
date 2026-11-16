@@ -27,7 +27,7 @@ Lab credentials: `alice / alice-lab-only`, `admin / admin-lab-only`. Login endpo
 | Endpoint | `POST /api/sql/{unsafe,safe,zod}/login` |
 | Sink | string interpolation into `db.query` |
 | Flow | JSON `username`/`password` → `'…${username}…${password}…'` |
-| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports SQL injection (CWE-89) on both interpolated fields.
 
@@ -91,7 +91,7 @@ curl -s -w '\n%{http_code}\n' http://127.0.0.1:3000/api/sql/safe/login \
 
 - `tests/unit/sql.test.mjs`: comment and tautology bypasses succeed only on unsafe; valid/invalid logins on all; response never leaks hash columns.
 - `tests/unit/zod.test.mjs`: zod control rejects bad shapes (empty/oversized/wrong type) with 400 and treats the bypass payload as data (401).
-- `scripts/test-http.mjs` repeats the pair over HTTP.
+- `tests/api/lab.api.test.mjs` repeats the pair over HTTP.
 
 ---
 
@@ -108,7 +108,7 @@ curl -s -w '\n%{http_code}\n' http://127.0.0.1:3000/api/sql/safe/login \
 | Endpoint | `GET /api/sql/{unsafe,safe,zod}/products?q=` |
 | Sink | ILIKE pattern interpolation |
 | Flow | `query.q` → `'…ILIKE '%${q}%…'` |
-| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports SQL injection (CWE-89) on the interpolated search term.
 
@@ -164,7 +164,7 @@ curl -s 'http://127.0.0.1:3000/api/sql/safe/products?q=%27%20OR%20true%20--'    
 
 - `tests/unit/sql.test.mjs`: 3 rows via unsafe (including the private product), 0 via safe; identical baselines; apostrophe search works safely.
 - `tests/unit/zod.test.mjs`: zod control returns 0 rows for the payload and 400 for oversized input.
-- `scripts/test-http.mjs` repeats the pair over HTTP.
+- `tests/api/lab.api.test.mjs` repeats the pair over HTTP.
 
 ---
 
@@ -181,7 +181,7 @@ curl -s 'http://127.0.0.1:3000/api/sql/safe/products?q=%27%20OR%20true%20--'    
 | Endpoint | `GET/POST /api/sql/{unsafe,safe,zod}/notes` |
 | Sink | `db.exec` (multi-statement) with interpolated note body |
 | Flow | JSON `body` → `INSERT … VALUES ('${body}', …)` |
-| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/sql.test.mjs`; `tests/unit/zod.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports SQL injection (CWE-89); the multi-statement sink additionally enables stacked queries (mutation/destruction, not just disclosure).
 
@@ -247,4 +247,4 @@ curl -s http://127.0.0.1:3000/api/sql/safe/products   # still 2 rows — payload
 
 - `tests/unit/sql.test.mjs`: stacked mutation flips visibility only via unsafe; safe write stores the string literally; apostrophes round-trip; reset recovers after `DROP TABLE`.
 - `tests/unit/zod.test.mjs`: zod write stores the payload verbatim with no product mutation; schema violations 400.
-- `scripts/test-http.mjs` repeats the scenario end-to-end.
+- `tests/api/lab.api.test.mjs` repeats the scenario end-to-end.

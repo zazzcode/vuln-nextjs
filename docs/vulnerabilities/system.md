@@ -22,7 +22,7 @@
 | Endpoint | `POST /api/vulnerable-exec` |
 | Sink | `child_process.exec` (shell command line) |
 | Flow | JSON `command` → `exec(command)` |
-| Tests | `tests/unit/command.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/command.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports OS command injection (CWE-78): the entire request field becomes a shell command line.
 
@@ -90,7 +90,7 @@ curl -s http://127.0.0.1:3000/api/secure/command \
 ### Automated tests
 
 - `tests/unit/command.test.mjs`: marker execution, two-command chaining (unsafe); literal echo of metacharacter strings, method/type/length validation (safe).
-- `scripts/test-http.mjs` repeats the pair over HTTP.
+- `tests/api/lab.api.test.mjs` repeats the pair over HTTP.
 
 ---
 
@@ -107,7 +107,7 @@ curl -s http://127.0.0.1:3000/api/secure/command \
 | Endpoint | `POST /api/vulnerable-file-read` |
 | Sink | `fs.readFileSync(filePath)` |
 | Flow | JSON `filePath` → unrestricted filesystem read |
-| Tests | `tests/unit/file-read.test.mjs`; `scripts/test-http.mjs` |
+| Tests | `tests/unit/file-read.test.mjs`; `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports path traversal / arbitrary file read (CWE-22): the caller controls the entire path.
 
@@ -169,4 +169,4 @@ curl -s -w '\n%{http_code}\n' http://127.0.0.1:3000/api/secure/file-read \
 ### Automated tests
 
 - `tests/unit/file-read.test.mjs`: unsafe reads `./package.json`; safe publishes exactly the allowlist and rejects traversal/absolute/partial/malformed inputs.
-- `scripts/test-http.mjs` repeats the pair over HTTP.
+- `tests/api/lab.api.test.mjs` repeats the pair over HTTP.

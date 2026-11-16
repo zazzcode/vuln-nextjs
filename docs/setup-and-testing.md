@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js `>= 22.13.0`
+- Node.js `>= 24.0.0` (24 LTS)
 - pnpm `11.25.0` — the repository pins it via the `packageManager` field; corepack supplies it automatically:
 
 ```bash
@@ -47,8 +47,8 @@ Both bind `127.0.0.1` only. Browse the scenario index at `http://127.0.0.1:3000/
 | --- | --- | --- |
 | `corepack pnpm test` | nothing (handlers load directly) | Vitest unit suite: SQL bypass/stacked-query exploitation and safe rejections, eval/server arithmetic, shell execution vs literal echo, allowlisted file reads, catalog/docs/path consistency |
 | `corepack pnpm lint` | nothing | ESLint across pages, components, lib, tests, scripts |
-| `corepack pnpm test:http` | built + started main app | End-to-end HTTP: all vulnerable/safe pairs, SSR raw vs escaped XSS markup, every page route |
-| `corepack pnpm test:browser` | built main app (config auto-starts it) | Playwright/Chromium: XSS and eval payloads **execute** on unsafe pages and **do not execute** on safe pages |
+| `corepack pnpm test:api` | built + started main app | Playwright **API** suite (`request` fixture — no browser binary needed): all vulnerable/safe pairs, SSR raw vs escaped XSS markup, redirect headers, every page route |
+| `corepack pnpm test:browser` | built main app + Chromium binary | Playwright/Chromium (separate suite from the API tests): XSS and eval payloads **execute** on unsafe pages and **do not execute** on safe pages |
 | `corepack pnpm test:react2shell` | built + started fixture | Server-side execution inside the affected RSC decoder via a computed marker |
 | `corepack pnpm audit:check` | install only | `pnpm audit --prod --json` output matches the committed snapshot `tests/expected-audit.json` — the SCA ground truth |
 | `corepack pnpm audit:update` | install only | Re-snapshot the audit ground truth after reviewing a deliberate change |
@@ -56,7 +56,7 @@ Both bind `127.0.0.1` only. Browse the scenario index at `http://127.0.0.1:3000/
 | `corepack pnpm scenario:update` | install only | Re-snapshot the hashes and the scanner-expectations export after a reviewed scenario change |
 | `corepack pnpm audit:lab` | install only | Raw human-readable audit (expected nonzero exit) |
 
-First browser-test run needs the Chromium binary:
+The API suite (`test:api`) never launches a browser, so it runs without that download; only the browser suite needs the Chromium binary:
 
 ```bash
 corepack pnpm exec playwright install chromium
@@ -68,7 +68,7 @@ corepack pnpm exec playwright install chromium
 
 ## CI
 
-`.github/workflows/ci.yml` runs the full matrix on every push and pull request: frozen install → lint → unit tests → builds → running-server HTTP probes → browser tests → React2Shell runtime probe, plus an informational (non-blocking) `pnpm audit --prod` so the intended findings stay visible. All required checks are expected green.
+`.github/workflows/ci.yml` runs the full matrix on every push and pull request: frozen install → lint → unit tests → builds → Playwright API tests (no browser) → Chromium install → browser tests (separate step) → React2Shell runtime probe, plus an informational (non-blocking) `pnpm audit --prod` so the intended findings stay visible. All required checks are expected green.
 
 ## Resetting state
 

@@ -13,8 +13,8 @@
     "lint": "eslint --ext .js,.mjs,.cjs pages components lib tests scripts next.config.js vitest.config.mjs playwright.config.mjs targets/react2shell/app",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:browser": "playwright test",
-    "test:http": "node scripts/test-http.mjs",
+    "test:api": "playwright test tests/api",
+    "test:browser": "playwright test tests/browser",
     "test:react2shell": "node scripts/test-react2shell.mjs",
     "audit:check": "node scripts/check-audit.mjs",
     "audit:update": "node scripts/check-audit.mjs --update",
@@ -38,6 +38,6 @@
   },
   "packageManager": "pnpm@11.25.0",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=24.0.0"
   }
 }

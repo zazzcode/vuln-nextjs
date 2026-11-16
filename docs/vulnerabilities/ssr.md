@@ -24,7 +24,7 @@ These flaws live in `getServerSideProps` — the Pages Router function that runs
 | Route | `/vulnerable/ssrf?fetch=…` vs `/secure/ssrf?fetch=…` |
 | Sink | `fetch(attacker-controlled absolute URL)` inside `getServerSideProps` |
 | Flow | `query.fetch` → server-side `fetch` → response rendered into the page |
-| Tests | `scripts/test-http.mjs` |
+| Tests | `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports SSRF (CWE-918): the server fetches a caller-chosen absolute URL with its internal network position.
 
@@ -85,7 +85,7 @@ curl -s 'http://127.0.0.1:3000/secure/ssrf?fetch=http%3A%2F%2F127.0.0.1%3A3001%2
 <a id="ssrf-001-tests"></a>
 ### Automated tests
 
-- `scripts/test-http.mjs`: internal API content rendered via the vulnerable page; safe page allows `/api/…` and blocks other origins/absolute URLs.
+- `tests/api/lab.api.test.mjs`: internal API content rendered via the vulnerable page; safe page allows `/api/…` and blocks other origins/absolute URLs.
 
 ---
 
@@ -102,7 +102,7 @@ curl -s 'http://127.0.0.1:3000/secure/ssrf?fetch=http%3A%2F%2F127.0.0.1%3A3001%2
 | Route | `/vulnerable/redirect?to=…` vs `/secure/redirect?to=…` |
 | Sink | `getServerSideProps` → `{ redirect: { destination: query.to } }` |
 | Flow | `query.to` → 307/308 `Location` header, verbatim |
-| Tests | `scripts/test-http.mjs` |
+| Tests | `tests/api/lab.api.test.mjs` |
 
 **Expected finding:** SAST reports open redirect (CWE-601): the redirect destination is attacker-controlled, including absolute URLs on other origins.
 
@@ -164,4 +164,4 @@ curl -s -o /dev/null -D - 'http://127.0.0.1:3000/secure/redirect?to=https%3A%2F%
 <a id="redir-001-tests"></a>
 ### Automated tests
 
-- `scripts/test-http.mjs`: 307 + verbatim `Location` for absolute and protocol-relative targets on the vulnerable route; rejection and working in-site redirect on the protected route.
+- `tests/api/lab.api.test.mjs`: 307 + verbatim `Location` for absolute and protocol-relative targets on the vulnerable route; rejection and working in-site redirect on the protected route.
