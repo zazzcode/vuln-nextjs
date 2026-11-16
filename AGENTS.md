@@ -51,17 +51,18 @@ Expanded checklist: [docs/adding-scenarios.md](docs/adding-scenarios.md). The me
 2. **Files**: unsafe source and safe control in **separate files**, mirroring existing pairs (`pages/api/sql/{unsafe,safe,zod}/…`, `pages/xss/{unsafe,safe,sanitized}/…`). Mark the sink: `// <ID> / <CWE>: …`. UI uses `components/LabLayout` / `components/ApiConsole`.
 3. **Catalog entry** (schema from any existing entry): `source`, `safeControl`, optional `safeControls: [...]` for library-based variants, `documentation`, `test`, `flow`, `runtime`, `cwe`, `expectedFinding: true`. No-sink explanation pages are `status: "demonstration"`, `expectedFinding: false`.
 4. **Docs section** in `docs/vulnerabilities/<module>.md` following the anchor contract (`#<id>`, `#<id>-agent` compact + self-contained, `#<id>-student`, `#<id>-exploit` with **verified** Burp Suite + Postman + curl commands, `#<id>-safe` vulnerable-vs-protected table *and why*, `#<id>-tests`), plus the Contents row and `docs/vulnerabilities/index.md` entry. Never document an unverified command — run it first.
-5. **Tests, both directions** — the non-negotiable shape of this lab:
-   - unit: `tests/unit/<name>.test.mjs`, import the handler directly, use `request()` from `helpers.mjs`; assert the exploitable outcome (positive) *and* the safe outcome for the **identical payload** (negative).
-   - API: pairs in `tests/api/lab.api.test.mjs` (Playwright `request` fixture) + add routes to the 200-sweep.
-   - browser (client-side execution only): marker **set** on the unsafe page, **provably unset** on the safe page after a settle window.
+5. **Tests, both directions — required, not optional:**
+   - **Playwright API test (always):** every new vulnerable route **and every safe control** gets a pair in `tests/api/lab.api.test.mjs` — one identical payload sent to both routes via the `request` fixture, asserting the exploit succeeds on the vulnerable side and stays inert on the protected side. Add new pages to the 200-sweep. No browser needed for this suite.
+   - **Playwright browser test (when the vuln executes client-side / FE):** add to `tests/browser/` — marker property **set** on the unsafe page, **provably unset** on the safe page after a settle window.
+   - **Unit test (when there is an API handler):** `tests/unit/<name>.test.mjs`, import the handler directly, use `request()` from `helpers.mjs`; same both-directions shape.
+   A scenario without its Playwright coverage is incomplete — do not commit it.
 6. **Re-snapshot** (`pnpm scenario:update`) in the same commit.
 
 ## Creating a safe example (protected route)
 
 1. Choose the pattern from [docs/validation-and-sanitization.md](docs/validation-and-sanitization.md): Zod for shape, bound SQL parameters, `execFile` + argument vector with `shell: false`, exact-string allowlists, DOMPurify when rich text must survive, React text nodes otherwise, origin policy before fetching, relative-only redirects.
 2. The control must accept the **identical payload** and keep it verifiably inert (echoed, stored literally, or stripped of execution) — safety must come from the pattern, not from rejecting quotes or "suspicious" input. Input checks shared with the vuln side (method/type/length) must not neutralize the exploit.
-3. Register it in the scenario's `safeControl`/`safeControls` (this hashes it and exports it as must-not-flag), document it in the scenario's `-safe` section with the *why*, and cover it in unit + HTTP tests.
+3. Register it in the scenario's `safeControl`/`safeControls` (this hashes it and exports it as must-not-flag), document it in the scenario's `-safe` section with the *why*, and add its pair to the Playwright API suite (`tests/api/lab.api.test.mjs`) — the identical payload must be asserted inert against the new control.
 4. `pnpm scenario:update` afterwards.
 
 ## Gotchas (each of these has cost an hour before)

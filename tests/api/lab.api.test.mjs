@@ -1,20 +1,19 @@
 /**
- * Zazzles vulnerability lab — Playwright API tests.
+ * Zazzles vulnerability lab — Playwright API regression suite.
  *
- * These specs exercise the lab's HTTP surface only: no browser is launched,
- * so this file runs without `playwright install` (nothing to download).
+ * Contributor/agent contract (see AGENTS.md): every scenario — vulnerable
+ * route AND every safe control — must be represented here as a pair:
+ * ONE identical payload sent to both routes, asserting the exploit
+ * succeeds on the vulnerable side and stays inert data on the protected
+ * side. Browser-executing scenarios additionally live in tests/browser/
+ * (which needs Chromium; this file never launches a browser, so it runs
+ * without `playwright install`).
  *
- * The teaching pattern used in every scenario below:
- *
- *   arrange  put the lab in a known state (reset the in-memory database)
- *   act      send ONE identical payload to the vulnerable route AND its
- *            protected twin — same bytes, same method, same query
- *   assert   the exploit succeeds on the vulnerable side, while the same
- *            payload stays inert data on the protected side
- *
- * If a "VULNERABLE" assertion ever fails, someone hardened a flaw (a
- * regression — restore it). If a "PROTECTED" assertion fails, a control
- * stopped neutralizing its payload (fix the control, not the test).
+ * Failure interpretation:
+ *   a VULNERABLE assertion failing  → someone hardened a flaw (regression:
+ *                                     restore the vulnerability)
+ *   a PROTECTED assertion failing   → a control stopped neutralizing its
+ *                                     payload (fix the control, not the test)
  */
 import { test, expect } from '@playwright/test';
 
