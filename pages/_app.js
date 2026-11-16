@@ -1,7 +1,4 @@
 import '../styles/globals.css';
-
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+export default function MyApp({ Component, pageProps, router }) {
+  return <Component key={router.asPath.split('?')[0]} {...pageProps} />;
 }
-
-export default MyApp;

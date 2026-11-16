@@ -1,0 +1,7 @@
+packages:
+  - targets/*
+allowBuilds:
+  sharp: set this to true or false
+# No image optimization in this lab; sharp install hooks are unnecessary.
+ignoredBuiltDependencies:
+  - sharp

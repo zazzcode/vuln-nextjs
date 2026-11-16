@@ -1,0 +1,16 @@
+{
+  "name": "@zazzles/react2shell",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deliberately pinned React2Shell SCA and runtime target",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3001",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3001"
+  },
+  "dependencies": {
+    "next": "15.0.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  }
+}

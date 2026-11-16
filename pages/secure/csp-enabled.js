@@ -71,12 +71,12 @@ module.exports = {
           <li>✅ <strong>X-Frame-Options:</strong> Prevents clickjacking</li>
           <li>✅ <strong>X-Content-Type-Options:</strong> Prevents MIME sniffing</li>
           <li>✅ <strong>X-XSS-Protection:</strong> Enables XSS filter</li>
-          <li>✅ <strong>Referrer-Policy:</strong> Controls referrer information</li>
+          <li>Referrer-Policy appears in the sample configuration; this page does not set it.</li>
         </ul>
       </div>
 
       <h3>Test CSP Protection:</h3>
-      <p>Open your browser's developer console. Even if malicious content is present, CSP prevents execution.</p>
+      <p>Open your browser's developer console. This page sets a CSP, but unsafe-inline still permits inline scripts. It is a limited teaching example, not a strict production policy.</p>
 
       <div style={{ background: '#1a1a1a', padding: '1.5rem', borderRadius: '5px', margin: '1rem 0' }}>
         <p><strong>User Input (sanitized):</strong></p>
@@ -86,7 +86,7 @@ module.exports = {
           Try accessing this page with: <code>/secure/csp-enabled?input=&lt;script&gt;alert('XSS')&lt;/script&gt;</code>
         </p>
         <p>
-          The script tags will be blocked by CSP, even if they somehow made it through sanitization.
+          Input is rendered as React text after character filtering. This policy permits inline scripts and does not protect server-side eval or shell execution.
         </p>
       </div>
 

@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = {
   reactStrictMode: true,
-}
-
-module.exports = nextConfig
+  // Keep PGlite's WASM and filesystem assets in its installed Node package.
+  webpack(config, { isServer }) {
+    if (isServer) config.externals.push({ '@electric-sql/pglite': 'commonjs @electric-sql/pglite' });
+    return config;
+  },
+};

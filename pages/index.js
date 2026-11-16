@@ -1,100 +1,11 @@
 import Link from 'next/link';
-import styles from '../styles/Home.module.css';
-
+import LabLayout from '../components/LabLayout';
+import catalog from '../lib/catalog.json';
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          React2Shell Vulnerability Test Site
-        </h1>
-
-        <div className={styles.warning}>
-          ⚠️ WARNING: This is a deliberately vulnerable application for testing purposes only.
-          <br />
-          DO NOT deploy this to production or expose it to the internet!
-        </div>
-
-        <p className={styles.description}>
-          CVE-2025-66478 - Next.js Remote Code Execution Vulnerability
-        </p>
-
-        <div className={styles.grid}>
-          <div className={styles.card}>
-            <h2>Vulnerable Examples</h2>
-            <ul>
-              <li>
-                <Link href="/vulnerable/eval-injection">
-                  1. Eval Injection via Query Params
-                </Link>
-              </li>
-              <li>
-                <Link href="/vulnerable/form-submission">
-                  2. Form Submission RCE
-                </Link>
-              </li>
-              <li>
-                <Link href="/vulnerable/api-route">
-                  3. API Route Exploitation
-                </Link>
-              </li>
-              <li>
-                <Link href="/vulnerable/header-injection">
-                  4. Header Injection Attack
-                </Link>
-              </li>
-              <li>
-                <Link href="/vulnerable/dynamic-import">
-                  5. Dynamic Import Vulnerability
-                </Link>
-              </li>
-              <li>
-                <Link href="/vulnerable/rsc-server-action">
-                  6. RSC Server Action RCE (CVE-2025-66478)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className={styles.card}>
-            <h2>Secure Examples</h2>
-            <ul>
-              <li>
-                <Link href="/secure/sanitized-input">
-                  1. Sanitized Input Handling
-                </Link>
-              </li>
-              <li>
-                <Link href="/secure/validated-form">
-                  2. Validated Form Processing
-                </Link>
-              </li>
-              <li>
-                <Link href="/secure/protected-api">
-                  3. Protected API Route
-                </Link>
-              </li>
-              <li>
-                <Link href="/secure/csp-enabled">
-                  4. CSP-Enabled Page
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className={styles.info}>
-          <h3>Test Scripts</h3>
-          <p>Run test scripts from the <code>/scripts</code> directory:</p>
-          <ul>
-            <li><code>./test-eval-injection.sh</code> - Test eval injection attacks</li>
-            <li><code>./test-form-rce.sh</code> - Test form-based RCE</li>
-            <li><code>./test-api-exploit.sh</code> - Test API exploitation</li>
-            <li><code>./test-rsc-exploit.sh</code> - Test RSC RCE vulnerability</li>
-            <li><code>./test-all.sh</code> - Run all tests</li>
-          </ul>
-        </div>
-      </main>
-    </div>
-  );
+  return <LabLayout title="A growing testbed for SAST and SCA">
+    <p>Repeatable Next.js security scenarios with intentional flaws, safe comparisons, and documented expected findings.</p>
+    <div className="cards">{catalog.filter((entry) => entry.status === 'active').map((entry) => <article key={entry.id}><span className="badge">{entry.id} · {entry.scanner}</span><h2><Link href={entry.route}>{entry.title}</Link></h2><p>{entry.flow}</p></article>)}</div>
+    <h2>Explore the lab</h2><ul><li><Link href="/vulnerabilities">Complete scenario index and source locations</Link></li><li><Link href="/secure/sanitized-input">Safe input handling</Link></li><li><Link href="/secure/validated-form">Validated form</Link></li><li><Link href="/secure/protected-api">Safe API processing</Link></li><li><Link href="/secure/csp-enabled">Page-specific CSP example</Link></li></ul>
+    <p>Documentation starts at <code>doc/index.md</code>. Scenario metadata lives in <code>lib/catalog.json</code>.</p>
+  </LabLayout>;
 }

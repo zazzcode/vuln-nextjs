@@ -2,6 +2,12 @@
 
 ⚠️ **CRITICAL WARNING: This is a deliberately vulnerable application for security testing and educational purposes ONLY. NEVER deploy this to production or expose it to the internet!**
 
+## Attribution and Project Origins
+
+This app is an expansion of the original [nextjs-vulsite](https://github.com/e-tang/nextjs-vulsite) by [e-tang](https://github.com/e-tang) (Eric, credited as `eric` in the original Git history). Credit for the original vulnsite, its initial vulnerability examples, and its documentation belongs to the original author.
+
+This version builds on that foundation as a customized vulnerability testing app for Zazzles, with additional vulnerability scenarios and testing capabilities planned.
+
 ## Overview
 
 This Next.js application demonstrates the React2Shell vulnerability (CVE-2025-66478), a critical Remote Code Execution (RCE) flaw affecting Next.js applications. The project includes:

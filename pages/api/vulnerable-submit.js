@@ -1,5 +1,5 @@
 // ⚠️ EXTREMELY VULNERABLE API ENDPOINT - FOR TESTING ONLY!
-// This endpoint demonstrates the React2Shell vulnerability
+// JS-002: application-level server-side eval injection (not React2Shell)
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {

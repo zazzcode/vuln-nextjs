@@ -2,7 +2,6 @@
 // This endpoint reads arbitrary files from the filesystem
 
 import fs from 'fs';
-import path from 'path';
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
