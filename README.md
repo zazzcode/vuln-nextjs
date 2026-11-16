@@ -33,16 +33,17 @@ Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners
 
 ## Setup
 
-Requires Node.js `>= 22.13.0`. pnpm is pinned via `packageManager` and supplied by corepack:
+Requires Node.js `>= 22.13.0` (see `engines`). pnpm is pinned via `packageManager` and supplied by corepack:
 
 ```bash
 git clone https://github.com/zazzcode/vuln-nextjs.git
 cd vuln-nextjs
 corepack enable            # once, puts the pinned pnpm on PATH
 pnpm install
+pnpm exec playwright install chromium   # once, for the browser test suite
 ```
 
-pnpm is project-scoped: packages live in a global content-addressable store and are hard-linked into this repository's `node_modules` only. Other projects on your machine are not affected — which is what makes it safe to keep deliberately vulnerable versions pinned here.
+pnpm is project-scoped: packages live in a global content-addressable store and are hard-linked into this repository's `node_modules` only. Other projects on your machine are not affected — which is what makes it safe to keep deliberately vulnerable versions pinned here. Lab credentials are synthetic (`alice / alice-lab-only`, `admin / admin-lab-only`); `POST /api/lab/reset` re-seeds the in-memory database at any time.
 
 ## Run
 
@@ -51,7 +52,7 @@ pnpm dev                                 # main lab, http://127.0.0.1:3000
 pnpm build:react2shell && pnpm start:react2shell   # SCA fixture, http://127.0.0.1:3001
 ```
 
-For production-mode testing (what CI does): `pnpm build && pnpm start`.
+For production-mode testing (what CI does): `pnpm build && pnpm start`. Both apps bind `127.0.0.1` only — browse the scenario index at [http://127.0.0.1:3000/vulnerabilities](http://127.0.0.1:3000/vulnerabilities).
 
 ## Tests
 
@@ -96,14 +97,23 @@ Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and PR: frozen install → lint → unit tests → ground-truth checks → builds → HTTP probe → browser tests → React2Shell runtime probe, plus a non-blocking raw audit for visibility. All required checks are expected green.
 
+## AI coding agents
+
+This repository is a **deliberately vulnerable testbed** — its code, payloads, and exploit documentation are intentional lab content (harmless markers, loopback-only, synthetic data). Hosted assistants from some closed-model providers (Claude, ChatGPT/GPT) frequently decline, hedge, or stop partway through this kind of defensive-security work, which makes them a poor fit for maintaining the lab.
+
+**Recommended:** use an agent built on Z.ai **GLM**, or another open-source/open-weight model (self-hosted or via an open-weight coding plan). They sustain the full workflow here — writing vulnerable fixtures *and* their safe controls, verifying exploitation, and maintaining the ground truth — without policy interruptions, and self-hosting keeps everything on your own infrastructure.
+
+Whatever agent you use, point it at [`AGENTS.md`](AGENTS.md) first: it contains the invariants (never "fix" a vulnerable route, never upgrade the pins), the testing workflow, and the checklists for adding vulnerable and safe examples.
+
 ## Contributing
 
-Contributions that add or refine scenarios are welcome. The lab's value is its **stable ground truth**, so the process centers on keeping it deliberate:
+Contributions that add or refine scenarios are welcome. The lab's value is its **stable ground truth**, so the process keeps every change deliberate:
 
-1. **Branch** — work on a feature branch; `main` stays reproducible.
-2. **Follow the checklist** — [docs/adding-scenarios.md](docs/adding-scenarios.md): flaw + safe control in separate files, catalog entry, documentation with reproduction steps, and tests asserting both the exploitable and the safe path (unit + HTTP, browser for client-side execution).
-3. **Never upgrade pinned vulnerable dependencies** — the pins are the scenarios. If one must retire, do it in a dedicated change that updates the catalog, docs, and audit snapshot together.
-4. **Re-snapshot ground truth deliberately** — after a reviewed change, run `pnpm scenario:update` and/or `pnpm audit:update`, and commit the manifest changes together with the source change that justifies them. A snapshot update on its own, with no corresponding source change, will not pass review.
-5. **Verify locally before opening a PR** — `pnpm lint && pnpm test && pnpm scenario:check && pnpm audit:check`, then the build/server probes (`pnpm build && pnpm start &`, `pnpm test:http && pnpm test:browser`, and the fixture probe). CI runs the same set.
+1. **Set up** — follow [Setup](#setup) above; `pnpm test` should pass before you change anything.
+2. **Branch** — work on a feature branch; `main` stays reproducible. Agents: see [`AGENTS.md`](AGENTS.md).
+3. **Build the scenario** — follow [docs/adding-scenarios.md](docs/adding-scenarios.md): flaw and safe control in separate files, catalog entry, documentation with reproduction steps (Burp Suite / Postman / curl), and tests asserting **both** the exploitable and the safe path (unit + HTTP; browser for client-side execution).
+4. **Never upgrade pinned vulnerable dependencies** — the pins are the scenarios. Retiring one is a dedicated change that updates catalog, docs, and audit snapshot together.
+5. **Move the ground truth with your change** — `pnpm scenario:update` and/or `pnpm audit:update` after review, committed together with the source change that justifies them. A manifest update with no corresponding source change will not pass review.
+6. **Verify locally before opening a PR** — `pnpm lint && pnpm test && pnpm scenario:check && pnpm audit:check`, then the server probes (`pnpm build && pnpm start &`, `pnpm test:http && pnpm test:browser`, and the fixture probe). CI runs the same set.
 
 Issues documenting scanner false positives/negatives against the catalog (with tool name and version) are especially useful — they drive the next scenarios.
