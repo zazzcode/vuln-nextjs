@@ -68,6 +68,8 @@ For production-mode testing (what CI does): `pnpm build && pnpm start`. Both app
 
 `pnpm audit --prod` itself exits nonzero **by design** — the vulnerable pins are the SCA scenario. `audit:check` turns that into a reviewable ground truth: drift fails until you inspect it and run `pnpm audit:update`. Likewise, scenario sources cannot silently change: run `pnpm scenario:update` only after reviewing a deliberate change.
 
+For source-only Next.js prototype pollution regressions, see the [scanner tests](tests/scanner/README.md).
+
 Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 
 ## Documentation

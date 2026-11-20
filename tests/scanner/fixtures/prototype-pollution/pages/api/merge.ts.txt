@@ -1,0 +1,7 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { merge } from 'lodash';
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  merge({}, req.body.settings);
+  res.status(204).end();
+}
