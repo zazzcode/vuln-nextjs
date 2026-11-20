@@ -24,3 +24,8 @@ Agents: each row links directly to the scenario's compact [expected-finding bloc
 | DEMO-002 | Dynamic import (no sink) | — | none | [ref](demonstrations.md#demo-002-agent) | `pages/vulnerable/dynamic-import.js` | — |
 
 Demonstrations are negative controls: scanners should **not** report them. Defense patterns across all protected routes: [validation-and-sanitization.md](../validation-and-sanitization.md).
+
+## Offline scanner fixtures
+
+- [Prototype pollution (CWE-1321)](prototype-pollution.md) covers affected and patched Lodash
+  calls, a key guard, JSON parsing, and an App Router computed write.

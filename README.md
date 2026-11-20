@@ -68,7 +68,20 @@ For production-mode testing (what CI does): `pnpm build && pnpm start`. Both app
 
 `pnpm audit --prod` itself exits nonzero **by design** — the vulnerable pins are the SCA scenario. `audit:check` turns that into a reviewable ground truth: drift fails until you inspect it and run `pnpm audit:update`. Likewise, scenario sources cannot silently change: run `pnpm scenario:update` only after reviewing a deliberate change.
 
-For source-only Next.js prototype pollution regressions, see the [scanner tests](tests/scanner/README.md).
+### Prototype pollution scanner fixtures
+
+These CWE-1321 fixtures are TypeScript text files for offline scans. They exercise both Next.js
+routing conventions without adding runnable lab endpoints.
+
+| Fixture | Expected scanner result |
+| --- | --- |
+| Pages Router merge with Lodash 4.17.4 | A raw prototype-write candidate from request-body settings |
+| The same merge with Lodash 4.17.21 | No prototype-write candidate |
+| Pages Router recursive merge with a key guard | A guarded candidate listing `__proto__`, `constructor`, and `prototype` as blocked |
+| Pages Router JSON parsing | No prototype-write candidate |
+| App Router nested assignment after `Request.json()` | A raw prototype-write candidate from the computed lookup |
+
+[Prototype pollution guide](docs/vulnerabilities/prototype-pollution.md) · [Run the scanner regressions](tests/scanner/README.md).
 
 Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 

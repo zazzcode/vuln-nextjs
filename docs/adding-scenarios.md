@@ -2,6 +2,19 @@
 
 A scenario is one deliberate flaw plus everything that makes it testable. Follow this checklist so the catalog tests keep the lab consistent.
 
+## Add a source-only scanner fixture
+
+1. Store fixture source as text under `tests/scanner/fixtures/`. Use a project layout the test
+   can copy into a temporary directory for the offline scanner.
+2. Keep fixture-only dependency pins in the test. Assert the scanner evidence expected from an
+   affected operation and its patched or guarded control.
+3. Add a page under `docs/vulnerabilities/` with fixture paths, expected outcomes, and the test
+   command. Link the page from the vulnerability index.
+
+The [prototype pollution fixtures](vulnerabilities/prototype-pollution.md) show this workflow
+for Pages Router and App Router source. The [export command](../tests/scanner/README.md#compare-scanners)
+materializes the same cases for other scanners. The checklist below applies to runtime scenarios.
+
 ## 1. Assign a stable ID
 
 Format `<CATEGORY>-<number>`: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `SCA-`, `DEMO-`. IDs never change once shipped — external tool evaluations reference them.

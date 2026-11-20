@@ -21,3 +21,18 @@ as application routes.
 
 The assertions check source locations, key facts, and assessment state. They require Node.js and
 the scanner binary. Package metadata is read as fixture data.
+
+## Compare scanners
+
+Export regular TypeScript files for the affected Pages Router project, patched Pages Router
+project, and App Router project. The command prints the temporary directory. Its
+`expected-scanner-findings.json` lists each source file, CWE, and expected finding status.
+
+```bash
+fixture_dir=$(node scripts/export-prototype-pollution-fixtures.mjs)
+semgrep scan --config /absolute/path/to/rules.yml --json "$fixture_dir"
+```
+
+Use the same directory with another scanner to compare the results against the manifest.
+A rule that analyzes only source may report both Lodash pins. Compare each pin separately so the
+patched copy counts as a control. For the rest of the lab, use the [catalog scanner expectations](../expected-scanner-findings.json).

@@ -1,37 +1,21 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cp, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { exportPrototypePollutionFixtures, writePrototypePollutionProject } from '../../scripts/export-prototype-pollution-fixtures.mjs';
 
-const fixtures = fileURLToPath(new URL('./fixtures/prototype-pollution/', import.meta.url));
 const basicMerge = 'pages/api/merge.ts';
 const guardedMerge = 'pages/api/guarded.ts';
 const nestedWrite = 'app/api/settings/route.ts';
 
-async function scanFixture(t, router, lodash) {
+async function scanFixture(t, name) {
   assert.ok(process.env.ZAZZLES_SCAN, 'Set ZAZZLES_SCAN to a scanner binary with the pollution family');
   const root = await mkdtemp(join(tmpdir(), 'zazzles-next-fixture-'));
   t.after(() => rm(root, { recursive: true, force: true }));
 
-  const target = join(root, router);
-  await cp(join(fixtures, router), target, { recursive: true });
-  for (const file of await readdir(target, { recursive: true })) {
-    if (file.endsWith('.ts.txt')) {
-      await rename(join(target, file), join(target, file.slice(0, -4)));
-    }
-  }
-
-  const dependencies = { next: '13.4.19' };
-  const packages = {};
-  if (lodash) {
-    dependencies.lodash = '^4.17.4';
-    packages['node_modules/lodash'] = { version: lodash };
-  }
-  await writeFile(join(root, 'package.json'), JSON.stringify({ private: true, dependencies }));
-  await writeFile(join(root, 'package-lock.json'), JSON.stringify({ lockfileVersion: 3, packages }));
+  await writePrototypePollutionProject(root, name);
 
   const output = execFileSync(resolve(process.env.ZAZZLES_SCAN), ['--analyze', '--json', '--output-dir', '', root], {
     encoding: 'utf8',
@@ -43,7 +27,7 @@ async function scanFixture(t, router, lodash) {
 }
 
 test('Pages Router detects the affected merge and lists the complete guard', async (t) => {
-  const uses = await scanFixture(t, 'pages', '4.17.4');
+  const uses = await scanFixture(t, 'pages-affected');
   assert.deepEqual(uses.map((use) => use.sink.span.file).sort(), [guardedMerge, basicMerge]);
 
   const raw = uses.find((use) => use.sink.span.file === basicMerge);
@@ -60,15 +44,34 @@ test('Pages Router detects the affected merge and lists the complete guard', asy
 });
 
 test('Pages Router excludes the patched merge and JSON parsing alone', async (t) => {
-  const uses = await scanFixture(t, 'pages', '4.17.21');
+  const uses = await scanFixture(t, 'pages-patched');
   assert.deepEqual(uses.map((use) => use.sink.span.file), [guardedMerge]);
 });
 
 test('App Router traces Request.json to the first computed key', async (t) => {
-  const uses = await scanFixture(t, 'app');
+  const uses = await scanFixture(t, 'app-nested');
   assert.deepEqual(uses.map((use) => use.sink.span.file), [nestedWrite]);
   assert.equal(uses[0].pollution.operation, 'nested_write');
   assert.deepEqual(uses[0].pollution.paths.map((path) => path.protection), ['raw']);
   assert.deepEqual(uses[0].completeness.blockers, []);
   assert.equal(uses[0].assessment.status, 'not_run');
+});
+
+test('exported manifest maps the raw, guarded, and absent cases to TypeScript files', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'zazzles-next-export-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await exportPrototypePollutionFixtures(root);
+
+  const { sources } = JSON.parse(await readFile(join(root, 'expected-scanner-findings.json'), 'utf8'));
+  assert.equal(sources.length, 7);
+  assert.deepEqual(
+    sources.filter((row) => row.expectedFinding).map((row) => row.source),
+    [`pages-affected/${basicMerge}`, `app-nested/${nestedWrite}`],
+  );
+  assert.equal(sources.find((row) => row.source === `pages-patched/${basicMerge}`).expectedPath, 'absent');
+  assert.equal(sources.find((row) => row.source === `pages-affected/${guardedMerge}`).expectedPath, 'guarded');
+  for (const row of sources) {
+    assert.equal(row.cwe, 'CWE-1321');
+    await access(join(root, row.source));
+  }
 });
