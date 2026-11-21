@@ -1,0 +1,20 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// Bypassable: the comparison has no type test, so the path
+// [["__proto__"], "polluted"] passes it and reaches Object.prototype.
+function setIn(target: Record<string, any>, path: any[], value: unknown) {
+  let cursor = target;
+  for (let i = 0; i < path.length - 1; i++) {
+    const part = path[i];
+    if (part === '__proto__' || part === 'constructor' || part === 'prototype') return;
+    cursor = cursor[part];
+  }
+  cursor[path[path.length - 1]] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  setIn(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

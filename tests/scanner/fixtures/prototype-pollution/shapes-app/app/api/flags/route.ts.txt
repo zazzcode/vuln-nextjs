@@ -1,0 +1,17 @@
+import { NextResponse } from 'next/server';
+
+const flags: Record<string, any> = {};
+
+function merge(target: Record<string, any>, source: Record<string, any>) {
+  return Object.keys(source).reduce((acc, key) => {
+    if (source[key] && typeof source[key] === 'object') merge(acc[key], source[key]);
+    else acc[key] = source[key];
+    return acc;
+  }, target);
+}
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  merge(flags, body.flags);
+  return NextResponse.json({ ok: true });
+}

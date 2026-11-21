@@ -1,0 +1,17 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const preferences: Record<string, Record<string, unknown>> = {};
+
+// The slot is created only when absent. An inherited slot such as __proto__
+// already has a value, skips the branch and receives the write.
+function remember(user: string, name: string, value: unknown) {
+  if (!preferences[user]) {
+    preferences[user] = {};
+  }
+  preferences[user][name] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  remember(req.body.user, req.body.name, req.body.value);
+  res.status(204).end();
+}

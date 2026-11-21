@@ -1,0 +1,16 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// "user[address].city" is split by a regular expression and walked with reduce.
+function setPath(target: Record<string, any>, path: string, value: unknown) {
+  const parts = path.split(/[.\[\]]+/);
+  const last = parts.pop() as string;
+  const holder = parts.reduce((cursor, part) => cursor[part], target);
+  holder[last] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  setPath(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

@@ -1,0 +1,26 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type Options = { deep?: boolean };
+
+// Keys come from Object.getOwnPropertyNames and the recursion takes a local
+// alias of the target slot, behind the caller's deep option.
+function merge(target: Record<string, any>, source: Record<string, any>, options: Options = {}) {
+  for (const key of Object.getOwnPropertyNames(source)) {
+    const value = source[key];
+    let slot = target[key];
+    if (value && typeof value === 'object') {
+      if (options.deep) {
+        if (!slot) slot = target[key] = {};
+        merge(slot, value, options);
+        continue;
+      }
+    }
+    target[key] = value;
+  }
+  return target;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  merge({}, req.body.settings, { deep: true });
+  res.status(204).end();
+}

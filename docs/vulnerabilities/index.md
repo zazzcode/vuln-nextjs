@@ -28,4 +28,5 @@ Demonstrations are negative controls: scanners should **not** report them. Defen
 ## Offline scanner fixtures
 
 - [Prototype pollution (CWE-1321)](prototype-pollution.md) covers affected and patched Lodash
-  calls, a key guard, JSON parsing, and an App Router computed write.
+  calls, two other advisory libraries, fifteen write shapes in application source with complete,
+  incomplete and unread guards, and three controls without a write.

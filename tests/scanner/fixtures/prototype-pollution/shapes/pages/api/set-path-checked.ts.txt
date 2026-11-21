@@ -1,0 +1,21 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// A part must be a string before it is compared. A nested array such as
+// ["__proto__"] is not equal to "__proto__" and would still name that key.
+function setIn(target: Record<string, any>, path: unknown[], value: unknown) {
+  let cursor = target;
+  for (let i = 0; i < path.length - 1; i++) {
+    const part = path[i];
+    if (typeof part !== 'string') return;
+    if (part === '__proto__' || part === 'constructor' || part === 'prototype') return;
+    cursor = cursor[part];
+  }
+  cursor[path[path.length - 1] as string] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  setIn(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

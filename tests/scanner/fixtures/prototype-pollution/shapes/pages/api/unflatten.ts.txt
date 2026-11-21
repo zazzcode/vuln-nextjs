@@ -1,0 +1,19 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+// Each key of the body is a dotted path: { "theme.color": "red" }.
+function unflatten(source: Record<string, unknown>) {
+  const out: Record<string, any> = {};
+  for (const flat in source) {
+    const parts = flat.split('.');
+    let cursor = out;
+    for (let i = 0; i < parts.length - 1; i++) {
+      cursor = cursor[parts[i]];
+    }
+    cursor[parts[parts.length - 1]] = source[flat];
+  }
+  return out;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.status(200).json(unflatten(req.body.settings));
+}

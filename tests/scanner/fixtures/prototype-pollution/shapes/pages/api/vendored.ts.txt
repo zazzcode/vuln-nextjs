@@ -1,0 +1,8 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import tinyMerge from '../../lib/tiny-merge';
+
+// The vulnerable function is library source kept in this repository.
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  tinyMerge({}, req.body.settings);
+  res.status(204).end();
+}

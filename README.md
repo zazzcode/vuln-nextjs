@@ -80,6 +80,9 @@ routing conventions without adding runnable lab endpoints.
 | Pages Router recursive merge with a key guard | A guarded candidate listing `__proto__`, `constructor`, and `prototype` as blocked |
 | Pages Router JSON parsing | No prototype-write candidate |
 | App Router nested assignment after `Request.json()` | A raw prototype-write candidate from the computed lookup |
+| Thirteen further write shapes: array, regular-expression and `reduce` path walks, unflatten, incomplete and complete guards, a create-if-absent slot, a lookup-gated write, library source kept in the repository | Raw, guarded or review, each listed in the guide with its payload |
+| Lodash `set`, `defaultsDeep` and `zipObjectDeep` at 4.17.4 and 4.17.21 | Raw candidates at the affected pin and none at the patched pin |
+| `dset` 3.1.3 (CVE-2024-21529) and `merge-deep` 3.0.2 (CVE-2021-26707) | Exploitable, with no source-analysis record: a known gap that a dependency audit covers |
 
 [Prototype pollution guide](docs/vulnerabilities/prototype-pollution.md) · [Run the scanner regressions](tests/scanner/README.md).
 

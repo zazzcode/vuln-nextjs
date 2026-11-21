@@ -1,0 +1,28 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const preferences: Record<string, Record<string, unknown>> = {};
+const users = new Map<string, { id: string }>([['alice', { id: 'alice' }]]);
+
+function findUser(user: string) {
+  return users.has(user) ? users.get(user) : null;
+}
+
+function remember(user: string, name: string, value: unknown) {
+  if (!preferences[user]) {
+    preferences[user] = {};
+  }
+  preferences[user][name] = value;
+}
+
+// Safe in practice: a Map lookup has no entry for a prototype key, so the
+// handler returns before the write. A scanner has to read findUser to know it.
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = req.body.user;
+  const account = findUser(user);
+  if (account == null) {
+    res.status(404).end();
+    return;
+  }
+  remember(user, req.body.name, req.body.value);
+  res.status(204).end();
+}

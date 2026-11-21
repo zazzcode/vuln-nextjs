@@ -1,0 +1,20 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// The whole path is rejected when it names any prototype key.
+function setPath(target: Record<string, any>, path: string, value: unknown) {
+  if (path.includes('__proto__') || path.includes('constructor') || path.includes('prototype')) return;
+  const parts = path.split('.');
+  let cursor = target;
+  while (parts.length > 1) {
+    const part = parts.shift() as string;
+    cursor = cursor[part];
+  }
+  cursor[parts[0]] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  setPath(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

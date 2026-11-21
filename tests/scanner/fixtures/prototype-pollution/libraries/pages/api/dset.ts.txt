@@ -1,0 +1,9 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { dset } from 'dset';
+
+const store: Record<string, unknown> = {};
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  dset(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

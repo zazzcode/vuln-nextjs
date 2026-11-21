@@ -1,0 +1,17 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// The caller passes the path as an array of parts.
+function setIn(target: Record<string, any>, path: string[], value: unknown) {
+  let cursor = target;
+  for (let i = 0; i < path.length - 1; i++) {
+    cursor = cursor[path[i]];
+  }
+  cursor[path[path.length - 1]] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  setIn(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

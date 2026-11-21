@@ -1,0 +1,21 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// Incomplete: only __proto__ is rejected, so "constructor.prototype.polluted"
+// still reaches Object.prototype.
+function setPath(target: Record<string, any>, path: string, value: unknown) {
+  if (path.includes('__proto__')) return;
+  const parts = path.split('.');
+  let cursor = target;
+  while (parts.length > 1) {
+    const part = parts.shift() as string;
+    cursor = cursor[part];
+  }
+  cursor[parts[0]] = value;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  setPath(store, req.body.path, req.body.value);
+  res.status(204).end();
+}

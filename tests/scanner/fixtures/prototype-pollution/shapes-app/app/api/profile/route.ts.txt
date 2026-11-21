@@ -1,0 +1,20 @@
+import { NextResponse } from 'next/server';
+
+// Each key of the JSON body is a bracket path: { "address[city]": "Lyon" }.
+function expand(source: Record<string, unknown>) {
+  const out: Record<string, any> = {};
+  for (const flat in source) {
+    const parts = flat.match(/[^\[\]]+/g) as string[];
+    let cursor = out;
+    for (let i = 0; i < parts.length - 1; i++) {
+      cursor = cursor[parts[i]];
+    }
+    cursor[parts[parts.length - 1]] = source[flat];
+  }
+  return out;
+}
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  return NextResponse.json(expand(body.profile));
+}

@@ -1,0 +1,12 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const store: Record<string, any> = {};
+
+// Control: a walk that only reads writes nothing.
+function getPath(target: Record<string, any>, path: string) {
+  return path.split('.').reduce((cursor, part) => cursor[part], target);
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.status(200).json({ value: getPath(store, req.body.path) });
+}

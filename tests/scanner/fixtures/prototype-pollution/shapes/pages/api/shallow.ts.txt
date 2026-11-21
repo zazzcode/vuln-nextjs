@@ -1,0 +1,13 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+// Control: a one-level copy can change only its own target.
+function copy(target: Record<string, unknown>, source: Record<string, unknown>) {
+  for (const key of Object.getOwnPropertyNames(source)) {
+    target[key] = source[key];
+  }
+  return target;
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.status(200).json(copy({}, req.body.settings));
+}

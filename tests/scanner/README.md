@@ -18,15 +18,28 @@ as application routes.
 | Pages Router recursive merge with a literal key guard | One guarded candidate listing `__proto__`, `constructor`, and `prototype` as blocked |
 | Pages Router JSON parsing | No candidate |
 | App Router computed write after `Request.json()` | One raw candidate for the lookup key |
+| `pages-shapes`: eleven write shapes in application source, one of them in library source kept in the repository, plus two controls | Seven raw, two guarded and two review candidates. The controls have none |
+| `app-shapes`: bracket-flattened keys and a `reduce` merge after `Request.json()` | Two raw candidates |
+| `libraries-affected`: Lodash `set`, `defaultsDeep` and `zipObjectDeep` at 4.17.4, `dset` 3.1.3, `merge-deep` 3.0.2 | Three raw Lodash candidates. No record for `dset` and `merge-deep`, which are known gaps |
+| `libraries-patched`: the same calls at Lodash 4.17.21, `dset` 3.1.4, `merge-deep` 3.0.3 | No candidate |
+
+The [prototype pollution guide](../../docs/vulnerabilities/prototype-pollution.md) lists every
+source with its payload and expected path.
 
 The assertions check source locations, key facts, and assessment state. They require Node.js and
 the scanner binary. Package metadata is read as fixture data.
 
 ## Compare scanners
 
-Export regular TypeScript files for the affected Pages Router project, patched Pages Router
-project, and App Router project. The command prints the temporary directory. Its
-`expected-scanner-findings.json` lists each source file, CWE, and expected finding status.
+Export regular TypeScript files for all seven projects. The command prints the temporary
+directory. Its `expected-scanner-findings.json` lists each source file with:
+
+- `expectedFinding`: whether the source is exploitable, for any scanner;
+- `expectedPath`: what the Zazzles scanner records, `raw`, `guarded`, `review` or `absent`;
+- `advisory`: the CVE, where the weakness is in an installed dependency.
+
+A source can be exploitable without a `raw` path. `pages-shapes/pages/api/set-path-compared.ts`
+is exploitable and `review`. The `dset` and `merge-deep` rows are exploitable and `absent`.
 
 ```bash
 fixture_dir=$(node scripts/export-prototype-pollution-fixtures.mjs)
