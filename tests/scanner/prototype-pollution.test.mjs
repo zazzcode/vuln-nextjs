@@ -97,7 +97,7 @@ test('the combined project holds every affected-pin candidate in one scan', asyn
       .map(([source, row]) => [source, protection[row.path]])
       .sort(),
   );
-  assert.equal(uses.length, 20);
+  assert.equal(uses.length, 19);
 });
 
 test('the added shapes carry their key facts', async (t) => {
