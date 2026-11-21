@@ -31,6 +31,9 @@ Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners
 
 **Per-scenario training modules with exact Burp Suite / Postman / curl exploit commands live in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md)** — each scenario has a linkable compact agent reference (`#<id>-agent`), a student guide, an exploit lab, and a vulnerable-vs-protected comparison explaining *why* the control works.
 
+For application-code CWE-502 coverage and offline scanner fixtures, see the
+[unsafe deserialization guide](docs/vulnerabilities/unsafe-deserialization.md).
+
 ## Setup
 
 Requires Node.js `>= 24.0.0` (24 LTS) (see `engines`). pnpm is pinned via `packageManager` and supplied by corepack:

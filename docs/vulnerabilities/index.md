@@ -30,3 +30,5 @@ Demonstrations are negative controls: scanners should **not** report them. Defen
 - [Prototype pollution (CWE-1321)](prototype-pollution.md) covers affected and patched Lodash
   calls, two other advisory libraries, fifteen write shapes in application source with complete,
   incomplete and unread guards, and three controls without a write.
+- [Unsafe deserialization (CWE-502)](unsafe-deserialization.md) explains the application-code
+  analyzer and links to its offline fixtures.

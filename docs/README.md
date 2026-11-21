@@ -19,7 +19,8 @@ Suggested reading order — each module is self-contained:
 | 7 | [demonstrations.md](vulnerabilities/demonstrations.md) | DEMO-001/002 negative controls (no findings expected) |
 
 Quick-reference table with agent links: [vulnerabilities/index.md](vulnerabilities/index.md).
-The [prototype pollution guide](vulnerabilities/prototype-pollution.md) covers offline scanner fixtures.
+The [prototype pollution](vulnerabilities/prototype-pollution.md) and
+[unsafe deserialization](vulnerabilities/unsafe-deserialization.md) guides cover offline scanner fixtures.
 Defense patterns used by every protected route: [validation-and-sanitization.md](validation-and-sanitization.md).
 New to the vocabulary? Start with the [glossary](#glossary).
 
