@@ -4,7 +4,13 @@ import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { exportPrototypePollutionFixtures, prototypePollutionProjects, writePrototypePollutionProject } from '../../scripts/export-prototype-pollution-fixtures.mjs';
+import {
+  combinedPrototypePollutionSources,
+  exportPrototypePollutionFixtures,
+  prototypePollutionProjects,
+  writeCombinedPrototypePollutionProject,
+  writePrototypePollutionProject,
+} from '../../scripts/export-prototype-pollution-fixtures.mjs';
 
 const basicMerge = 'pages/api/merge.ts';
 const guardedMerge = 'pages/api/guarded.ts';
@@ -15,7 +21,11 @@ async function scanFixture(t, name) {
   const root = await mkdtemp(join(tmpdir(), 'zazzles-next-fixture-'));
   t.after(() => rm(root, { recursive: true, force: true }));
 
-  await writePrototypePollutionProject(root, name);
+  if (name === 'combined') {
+    await writeCombinedPrototypePollutionProject(root);
+  } else {
+    await writePrototypePollutionProject(root, name);
+  }
 
   const output = execFileSync(resolve(process.env.ZAZZLES_SCAN), ['--analyze', '--json', '--output-dir', '', root], {
     encoding: 'utf8',
@@ -76,6 +86,19 @@ for (const name of ['pages-shapes', 'app-shapes', 'libraries-affected', 'librari
     }
   });
 }
+
+test('the combined project holds every affected-pin candidate in one scan', async (t) => {
+  const uses = await scanFixture(t, 'combined');
+  const expected = combinedPrototypePollutionSources();
+  assert.deepEqual(
+    uses.map((use) => [use.sink.span.file, use.pollution.paths[0].protection]).sort(),
+    Object.entries(expected)
+      .filter(([, row]) => row.path !== 'absent')
+      .map(([source, row]) => [source, protection[row.path]])
+      .sort(),
+  );
+  assert.equal(uses.length, 20);
+});
 
 test('the added shapes carry their key facts', async (t) => {
   const uses = await scanFixture(t, 'pages-shapes');

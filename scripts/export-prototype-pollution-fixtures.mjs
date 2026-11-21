@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, readdir, rename, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rename, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -117,6 +117,29 @@ export async function writePrototypePollutionProject(root, name) {
   await writeFile(join(root, 'package-lock.json'), JSON.stringify({ lockfileVersion: 3, packages }));
 }
 
+// One project that holds every affected-pin fixture, for a single scan and a
+// single report. The patched pins are separate projects because one lockfile
+// resolves one version.
+const combined = ['pages-affected', 'app-nested', 'pages-shapes', 'app-shapes', 'libraries-affected'];
+
+export function combinedPrototypePollutionSources() {
+  const all = prototypePollutionProjects();
+  return Object.assign({}, ...combined.map((name) => all[name]));
+}
+
+export async function writeCombinedPrototypePollutionProject(root) {
+  const dependencies = {};
+  const packages = {};
+  for (const name of combined) {
+    await writePrototypePollutionProject(root, name);
+    const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
+    Object.assign(packages, lock.packages);
+    Object.assign(dependencies, JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).dependencies);
+  }
+  await writeFile(join(root, 'package.json'), JSON.stringify({ private: true, dependencies }));
+  await writeFile(join(root, 'package-lock.json'), JSON.stringify({ lockfileVersion: 3, packages }));
+}
+
 export async function exportPrototypePollutionFixtures(root) {
   const sources = [];
   for (const [name, project] of Object.entries(projects)) {
@@ -136,6 +159,10 @@ export async function exportPrototypePollutionFixtures(root) {
 
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1] ?? '')) {
   const root = await mkdtemp(join(tmpdir(), 'zazzles-next-pollution-'));
-  await exportPrototypePollutionFixtures(root);
+  if (process.argv.includes('--combined')) {
+    await writeCombinedPrototypePollutionProject(root);
+  } else {
+    await exportPrototypePollutionFixtures(root);
+  }
   console.log(root);
 }

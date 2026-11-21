@@ -46,6 +46,10 @@ fixture_dir=$(node scripts/export-prototype-pollution-fixtures.mjs)
 semgrep scan --config /absolute/path/to/rules.yml --json "$fixture_dir"
 ```
 
+Add `--combined` to export one project that holds every affected-pin fixture, for a single scan
+and a single report. Its lockfile pins Lodash 4.17.4, `dset` 3.1.3 and `merge-deep` 3.0.2, and a
+Zazzles scan of it records 20 prototype-write candidates.
+
 Use the same directory with another scanner to compare the results against the manifest.
 A rule that analyzes only source may report both Lodash pins. Compare each pin separately so the
 patched copy counts as a control. For the rest of the lab, use the [catalog scanner expectations](../expected-scanner-findings.json).
