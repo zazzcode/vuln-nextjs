@@ -26,9 +26,12 @@ const alice = ({ data }) => data.person?.login === 'alice';
 const isAdmin = ({ data }) => data.person?.login === 'admin' && data.person?.role === 'admin';
 const some = (key) => ({ data }) => data[key]?.length > 0;
 const is = (key, value) => ({ data }) => data[key] === value;
-const logins = (key) => ({ data }) => (data[key] ?? []).map((row) => row.login);
-const includes = (login, key) => ({ data }) => logins(key).includes(login);
+const includes = (login, key) => ({ data }) => (data[key] ?? []).some((row) => row.login === login);
 const passcode = ({ data }) => data.person === null;
+// The bulk update changed exactly one row that is not the caller's own loan:
+// the ordinary batch on the caller's own number still changes it afterwards.
+const changedOtherLoan = async (result, send) => result.data.changed === 1
+  && is('changed', 1)(await send('loans/batch', body({ items: [{ where: { number: 101 } }] })));
 
 const body = (value) => ({ body: value });
 const query = (text, extra = {}) => ({ query: text, ...extra });
@@ -133,7 +136,7 @@ const behaviours = {
     attacks: [body({ badge: 'B-77.ADM' })],
   },
   'MONGO-038': { exploited: isAdmin },
-  'MONGO-039': { exploited: is('changed', 2) },
+  'MONGO-039': { exploited: changedOtherLoan },
   'MONGO-040': { exploited: is('gone', 202) },
   'MONGO-041': { exploited: ({ data }) => data.loan?.number === 202 },
   'MONGO-042': { exploited: ({ data }) => (data.rows ?? []).some((row) => row.extra?.[0]?.passcode === 'alice-lab-only') },

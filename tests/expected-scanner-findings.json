@@ -748,6 +748,504 @@
       "scanner": "SAST"
     },
     {
+      "id": "MONGO-028",
+      "source": "pages/api/workshop/desk/arrive.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-028-safeControl",
+      "controlFor": "MONGO-028",
+      "source": "pages/api/workshop/desk/checkin.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-029",
+      "source": "pages/api/workshop/desk/badge-in.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-029-safeControl",
+      "controlFor": "MONGO-029",
+      "source": "pages/api/workshop/desk/begin.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-029-safeControl",
+      "controlFor": "MONGO-029",
+      "source": "pages/api/workshop/desk/clock-in.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-030",
+      "source": "pages/api/workshop/desk/context.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-030-safeControl",
+      "controlFor": "MONGO-030",
+      "source": "pages/api/workshop/desk/terminal.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-031",
+      "source": "pages/api/workshop/desk/enter.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-031-safeControl",
+      "controlFor": "MONGO-031",
+      "source": "pages/api/workshop/desk/unlock.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-032",
+      "source": "pages/api/workshop/desk/hint.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-032-safeControl",
+      "controlFor": "MONGO-032",
+      "source": "pages/api/workshop/desk/verify.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-033",
+      "source": "pages/api/workshop/desk/import.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-033-safeControl",
+      "controlFor": "MONGO-033",
+      "source": "pages/api/workshop/desk/accept.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-033-safeControl",
+      "controlFor": "MONGO-033",
+      "source": "pages/api/workshop/desk/load.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-034",
+      "source": "pages/api/workshop/desk/open-up.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-034-safeControl",
+      "controlFor": "MONGO-034",
+      "source": "pages/api/workshop/desk/start.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-035",
+      "source": "pages/api/workshop/desk/pass.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-035-safeControl",
+      "controlFor": "MONGO-035",
+      "source": "pages/api/workshop/desk/permit.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-036",
+      "source": "pages/api/workshop/desk/renew.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-036-safeControl",
+      "controlFor": "MONGO-036",
+      "source": "pages/api/workshop/desk/refresh.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-037",
+      "source": "pages/api/workshop/desk/scan.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-037-safeControl",
+      "controlFor": "MONGO-037",
+      "source": "pages/api/workshop/desk/tap.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-037-safeControl",
+      "controlFor": "MONGO-037",
+      "source": "pages/api/workshop/desk/wave.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-038",
+      "source": "pages/api/workshop/desk/shift.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-038-safeControl",
+      "controlFor": "MONGO-038",
+      "source": "pages/api/workshop/desk/begin.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-039",
+      "source": "pages/api/workshop/loans/batch.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-039-safeControl",
+      "controlFor": "MONGO-039",
+      "source": "pages/api/workshop/loans/bundle.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-040",
+      "source": "pages/api/workshop/loans/cancel.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-040-safeControl",
+      "controlFor": "MONGO-040",
+      "source": "pages/api/workshop/loans/withdraw.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-041",
+      "source": "pages/api/workshop/loans/hand-back.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-041-safeControl",
+      "controlFor": "MONGO-041",
+      "source": "pages/api/workshop/loans/give-back.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-042",
+      "source": "pages/api/workshop/loans/joined.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-042-safeControl",
+      "controlFor": "MONGO-042",
+      "source": "pages/api/workshop/loans/linked.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-043",
+      "source": "pages/api/workshop/loans/mine.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-043-safeControl",
+      "controlFor": "MONGO-043",
+      "source": "pages/api/workshop/loans/ours.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-044",
+      "source": "pages/api/workshop/parts/combine.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-044-safeControl",
+      "controlFor": "MONGO-044",
+      "source": "pages/api/workshop/parts/blend.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-045",
+      "source": "pages/api/workshop/parts/everything.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-045-safeControl",
+      "controlFor": "MONGO-045",
+      "source": "pages/api/workshop/parts/overview.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-046",
+      "source": "pages/api/workshop/parts/select.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-046-safeControl",
+      "controlFor": "MONGO-046",
+      "source": "pages/api/workshop/parts/choose.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-047",
+      "source": "pages/api/workshop/people/bureau.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-047-safeControl",
+      "controlFor": "MONGO-047",
+      "source": "pages/api/workshop/people/crew.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-048",
+      "source": "pages/api/workshop/people/card.js",
+      "expectedFinding": true,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-048-safeControl",
+      "controlFor": "MONGO-048",
+      "source": "pages/api/workshop/people/sheet.js",
+      "expectedFinding": false,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-049",
+      "source": "pages/api/workshop/people/group.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-049-safeControl",
+      "controlFor": "MONGO-049",
+      "source": "pages/api/workshop/people/crew.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-049-safeControl",
+      "controlFor": "MONGO-049",
+      "source": "pages/api/workshop/people/finder.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-049-safeControl",
+      "controlFor": "MONGO-049",
+      "source": "pages/api/workshop/people/roster.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-050",
+      "source": "pages/api/workshop/people/recent.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-050-safeControl",
+      "controlFor": "MONGO-050",
+      "source": "pages/api/workshop/people/latest.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-051",
+      "source": "pages/api/workshop/people/teams.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-051-safeControl",
+      "controlFor": "MONGO-051",
+      "source": "pages/api/workshop/people/others.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-051-safeControl",
+      "controlFor": "MONGO-051",
+      "source": "pages/api/workshop/people/units.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-052",
+      "source": "pages/api/workshop/stats/headcount.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-052-safeControl",
+      "controlFor": "MONGO-052",
+      "source": "pages/api/workshop/stats/heads.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-053",
+      "source": "pages/api/workshop/stats/sample.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-053-safeControl",
+      "controlFor": "MONGO-053",
+      "source": "pages/api/workshop/stats/size.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-054",
+      "source": "pages/api/workshop/stats/snapshot.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-054-safeControl",
+      "controlFor": "MONGO-054",
+      "source": "pages/api/workshop/stats/export.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-055",
+      "source": "pages/api/workshop/stats/sum.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-055-safeControl",
+      "controlFor": "MONGO-055",
+      "source": "pages/api/workshop/stats/amount.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-056",
+      "source": "pages/api/workshop/stats/values.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-056-safeControl",
+      "controlFor": "MONGO-056",
+      "source": "pages/api/workshop/stats/options.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-057",
+      "source": "pages/api/workshop/stats/weights.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-057-safeControl",
+      "controlFor": "MONGO-057",
+      "source": "pages/api/workshop/stats/loads.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
       "id": "OS-001",
       "source": "pages/api/vulnerable-exec.js",
       "expectedFinding": true,

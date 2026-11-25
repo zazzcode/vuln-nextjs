@@ -59,7 +59,7 @@
   "mongo-039": {
     "method": "POST",
     "endpoints": ["/api/workshop/loans/batch", "/api/workshop/loans/bundle"],
-    "input": { "items": [{ "where": { "number": { "$gt": 0 } } }] }
+    "input": { "items": [{ "where": { "number": { "$ne": 101 } } }] }
   },
   "mongo-040": {
     "method": "POST",
