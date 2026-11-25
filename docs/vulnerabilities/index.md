@@ -19,6 +19,13 @@ Agents: each row links directly to the scenario's compact [expected-finding bloc
 | XSS-004 | Stored guestbook XSS | CWE-79 | SAST | [ref](xss.md#xss-004-agent) | `pages/xss/unsafe/comments.js` | `pages/xss/sanitized/comments.js` |
 | SSRF-001 | SSRF during rendering | CWE-918 | SAST | [ref](ssr.md#ssrf-001-agent) | `pages/vulnerable/ssrf.js` | `pages/secure/ssrf.js` |
 | REDIR-001 | Open redirect | CWE-601 | SAST | [ref](ssr.md#redir-001-agent) | `pages/vulnerable/redirect.js` | `pages/secure/redirect.js` |
+| COOKIE-001 | Session cookie without HttpOnly | CWE-1004 | SAST | [ref](cookies.md#cookie-001-agent) | `pages/api/cookies/unsafe/script-readable.js` | `pages/api/cookies/safe/session.js` |
+| COOKIE-002 | Session cookie without Secure | CWE-614 | SAST | [ref](cookies.md#cookie-002-agent) | `pages/api/cookies/unsafe/plain-transport.js` | `pages/api/cookies/safe/session.js` |
+| COOKIE-003 | Session cookie with a misleading name, without HttpOnly | CWE-1004 | SAST | [ref](cookies.md#cookie-003-agent) | `pages/api/cookies/unsafe/misleading-name.js` | `pages/api/cookies/safe/session.js` |
+| COOKIE-004 | Session cookie without Secure among several cookies | CWE-614 | SAST | [ref](cookies.md#cookie-004-agent) | `pages/api/cookies/unsafe/several-cookies.js` | `pages/api/cookies/safe/session.js` |
+| COOKIE-005 | Hardened cookie options overridden by a later false | CWE-1004 | SAST | [ref](cookies.md#cookie-005-agent) | `pages/api/cookies/unsafe/overridden-options.js` | `pages/api/cookies/safe/overridden-options.js` |
+| COOKIE-006 | HttpOnly in the cookie name, not in the attributes | CWE-1004 | SAST | [ref](cookies.md#cookie-006-agent) | `pages/api/cookies/unsafe/attribute-in-name.js` | `pages/api/cookies/safe/lowercase-attributes.js` |
+| COOKIE-007 | Hardened cookie header replaced by one without Secure | CWE-614 | SAST | [ref](cookies.md#cookie-007-agent) | `pages/api/cookies/unsafe/replaced-header.js` | `pages/api/cookies/safe/replaced-header.js` |
 | SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | [ref](react2shell.md#sca-001-agent) | `targets/react2shell/package.json` | pinned on purpose |
 | DEMO-001 | Header reflection (no sink) | — | none | [ref](demonstrations.md#demo-001-agent) | `pages/vulnerable/header-injection.js` | — |
 | DEMO-002 | Dynamic import (no sink) | — | none | [ref](demonstrations.md#demo-002-agent) | `pages/vulnerable/dynamic-import.js` | — |

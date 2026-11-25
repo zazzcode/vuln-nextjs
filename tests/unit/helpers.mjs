@@ -1,7 +1,7 @@
 // Invoke a Next.js API handler directly with minimal req/res doubles.
 // Resolves only when the handler sends a JSON response, so callback-style
 // handlers (for example child_process.exec) are awaited correctly.
-export function request(handler, { method = 'POST', body = {}, query = {} } = {}) {
+export function request(handler, { method = 'POST', body = {}, query = {}, cookies = {}, headers: requestHeaders = {} } = {}) {
   return new Promise((resolve, reject) => {
     const headers = {};
     let status, data, done = false;
@@ -13,7 +13,7 @@ export function request(handler, { method = 'POST', body = {}, query = {} } = {}
         if (!done) { done = true; resolve({ status, data, headers }); }
       },
     };
-    Promise.resolve(handler({ method, body, query }, res)).catch((error) => {
+    Promise.resolve(handler({ method, body, query, cookies, headers: requestHeaders }, res)).catch((error) => {
       if (!done) { done = true; reject(error); }
     });
   });

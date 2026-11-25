@@ -180,6 +180,72 @@ test.describe('REDIR-001 · open redirect during rendering', () => {
   });
 });
 
+// -- COOKIE · session cookie attributes ------------------------------------------
+
+/** Sign in and return the Set-Cookie header of one cookie. */
+async function signInCookie(request, path, name) {
+  const response = await postJson(request, path, { username: 'alice', password: 'alice-lab-only' });
+  expect(response.status(), path).toBe(200);
+  const header = response.headersArray().filter((h) => h.name.toLowerCase() === 'set-cookie').map((h) => h.value).find((v) => v.startsWith(`${name}=`));
+  expect(header, `${path} sets ${name}`).toBeTruthy();
+  return header;
+}
+
+const cookieValue = (header) => header.slice(header.indexOf('=') + 1).split(';')[0];
+const whoami = (request, path, name, value) => request.get(path, { headers: { cookie: `${name}=${value}` } });
+
+test.describe('COOKIE · session cookie attributes', () => {
+  const unsafe = [
+    ['COOKIE-001', 'script-readable', 'lab_sid_readable', /;\s*HttpOnly/i, 'composed-attributes', 'lab_sid_composed'],
+    ['COOKIE-002', 'plain-transport', 'lab_sid_plain', /;\s*Secure/i, 'session', 'lab_sid_safe'],
+    ['COOKIE-003', 'misleading-name', 'ui_prefs', /;\s*HttpOnly/i, 'session', 'lab_sid_safe'],
+    ['COOKIE-004', 'several-cookies', 'lab_sid_multi', /;\s*Secure/i, 'session', 'lab_sid_safe'],
+    ['COOKIE-005', 'overridden-options', 'lab_sid_order', /;\s*HttpOnly/i, 'overridden-options', 'lab_sid_order_safe'],
+    ['COOKIE-006', 'attribute-in-name', 'lab_HttpOnly_sid', /;\s*HttpOnly/i, 'lowercase-attributes', 'lab_sid_lower'],
+    ['COOKIE-007', 'replaced-header', 'lab_sid_replaced', /;\s*Secure/i, 'replaced-header', 'lab_sid_final'],
+  ];
+  for (const [id, slug, name, missing, safeSlug, safeName] of unsafe) {
+    test(`${id}: identical sign-in, VULNERABLE session cookie lacks the attribute, PROTECTED has it`, async ({ request }) => {
+      const path = `/api/cookies/unsafe/${slug}`;
+      const vulnerable = await signInCookie(request, path, name);
+      expect(vulnerable, 'attribute missing').not.toMatch(missing);
+      expect((await (await whoami(request, path, name, cookieValue(vulnerable))).json()).user.username, 'cookie identifies the caller').toBe('alice');
+
+      const safePath = `/api/cookies/safe/${safeSlug}`;
+      const safe = await signInCookie(request, safePath, safeName);
+      expect(safe).toMatch(/;\s*HttpOnly/i);
+      expect(safe).toMatch(/;\s*Secure/i);
+      expect((await whoami(request, safePath, safeName, cookieValue(safe))).status()).toBe(200);
+    });
+  }
+
+  test('COOKIE-002 control: environment-secure sends Secure in this production build', async ({ request }) => {
+    expect(await signInCookie(request, '/api/cookies/safe/environment-secure', 'lab_sid_env')).toMatch(/;\s*Secure/i);
+  });
+
+  test('hard negatives: preference, CSRF, banner, visitor and sign-out cookies carry no session', async ({ request }) => {
+    const preference = await postJson(request, '/api/cookies/safe/preference', { theme: 'dark' });
+    expect(preference.headers()['set-cookie']).toContain('lab_theme=dark');
+    expect((await whoami(request, '/api/cookies/safe/session', 'lab_sid_safe', 'dark')).status()).toBe(401);
+
+    const issued = (await request.get('/api/cookies/safe/csrf-token')).headers()['set-cookie'];
+    expect(issued).not.toMatch(/;\s*HttpOnly/i);
+    const token = cookieValue(issued);
+    const submit = (headers) => request.post('/api/cookies/safe/csrf-token', { headers, data: {} });
+    expect((await submit({ cookie: `lab_csrf=${token}`, 'x-csrf-token': token })).status()).toBe(200);
+    expect((await submit({ cookie: `lab_csrf=${token}`, 'x-csrf-token': 'other' })).status()).toBe(403);
+
+    expect((await postJson(request, '/api/cookies/safe/session-named-preference', {})).headers()['set-cookie']).toContain('session_banner=dismissed');
+    const visitor = cookieValue((await request.get('/api/cookies/safe/visitor-counter')).headers()['set-cookie']);
+    expect((await whoami(request, '/api/cookies/safe/session', 'lab_sid_safe', visitor)).status(), 'visitor token signs nobody in').toBe(401);
+
+    const session = cookieValue(await signInCookie(request, '/api/cookies/safe/session', 'lab_sid_safe'));
+    const out = await request.post('/api/cookies/safe/sign-out', { headers: { cookie: `lab_sid_safe=${session}` }, data: {} });
+    expect(out.headers()['set-cookie']).toContain('Max-Age=0');
+    expect((await whoami(request, '/api/cookies/safe/session', 'lab_sid_safe', session)).status(), 'session ended').toBe(401);
+  });
+});
+
 // -- every page renders ---------------------------------------------------------
 
 test('all lab pages return 200', async ({ request }) => {
@@ -191,7 +257,9 @@ test('all lab pages return 200', async ({ request }) => {
     '/vulnerable/ssrf', '/secure/ssrf', '/secure/redirect',
     '/vulnerable/header-injection', '/vulnerable/dynamic-import', '/vulnerable/rsc-server-action',
     '/secure/sanitized-input', '/secure/validated-form', '/secure/protected-api', '/secure/csp-enabled',
-    '/secure/command-execution', '/secure/file-access'];
+    '/secure/command-execution', '/secure/file-access',
+    '/cookies/script-readable', '/cookies/plain-transport', '/cookies/misleading-name', '/cookies/several-cookies',
+    '/cookies/overridden-options', '/cookies/attribute-in-name', '/cookies/replaced-header'];
   for (const route of routes) {
     expect((await request.get(route)).status(), route).toBe(200);
   }

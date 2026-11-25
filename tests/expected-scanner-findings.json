@@ -3,6 +3,215 @@
   "scopeNote": "Per-source expectations for scanner evaluations. expectedFinding=true rows must be flagged (a miss is a false negative). expectedFinding=false rows are scoped claims: the file should NOT be flagged for the listed CWE — the flaw it is the registered safe control for; findings for unrelated issues are out of scope for this lab. Regenerate with: pnpm scenario:update",
   "sources": [
     {
+      "id": "COOKIE-001",
+      "source": "pages/api/cookies/unsafe/script-readable.js",
+      "expectedFinding": true,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-001-safeControl",
+      "controlFor": "COOKIE-001",
+      "source": "pages/api/cookies/safe/composed-attributes.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-001-safeControl",
+      "controlFor": "COOKIE-001",
+      "source": "pages/api/cookies/safe/csrf-token.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-001-safeControl",
+      "controlFor": "COOKIE-001",
+      "source": "pages/api/cookies/safe/preference.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-001-safeControl",
+      "controlFor": "COOKIE-001",
+      "source": "pages/api/cookies/safe/session.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-001-safeControl",
+      "controlFor": "COOKIE-001",
+      "source": "pages/api/cookies/safe/sign-out.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-001-safeControl",
+      "controlFor": "COOKIE-001",
+      "source": "pages/api/cookies/safe/visitor-counter.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-002",
+      "source": "pages/api/cookies/unsafe/plain-transport.js",
+      "expectedFinding": true,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-002-safeControl",
+      "controlFor": "COOKIE-002",
+      "source": "pages/api/cookies/safe/composed-attributes.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-002-safeControl",
+      "controlFor": "COOKIE-002",
+      "source": "pages/api/cookies/safe/environment-secure.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-002-safeControl",
+      "controlFor": "COOKIE-002",
+      "source": "pages/api/cookies/safe/session.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-002-safeControl",
+      "controlFor": "COOKIE-002",
+      "source": "pages/api/cookies/safe/sign-out.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-003",
+      "source": "pages/api/cookies/unsafe/misleading-name.js",
+      "expectedFinding": true,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-003-safeControl",
+      "controlFor": "COOKIE-003",
+      "source": "pages/api/cookies/safe/csrf-token.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-003-safeControl",
+      "controlFor": "COOKIE-003",
+      "source": "pages/api/cookies/safe/preference.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-003-safeControl",
+      "controlFor": "COOKIE-003",
+      "source": "pages/api/cookies/safe/session-named-preference.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-003-safeControl",
+      "controlFor": "COOKIE-003",
+      "source": "pages/api/cookies/safe/session.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-003-safeControl",
+      "controlFor": "COOKIE-003",
+      "source": "pages/api/cookies/safe/visitor-counter.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-004",
+      "source": "pages/api/cookies/unsafe/several-cookies.js",
+      "expectedFinding": true,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-004-safeControl",
+      "controlFor": "COOKIE-004",
+      "source": "pages/api/cookies/safe/environment-secure.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-004-safeControl",
+      "controlFor": "COOKIE-004",
+      "source": "pages/api/cookies/safe/session.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-005",
+      "source": "pages/api/cookies/unsafe/overridden-options.js",
+      "expectedFinding": true,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-005-safeControl",
+      "controlFor": "COOKIE-005",
+      "source": "pages/api/cookies/safe/overridden-options.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-006",
+      "source": "pages/api/cookies/unsafe/attribute-in-name.js",
+      "expectedFinding": true,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-006-safeControl",
+      "controlFor": "COOKIE-006",
+      "source": "pages/api/cookies/safe/lowercase-attributes.js",
+      "expectedFinding": false,
+      "cwe": "CWE-1004",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-007",
+      "source": "pages/api/cookies/unsafe/replaced-header.js",
+      "expectedFinding": true,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
+      "id": "COOKIE-007-safeControl",
+      "controlFor": "COOKIE-007",
+      "source": "pages/api/cookies/safe/replaced-header.js",
+      "expectedFinding": false,
+      "cwe": "CWE-614",
+      "scanner": "SAST"
+    },
+    {
       "id": "DEMO-001",
       "source": "pages/vulnerable/header-injection.js",
       "expectedFinding": false,

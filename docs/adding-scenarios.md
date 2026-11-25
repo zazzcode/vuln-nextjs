@@ -17,7 +17,7 @@ materializes the same cases for other scanners. The checklist below applies to r
 
 ## 1. Assign a stable ID
 
-Format `<CATEGORY>-<number>`: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `SCA-`, `DEMO-`. IDs never change once shipped — external tool evaluations reference them.
+Format `<CATEGORY>-<number>`: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `COOKIE-`, `SCA-`, `DEMO-`. IDs never change once shipped — external tool evaluations reference them.
 
 ## 2. Implement the flaw and its safe control
 

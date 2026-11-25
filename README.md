@@ -25,6 +25,13 @@ Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-
 | XSS-004 | Stored guestbook XSS (SSR) | CWE-79 | SAST | `/xss/unsafe/comments` → `/xss/sanitized/comments` (DOMPurify) |
 | SSRF-001 | SSRF during rendering | CWE-918 | SAST | `/vulnerable/ssrf` → `/secure/ssrf` (origin + path allowlist) |
 | REDIR-001 | Open redirect during rendering | CWE-601 | SAST | `/vulnerable/redirect` → `/secure/redirect` (relative-path only) |
+| COOKIE-001 | Session cookie without HttpOnly | CWE-1004 | SAST | `/api/cookies/unsafe/script-readable` → `/api/cookies/safe/session` |
+| COOKIE-002 | Session cookie without Secure | CWE-614 | SAST | `/api/cookies/unsafe/plain-transport` → `/api/cookies/safe/session` |
+| COOKIE-003 | Session cookie with a misleading name, without HttpOnly | CWE-1004 | SAST | `/api/cookies/unsafe/misleading-name` → `/api/cookies/safe/session` |
+| COOKIE-004 | Session cookie without Secure among several cookies | CWE-614 | SAST | `/api/cookies/unsafe/several-cookies` → `/api/cookies/safe/session` |
+| COOKIE-005 | Hardened cookie options overridden by a later false | CWE-1004 | SAST | `/api/cookies/unsafe/overridden-options` → `/api/cookies/safe/overridden-options` |
+| COOKIE-006 | HttpOnly in the cookie name, not in the attributes | CWE-1004 | SAST | `/api/cookies/unsafe/attribute-in-name` → `/api/cookies/safe/lowercase-attributes` |
+| COOKIE-007 | Hardened cookie header replaced by one without Secure | CWE-614 | SAST | `/api/cookies/unsafe/replaced-header` → `/api/cookies/safe/replaced-header` |
 | SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | pinned `next@15.0.4` fixture in `targets/react2shell` |
 
 Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners should not report them.

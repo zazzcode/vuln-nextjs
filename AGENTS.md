@@ -47,7 +47,7 @@ Always, before pushing: the full matrix from [docs/setup-and-testing.md](docs/se
 
 Expanded checklist: [docs/adding-scenarios.md](docs/adding-scenarios.md). The mechanics:
 
-1. **ID**: `<CATEGORY>-<number>` (existing: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `SSRF-`, `REDIR-`, `SCA-`, `DEMO-`). IDs are permanent once shipped — external evaluations reference them.
+1. **ID**: `<CATEGORY>-<number>` (existing: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `SSRF-`, `REDIR-`, `COOKIE-`, `SCA-`, `DEMO-`). IDs are permanent once shipped — external evaluations reference them.
 2. **Files**: unsafe source and safe control in **separate files**, mirroring existing pairs (`pages/api/sql/{unsafe,safe,zod}/…`, `pages/xss/{unsafe,safe,sanitized}/…`). Mark the sink: `// <ID> / <CWE>: …`. UI uses `components/LabLayout` / `components/ApiConsole`.
 3. **Catalog entry** (schema from any existing entry): `source`, `safeControl`, optional `safeControls: [...]` for library-based variants, `documentation`, `test`, `flow`, `runtime`, `cwe`, `expectedFinding: true`. No-sink explanation pages are `status: "demonstration"`, `expectedFinding: false`.
 4. **Docs section** in `docs/vulnerabilities/<module>.md` following the anchor contract (`#<id>`, `#<id>-agent` compact + self-contained, `#<id>-student`, `#<id>-exploit` with **verified** Burp Suite + Postman + curl commands, `#<id>-safe` vulnerable-vs-protected table *and why*, `#<id>-tests`), plus the Contents row and `docs/vulnerabilities/index.md` entry. Never document an unverified command — run it first.

@@ -15,6 +15,7 @@ Suggested reading order — each module is self-contained:
 | 3 | [sql.md](vulnerabilities/sql.md) | SQL-001 login bypass · SQL-002 search injection · SQL-003 stacked statements |
 | 4 | [xss.md](vulnerabilities/xss.md) | XSS-001 reflected · XSS-002 stored (notes) · XSS-003 script-context · XSS-004 stored guestbook |
 | 5 | [ssr.md](vulnerabilities/ssr.md) | SSRF-001 request forgery · REDIR-001 open redirect |
+| 5b | [cookies.md](vulnerabilities/cookies.md) | COOKIE-001 to COOKIE-007 session cookie attributes, with tricky safe cases |
 | 6 | [react2shell.md](vulnerabilities/react2shell.md) | SCA-001 dependency vulnerability (CVE-2025-66478) |
 | 7 | [demonstrations.md](vulnerabilities/demonstrations.md) | DEMO-001/002 negative controls (no findings expected) |
 
