@@ -17,13 +17,14 @@ materializes the same cases for other scanners. The checklist below applies to r
 
 ## 1. Assign a stable ID
 
-Format `<CATEGORY>-<number>`: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `COOKIE-`, `SCA-`, `DEMO-`. IDs never change once shipped — external tool evaluations reference them.
+Format `<CATEGORY>-<number>`: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `COOKIE-`, `MONGO-`, `SCA-`, `DEMO-`. IDs never change once shipped — external tool evaluations reference them.
 
 ## 2. Implement the flaw and its safe control
 
 - Unsafe source and safe control live in separate files under the matching area (`pages/api/…`, `pages/xss/…`), following the existing pairs.
 - The safe control must accept the **identical payload** and keep it data (parameterized SQL, `execFile` argument vectors, React text nodes, exact-string allowlists). Scope it to the flaw under test; do not present it as universally secure.
 - Mark the sink with a comment naming the scenario: `// XSS-001 / CWE-79: …`.
+- The `MONGO-` scenarios are different on purpose: neutral route names under `pages/api/mongo/`, no sink comments, inputs in `lib/mongo-cases.json` and behaviours in `tests/mongo-cases.mjs`. Keep that form when you add one.
 - UI pages use `components/LabLayout` and `components/ApiConsole`, and cross-link the vulnerable/safe pair.
 - Input validation (methods, types, lengths) belongs on **both** sides and must not neutralize the attack payload — the exploit must still work on the unsafe side.
 

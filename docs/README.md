@@ -16,6 +16,7 @@ Suggested reading order — each module is self-contained:
 | 4 | [xss.md](vulnerabilities/xss.md) | XSS-001 reflected · XSS-002 stored (notes) · XSS-003 script-context · XSS-004 stored guestbook |
 | 5 | [ssr.md](vulnerabilities/ssr.md) | SSRF-001 request forgery · REDIR-001 open redirect |
 | 5b | [cookies.md](vulnerabilities/cookies.md) | COOKIE-001 to COOKIE-007 session cookie attributes, with tricky safe cases |
+| 5c | [mongodb.md](vulnerabilities/mongodb.md) | MONGO-001 to MONGO-027 query injection with the native MongoDB driver, with tricky safe cases |
 | 6 | [react2shell.md](vulnerabilities/react2shell.md) | SCA-001 dependency vulnerability (CVE-2025-66478) |
 | 7 | [demonstrations.md](vulnerabilities/demonstrations.md) | DEMO-001/002 negative controls (no findings expected) |
 
@@ -80,5 +81,6 @@ Terms used across the modules, defined once here; modules link or use them freel
 | scrypt | A deliberately slow, salted password-hashing function — verification is cheap for one password, expensive for mass guessing |
 | allowlist vs blocklist | Permitting only known-good entries vs trying to enumerate every bad one; allowlists fail safer |
 | PGlite | PostgreSQL compiled to WebAssembly, running inside the Node process — no database server, no persistence |
+| operator injection | A request value that is an object such as `{ "$ne": "" }`, which a MongoDB query reads as an operator and not as a value |
 | hydration | React attaching event behavior to server-rendered HTML once it reaches the browser |
 | multipart body | A request-body format carrying multiple form fields (used for file uploads and Server Action posts) |

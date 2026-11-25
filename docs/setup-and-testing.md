@@ -24,6 +24,8 @@ corepack pnpm install
 
 CI installs with `--frozen-lockfile`. Do not commit changes to `pnpm-lock.yaml` that upgrade the pinned vulnerable dependencies — the pins are the scenarios.
 
+The MongoDB scenarios need a `mongod` binary. `mongodb-memory-server` downloads MongoDB 8.2.6 (about 80 MB) at the first MongoDB request; run `corepack pnpm test` once to fetch it before `test:api`. Its install script is switched off in `pnpm-workspace.yaml`, so an install alone downloads no binary.
+
 ## Run the lab
 
 Main app (Pages Router, port 3000):

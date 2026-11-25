@@ -16,6 +16,7 @@
  *                                     payload (fix the control, not the test)
  */
 import { test, expect } from '@playwright/test';
+import { methods, scenarios as mongoScenarios } from '../mongo-cases.mjs';
 
 // -- small helpers: keep the specs about security, not plumbing -------------
 
@@ -246,6 +247,60 @@ test.describe('COOKIE · session cookie attributes', () => {
   });
 });
 
+// -- MONGO · query injection ------------------------------------------------------
+
+// Literal IDs: tests/unit/catalog.test.mjs looks for each one in this file.
+const mongoIds = [
+  'MONGO-001', 'MONGO-002', 'MONGO-003', 'MONGO-004', 'MONGO-005', 'MONGO-006',
+  'MONGO-007', 'MONGO-008', 'MONGO-009', 'MONGO-010', 'MONGO-011', 'MONGO-012',
+  'MONGO-013', 'MONGO-014', 'MONGO-015', 'MONGO-016', 'MONGO-017', 'MONGO-018',
+  'MONGO-019', 'MONGO-020', 'MONGO-021', 'MONGO-022', 'MONGO-023', 'MONGO-024',
+  'MONGO-025', 'MONGO-026', 'MONGO-027',
+];
+
+test.describe('MONGO · query injection', () => {
+  test.beforeEach(async ({ request }) => resetLab(request));
+
+  test('the suite covers every registered scenario', () => {
+    expect(mongoScenarios.map(({ id }) => id)).toEqual(mongoIds);
+  });
+
+  for (const { id, title, vulnerable, controls, attacks, exploited, attacksOn, exploitedOn, normalFor } of mongoScenarios) {
+    const sender = (request) => async (route, input) => {
+      const path = `/api/mongo/${route}`;
+      const response = methods[route] === 'GET' ? await request.get(`${path}?${new URLSearchParams(input)}`) : await postJson(request, path, input);
+      return { status: response.status(), data: await response.json() };
+    };
+
+    test(`${id} ${title}: VULNERABLE shows the effect`, async ({ request }) => {
+      const send = sender(request);
+      for (const input of attacks) {
+        await resetLab(request);
+        expect(await exploited(await send(vulnerable, input), send), JSON.stringify(input)).toBe(true);
+      }
+    });
+
+    test(`${id} ${title}: PROTECTED keeps the identical input inert`, async ({ request }) => {
+      const send = sender(request);
+      for (const route of controls) {
+        for (const input of attacksOn(route)) {
+          await resetLab(request);
+          expect(await exploitedOn(route)(await send(route, input), send), `${route} ${JSON.stringify(input)}`).toBe(false);
+        }
+      }
+    });
+
+    test(`${id} ${title}: every route accepts ordinary input`, async ({ request }) => {
+      const send = sender(request);
+      for (const route of [vulnerable, ...controls]) {
+        await resetLab(request);
+        const [input, ok] = normalFor(route);
+        expect(ok(await send(route, input)), route).toBe(true);
+      }
+    });
+  }
+});
+
 // -- every page renders ---------------------------------------------------------
 
 test('all lab pages return 200', async ({ request }) => {
@@ -259,7 +314,8 @@ test('all lab pages return 200', async ({ request }) => {
     '/secure/sanitized-input', '/secure/validated-form', '/secure/protected-api', '/secure/csp-enabled',
     '/secure/command-execution', '/secure/file-access',
     '/cookies/script-readable', '/cookies/plain-transport', '/cookies/misleading-name', '/cookies/several-cookies',
-    '/cookies/overridden-options', '/cookies/attribute-in-name', '/cookies/replaced-header'];
+    '/cookies/overridden-options', '/cookies/attribute-in-name', '/cookies/replaced-header',
+    ...mongoIds.map((id) => `/mongo/${id.toLowerCase()}`)];
   for (const route of routes) {
     expect((await request.get(route)).status(), route).toBe(200);
   }

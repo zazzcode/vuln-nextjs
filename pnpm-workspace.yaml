@@ -6,3 +6,5 @@ saveExact: true
 # This lab does no image optimization, so sharp's install hooks are unnecessary.
 allowBuilds:
   sharp: false
+  # The mongod binary is fetched at first use, not at install.
+  mongodb-memory-server: false

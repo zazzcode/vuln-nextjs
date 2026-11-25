@@ -19,7 +19,8 @@ Both apps bind `127.0.0.1` only. The lab is for local, isolated testing.
 - `lib/database.cjs` owns one global initialization promise per server process (survives dev reloads). Each test process gets its own instance.
 - Seeded synthetic data: users `admin / admin-lab-only` and `alice / alice-lab-only`, two public products, one hidden `Internal prototype`, one note, and two guestbook comments.
 - The `password_demo` plaintext column exists **only** so SQL-001's unsafe login can interpolate it; the safe login verifies a salted scrypt hash instead. This is a lab-only comparison, not production authentication. No sessions or cookies are created.
-- `POST /api/lab/reset` drops and re-seeds all tables on the same instance. It is intentionally unauthenticated lab tooling.
+- MongoDB scenarios use the native `mongodb` driver with `mongodb-memory-server`. `lib/mongo.cjs` starts one `mongod` per server process on loopback at the first MongoDB request and keeps synthetic data in memory. The binary (MongoDB 8.2.6, about 80 MB) is downloaded once.
+- `POST /api/lab/reset` drops and re-seeds all tables on the same instance, and re-seeds MongoDB when it is running. It is intentionally unauthenticated lab tooling.
 
 `next.config.js` marks `@electric-sql/pglite` as a server webpack external so its WASM assets load from the installed package instead of being bundled.
 
@@ -31,7 +32,7 @@ Both apps bind `127.0.0.1` only. The lab is for local, isolated testing.
 
 | Layer | Runner | Files | Proves |
 | --- | --- | --- | --- |
-| Unit (API handlers, real PGlite) | Vitest | `tests/unit/*.test.mjs` | Handlers import directly — no server, no VM transform. Exploitable outcomes (bypass, stacked SQL, shell execution) and safe-control outcomes for identical payloads |
+| Unit (API handlers, real PGlite and in-memory MongoDB) | Vitest | `tests/unit/*.test.mjs` | Handlers import directly — no server, no VM transform. Exploitable outcomes (bypass, stacked SQL, shell execution) and safe-control outcomes for identical payloads |
 | API integration | Playwright (`request` fixture, no browser) | `tests/api/lab.api.test.mjs` | Running production server: full request/response cycles for every vulnerable/protected pair, SSR output of unsafe vs safe XSS rendering, redirect headers, route sweep |
 | Browser execution | Playwright | `tests/browser/xss.browser.test.mjs` | XSS/eval payloads actually execute JavaScript in a real browser on unsafe pages, and provably do not execute on safe pages |
 | SCA visibility | `pnpm audit --prod` | — (informational) | The raw audit reports the intentional vulnerable pins; its nonzero exit is the scenario working, so it never gates CI |

@@ -18,7 +18,7 @@ Deep references when needed: [docs/adding-scenarios.md](docs/adding-scenarios.md
 
 | You changed… | Minimum before commit | Why |
 | --- | --- | --- |
-| API handlers / lib | `pnpm test` (unit suite imports handlers directly against real PGlite — no server needed) | Exploitable outcome + safe rejection per scenario |
+| API handlers / lib | `pnpm test` (unit suite imports handlers directly against real PGlite and an in-memory MongoDB server — no web server needed) | Exploitable outcome + safe rejection per scenario |
 | API routes / pages | `pnpm build`, then against a running `pnpm start`: `pnpm test:api` (Playwright `request` fixture — no browser needed); `pnpm test:browser` for anything executing client-side | Vulnerable/protected pairs over real HTTP; real-browser execution/non-execution |
 | `lib/catalog.json` or any scenario source | `pnpm scenario:check` — expect it to fail until you re-snapshot (below) | Ground truth must move with the change |
 | Dependencies / lockfile | `pnpm audit:check` — expect drift until `pnpm audit:update` | Audit snapshot is the SCA scenario |
@@ -47,8 +47,8 @@ Always, before pushing: the full matrix from [docs/setup-and-testing.md](docs/se
 
 Expanded checklist: [docs/adding-scenarios.md](docs/adding-scenarios.md). The mechanics:
 
-1. **ID**: `<CATEGORY>-<number>` (existing: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `SSRF-`, `REDIR-`, `COOKIE-`, `SCA-`, `DEMO-`). IDs are permanent once shipped — external evaluations reference them.
-2. **Files**: unsafe source and safe control in **separate files**, mirroring existing pairs (`pages/api/sql/{unsafe,safe,zod}/…`, `pages/xss/{unsafe,safe,sanitized}/…`). Mark the sink: `// <ID> / <CWE>: …`. UI uses `components/LabLayout` / `components/ApiConsole`.
+1. **ID**: `<CATEGORY>-<number>` (existing: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `SSRF-`, `REDIR-`, `COOKIE-`, `MONGO-`, `SCA-`, `DEMO-`). IDs are permanent once shipped — external evaluations reference them.
+2. **Files**: unsafe source and safe control in **separate files**, mirroring existing pairs (`pages/api/sql/{unsafe,safe,zod}/…`, `pages/xss/{unsafe,safe,sanitized}/…`). Mark the sink: `// <ID> / <CWE>: …`. UI uses `components/LabLayout` / `components/ApiConsole`. Exception: `pages/api/mongo/` uses neutral names and no sink comments, so that the source does not give the answer away; the catalog and `docs/vulnerabilities/mongodb.md` hold it.
 3. **Catalog entry** (schema from any existing entry): `source`, `safeControl`, optional `safeControls: [...]` for library-based variants, `documentation`, `test`, `flow`, `runtime`, `cwe`, `expectedFinding: true`. No-sink explanation pages are `status: "demonstration"`, `expectedFinding: false`.
 4. **Docs section** in `docs/vulnerabilities/<module>.md` following the anchor contract (`#<id>`, `#<id>-agent` compact + self-contained, `#<id>-student`, `#<id>-exploit` with **verified** Burp Suite + Postman + curl commands, `#<id>-safe` vulnerable-vs-protected table *and why*, `#<id>-tests`), plus the Contents row and `docs/vulnerabilities/index.md` entry. Never document an unverified command — run it first.
 5. **Tests, both directions — required, not optional:**

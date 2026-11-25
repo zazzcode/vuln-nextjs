@@ -14,6 +14,7 @@ Every protected route in the lab implements one named defense pattern. This page
 | Decide-then-fetch origin policy | `URL` normalization + origin/path check | `pages/secure/ssrf.js` | SSRF (SSRF-001) |
 | Relative-path-only redirect | `/^\/[^/]/` + no scheme | `pages/secure/redirect.js` | open redirect (REDIR-001) |
 | Session cookie attributes | `HttpOnly; Secure; SameSite=Lax` on the cookie that identifies the caller | `pages/api/cookies/safe/session.js` | script-readable and plain-HTTP session cookies (COOKIE-001 to COOKIE-007) |
+| Typed and fixed-shape MongoDB queries | coercion, `$eq`, `$literal`, Zod, checked `ObjectId`, constant lists, escaped patterns | `pages/api/mongo/*` (listed in [mongodb.md](vulnerabilities/mongodb.md)) | MongoDB query injection (MONGO-001 to MONGO-027) |
 | Whitelist + no evaluation | character whitelist, no eval | `pages/api/protected-example.js`, `pages/secure/sanitized-input.js` | code injection (JS-001/002) |
 
 ## Validation vs sanitization vs escaping

@@ -263,6 +263,491 @@
       "scanner": "SAST"
     },
     {
+      "id": "MONGO-001",
+      "source": "pages/api/mongo/sign-in/front-desk.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-001-safeControl",
+      "controlFor": "MONGO-001",
+      "source": "pages/api/mongo/sign-in/branch.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-001-safeControl",
+      "controlFor": "MONGO-001",
+      "source": "pages/api/mongo/sign-in/kiosk.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-001-safeControl",
+      "controlFor": "MONGO-001",
+      "source": "pages/api/mongo/sign-in/mobile.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-002",
+      "source": "pages/api/mongo/sign-in/partner.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-002-safeControl",
+      "controlFor": "MONGO-002",
+      "source": "pages/api/mongo/sign-in/vendor.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-003",
+      "source": "pages/api/mongo/sign-in/portal.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-003-safeControl",
+      "controlFor": "MONGO-003",
+      "source": "pages/api/mongo/sign-in/gateway.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-004",
+      "source": "pages/api/mongo/sign-in/reception.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-004-safeControl",
+      "controlFor": "MONGO-004",
+      "source": "pages/api/mongo/sign-in/lobby.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-005",
+      "source": "pages/api/mongo/sign-in/terminal.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-005-safeControl",
+      "controlFor": "MONGO-005",
+      "source": "pages/api/mongo/sign-in/console.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-006",
+      "source": "pages/api/mongo/directory/badge.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-006-safeControl",
+      "controlFor": "MONGO-006",
+      "source": "pages/api/mongo/articles/shelf.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-006-safeControl",
+      "controlFor": "MONGO-006",
+      "source": "pages/api/mongo/directory/desk.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-006-safeControl",
+      "controlFor": "MONGO-006",
+      "source": "pages/api/mongo/directory/locker.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-007",
+      "source": "pages/api/mongo/articles/entry.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-007-safeControl",
+      "controlFor": "MONGO-007",
+      "source": "pages/api/mongo/articles/item.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-008",
+      "source": "pages/api/mongo/articles/browse.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-008-safeControl",
+      "controlFor": "MONGO-008",
+      "source": "pages/api/mongo/articles/budget.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-008-safeControl",
+      "controlFor": "MONGO-008",
+      "source": "pages/api/mongo/articles/range.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-008-safeControl",
+      "controlFor": "MONGO-008",
+      "source": "pages/api/mongo/articles/topic.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-008-safeControl",
+      "controlFor": "MONGO-008",
+      "source": "pages/api/mongo/articles/view.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-009",
+      "source": "pages/api/mongo/articles/score.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-009-safeControl",
+      "controlFor": "MONGO-009",
+      "source": "pages/api/mongo/articles/rank.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-010",
+      "source": "pages/api/mongo/articles/search.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-010-safeControl",
+      "controlFor": "MONGO-010",
+      "source": "pages/api/mongo/articles/match.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-011",
+      "source": "pages/api/mongo/articles/listing.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-011-safeControl",
+      "controlFor": "MONGO-011",
+      "source": "pages/api/mongo/articles/catalogue.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-012",
+      "source": "pages/api/mongo/directory/tally.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-012-safeControl",
+      "controlFor": "MONGO-012",
+      "source": "pages/api/mongo/directory/count.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-013",
+      "source": "pages/api/mongo/bookings/close.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-013-safeControl",
+      "controlFor": "MONGO-013",
+      "source": "pages/api/mongo/bookings/finish.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-014",
+      "source": "pages/api/mongo/bookings/remove.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-014-safeControl",
+      "controlFor": "MONGO-014",
+      "source": "pages/api/mongo/bookings/discard.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-015",
+      "source": "pages/api/mongo/bookings/confirm.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-015-safeControl",
+      "controlFor": "MONGO-015",
+      "source": "pages/api/mongo/bookings/accept.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-016",
+      "source": "pages/api/mongo/reports/run.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-016-safeControl",
+      "controlFor": "MONGO-016",
+      "source": "pages/api/mongo/reports/named.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-017",
+      "source": "pages/api/mongo/reports/summary.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-017-safeControl",
+      "controlFor": "MONGO-017",
+      "source": "pages/api/mongo/reports/overview.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-018",
+      "source": "pages/api/mongo/reports/breakdown.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-018-safeControl",
+      "controlFor": "MONGO-018",
+      "source": "pages/api/mongo/reports/totals.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-019",
+      "source": "pages/api/mongo/members/profile.js",
+      "expectedFinding": true,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-019-safeControl",
+      "controlFor": "MONGO-019",
+      "source": "pages/api/mongo/members/details.js",
+      "expectedFinding": false,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-019-safeControl",
+      "controlFor": "MONGO-019",
+      "source": "pages/api/mongo/members/settings.js",
+      "expectedFinding": false,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-020",
+      "source": "pages/api/mongo/members/preferences.js",
+      "expectedFinding": true,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-020-safeControl",
+      "controlFor": "MONGO-020",
+      "source": "pages/api/mongo/members/options.js",
+      "expectedFinding": false,
+      "cwe": "CWE-915",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-021",
+      "source": "pages/api/mongo/members/record.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-021-safeControl",
+      "controlFor": "MONGO-021",
+      "source": "pages/api/mongo/members/entry.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-022",
+      "source": "pages/api/mongo/members/nickname.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-022-safeControl",
+      "controlFor": "MONGO-022",
+      "source": "pages/api/mongo/members/alias.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-023",
+      "source": "pages/api/mongo/articles/ordered.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-023-safeControl",
+      "controlFor": "MONGO-023",
+      "source": "pages/api/mongo/articles/sorted.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-024",
+      "source": "pages/api/mongo/directory/card.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-024-safeControl",
+      "controlFor": "MONGO-024",
+      "source": "pages/api/mongo/directory/contact.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-025",
+      "source": "pages/api/mongo/directory/resolve.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-025-safeControl",
+      "controlFor": "MONGO-025",
+      "source": "pages/api/mongo/directory/locate.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-026",
+      "source": "pages/api/mongo/invites/redeem.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-026-safeControl",
+      "controlFor": "MONGO-026",
+      "source": "pages/api/mongo/invites/check.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-026-safeControl",
+      "controlFor": "MONGO-026",
+      "source": "pages/api/mongo/invites/claim.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-026-safeControl",
+      "controlFor": "MONGO-026",
+      "source": "pages/api/mongo/invites/open.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-027",
+      "source": "pages/api/mongo/invites/accept.js",
+      "expectedFinding": true,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
+      "id": "MONGO-027-safeControl",
+      "controlFor": "MONGO-027",
+      "source": "pages/api/mongo/invites/join.js",
+      "expectedFinding": false,
+      "cwe": "CWE-943",
+      "scanner": "SAST"
+    },
+    {
       "id": "OS-001",
       "source": "pages/api/vulnerable-exec.js",
       "expectedFinding": true,

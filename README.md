@@ -32,6 +32,33 @@ Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-
 | COOKIE-005 | Hardened cookie options overridden by a later false | CWE-1004 | SAST | `/api/cookies/unsafe/overridden-options` → `/api/cookies/safe/overridden-options` |
 | COOKIE-006 | HttpOnly in the cookie name, not in the attributes | CWE-1004 | SAST | `/api/cookies/unsafe/attribute-in-name` → `/api/cookies/safe/lowercase-attributes` |
 | COOKIE-007 | Hardened cookie header replaced by one without Secure | CWE-614 | SAST | `/api/cookies/unsafe/replaced-header` → `/api/cookies/safe/replaced-header` |
+| MONGO-001 | Operator injection in a sign-in body | CWE-943 | SAST | `/api/mongo/sign-in/front-desk` → `/api/mongo/sign-in/kiosk` + `/api/mongo/sign-in/branch` + `/api/mongo/sign-in/mobile` |
+| MONGO-002 | Type check without a return | CWE-943 | SAST | `/api/mongo/sign-in/partner` → `/api/mongo/sign-in/vendor` |
+| MONGO-003 | Only top-level operator keys are removed | CWE-943 | SAST | `/api/mongo/sign-in/portal` → `/api/mongo/sign-in/gateway` |
+| MONGO-004 | A different field is checked | CWE-943 | SAST | `/api/mongo/sign-in/reception` → `/api/mongo/sign-in/lobby` |
+| MONGO-005 | Text read as a field path in $expr | CWE-943 | SAST | `/api/mongo/sign-in/terminal` → `/api/mongo/sign-in/console` |
+| MONGO-006 | Operator injection from bracketed query parameters | CWE-943 | SAST | `/api/mongo/directory/badge` → `/api/mongo/directory/locker` + `/api/mongo/directory/desk` + `/api/mongo/articles/shelf` |
+| MONGO-007 | ObjectId fallback to the raw value | CWE-943 | SAST | `/api/mongo/articles/entry` → `/api/mongo/articles/item` |
+| MONGO-008 | $where built from request text | CWE-943 | SAST | `/api/mongo/articles/browse` → `/api/mongo/articles/topic` + `/api/mongo/articles/budget` + `/api/mongo/articles/view` + `/api/mongo/articles/range` |
+| MONGO-009 | $function body built from request text | CWE-943 | SAST | `/api/mongo/articles/score` → `/api/mongo/articles/rank` |
+| MONGO-010 | A parsed JSON filter passed to find | CWE-943 | SAST | `/api/mongo/articles/search` → `/api/mongo/articles/match` |
+| MONGO-011 | A fixed condition overridden by a spread | CWE-943 | SAST | `/api/mongo/articles/listing` → `/api/mongo/articles/catalogue` |
+| MONGO-012 | A request filter passed to countDocuments | CWE-943 | SAST | `/api/mongo/directory/tally` → `/api/mongo/directory/count` |
+| MONGO-013 | A request object selects the document to update | CWE-943 | SAST | `/api/mongo/bookings/close` → `/api/mongo/bookings/finish` |
+| MONGO-014 | A spread overrides the owner in a delete | CWE-943 | SAST | `/api/mongo/bookings/remove` → `/api/mongo/bookings/discard` |
+| MONGO-015 | Validation after the query | CWE-943 | SAST | `/api/mongo/bookings/confirm` → `/api/mongo/bookings/accept` |
+| MONGO-016 | An aggregation pipeline from the request | CWE-943 | SAST | `/api/mongo/reports/run` → `/api/mongo/reports/named` |
+| MONGO-017 | A $match stage from the request | CWE-943 | SAST | `/api/mongo/reports/summary` → `/api/mongo/reports/overview` |
+| MONGO-018 | A group key named by the request | CWE-943 | SAST | `/api/mongo/reports/breakdown` → `/api/mongo/reports/totals` |
+| MONGO-019 | A request object passed to $set | CWE-915 | SAST | `/api/mongo/members/profile` → `/api/mongo/members/details` + `/api/mongo/members/settings` |
+| MONGO-020 | Removed keys and a dotted path | CWE-915 | SAST | `/api/mongo/members/preferences` → `/api/mongo/members/options` |
+| MONGO-021 | A complete update document from the request | CWE-943 | SAST | `/api/mongo/members/record` → `/api/mongo/members/entry` |
+| MONGO-022 | Text read as a field path in an update pipeline | CWE-943 | SAST | `/api/mongo/members/nickname` → `/api/mongo/members/alias` |
+| MONGO-023 | Request-controlled sort | CWE-943 | SAST | `/api/mongo/articles/ordered` → `/api/mongo/articles/sorted` |
+| MONGO-024 | Request-controlled projection | CWE-943 | SAST | `/api/mongo/directory/card` → `/api/mongo/directory/contact` |
+| MONGO-025 | Request-controlled field name | CWE-943 | SAST | `/api/mongo/directory/resolve` → `/api/mongo/directory/locate` |
+| MONGO-026 | User text in $regex | CWE-943 | SAST | `/api/mongo/invites/redeem` → `/api/mongo/invites/claim` + `/api/mongo/invites/check` + `/api/mongo/invites/open` |
+| MONGO-027 | Incomplete escape before $regex | CWE-943 | SAST | `/api/mongo/invites/accept` → `/api/mongo/invites/join` |
 | SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | pinned `next@15.0.4` fixture in `targets/react2shell` |
 
 Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners should not report them.
