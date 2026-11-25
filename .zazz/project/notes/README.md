@@ -9,7 +9,7 @@ Working notes for developing and maintaining this lab: where the work stands, wh
 - A note says what the documentation does not: a decision and its reason, a measurement, the state of the work, a lesson.
 - `.zazz/ephemeral/` is ignored by git. It holds scratch files and handoffs that stay on the machine.
 
-Index updated: 2026-11-25T21:55:02Z.
+Index updated: 2026-11-25T22:06:07Z.
 
 ## Current notes
 
@@ -17,6 +17,7 @@ Newest first.
 
 | Written (UTC) | Note | What it holds |
 | --- | --- | --- |
+| 2026-11-25 22:06 | [Vulnerable dependencies: what protects them](2026-11-25T22-06-07Z_vulnerable-dependencies.md) | The SCA findings and the guards around them; `audit:update` now refuses to drop an advisory; `main` has no branch protection |
 | 2026-11-25 21:55 | [Session: inputs that reach three workshop controls](2026-11-25T21-55-02Z_session-workshop-controls.md) | The second MongoDB batch re-verified; three controls whose tests could not fail; the fix and its evidence |
 | 2026-11-25 21:55 | [Project state](2026-11-25T21-55-02Z_project-state.md) | What is built, why the pins are pins, where the work stands, environment and server facts |
 | 2026-11-25 21:55 | [Ground truth](2026-11-25T21-55-02Z_ground-truth-snapshots.md) | Why expected findings are compared against generated files |

@@ -69,7 +69,7 @@ The Playwright coverage is **enforced by `tests/unit/catalog.test.mjs`**: an act
 
 ## 6. Dependency scenarios (SCA)
 
-Pin the vulnerable version exactly in the target package and keep the lockfile frozen. Detection is plain `pnpm audit --prod` (expected to report the pin and exit nonzero) — document the expected advisory ID and finding path in the scenario doc. Never upgrade a pinned vulnerable dependency; retire the scenario in a dedicated change instead.
+Pin the vulnerable version exactly in the target package and keep the lockfile frozen. Detection is plain `pnpm audit --prod` (expected to report the pin and exit nonzero) — document the expected advisory ID and finding path in the scenario doc. Never upgrade a pinned vulnerable dependency; retire the scenario in a dedicated change instead, with `pnpm audit:update --retire=<id>` in that commit. The update removes an advisory no other way.
 
 ## 7. Re-snapshot the ground truth
 
