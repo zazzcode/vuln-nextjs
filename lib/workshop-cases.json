@@ -1,0 +1,155 @@
+{
+  "mongo-028": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/arrive", "/api/workshop/desk/checkin"],
+    "input": { "otp": { "$ne": "x" } }
+  },
+  "mongo-029": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/badge-in", "/api/workshop/desk/begin", "/api/workshop/desk/clock-in"],
+    "input": { "login": "admin", "passcode": { "$ne": "" } }
+  },
+  "mongo-030": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/desk/context", "/api/workshop/desk/terminal"],
+    "input": "",
+    "headers": { "x-desk": "{\"login\":\"admin\",\"badge\":{\"$ne\":\"\"}}" }
+  },
+  "mongo-031": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/enter", "/api/workshop/desk/unlock"],
+    "input": { "login": "admin", "passcode": { "$ne": "" } }
+  },
+  "mongo-032": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/hint", "/api/workshop/desk/verify"],
+    "input": { "login": "admin", "start": ".*" }
+  },
+  "mongo-033": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/accept", "/api/workshop/desk/import", "/api/workshop/desk/load"],
+    "input": { "payload": "{\"login\":\"admin\",\"passcode\":\"/.*-only/\"}" }
+  },
+  "mongo-034": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/open-up", "/api/workshop/desk/start"],
+    "input": { "login": "admin", "passcode": { "$ne": "" } }
+  },
+  "mongo-035": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/desk/pass", "/api/workshop/desk/permit"],
+    "input": "",
+    "headers": { "x-pass": "eyJzdWIiOnsiJG5lIjoiIn19.x" }
+  },
+  "mongo-036": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/refresh", "/api/workshop/desk/renew"],
+    "input": { "code": { "$ne": "" }, "next": "zazzles-marker-pass" }
+  },
+  "mongo-037": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/scan", "/api/workshop/desk/tap", "/api/workshop/desk/wave"],
+    "input": { "badge": ".*" }
+  },
+  "mongo-038": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/desk/begin", "/api/workshop/desk/shift"],
+    "input": { "login": "admin", "passcode": { "$ne": "" } }
+  },
+  "mongo-039": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/loans/batch", "/api/workshop/loans/bundle"],
+    "input": { "items": [{ "where": { "number": { "$gt": 0 } } }] }
+  },
+  "mongo-040": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/loans/cancel", "/api/workshop/loans/withdraw"],
+    "input": { "number": { "$ne": 101 } }
+  },
+  "mongo-041": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/loans/give-back", "/api/workshop/loans/hand-back"],
+    "input": { "loan": { "number": 202, "borrower": "admin" } }
+  },
+  "mongo-042": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/loans/joined", "/api/workshop/loans/linked"],
+    "input": { "from": "people", "mine": "borrower", "theirs": "login" }
+  },
+  "mongo-043": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/loans/mine", "/api/workshop/loans/ours"],
+    "input": { "also": [{ "borrower": { "$ne": "alice" } }] }
+  },
+  "mongo-044": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/parts/blend", "/api/workshop/parts/combine"],
+    "input": "mode=nor&bin=A"
+  },
+  "mongo-045": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/parts/everything", "/api/workshop/parts/overview"],
+    "input": "plus=people"
+  },
+  "mongo-046": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/parts/choose", "/api/workshop/parts/select"],
+    "input": { "terms": [{ "name": { "$ne": "" } }] }
+  },
+  "mongo-047": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/people/bureau", "/api/workshop/people/crew"],
+    "input": { "view": "floor", "only": { "team": { "$ne": "floor" } } }
+  },
+  "mongo-048": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/people/card", "/api/workshop/people/sheet"],
+    "input": { "role": "admin" }
+  },
+  "mongo-049": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/people/crew", "/api/workshop/people/group"],
+    "input": { "team": { "$ne": "floor" } }
+  },
+  "mongo-050": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/people/latest", "/api/workshop/people/recent"],
+    "input": "",
+    "cookies": { "view": "{\"team\":{\"$ne\":\"floor\"}}" }
+  },
+  "mongo-051": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/people/others", "/api/workshop/people/teams", "/api/workshop/people/units"],
+    "input": { "teams": { "$regex": ".*" } }
+  },
+  "mongo-052": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/stats/headcount", "/api/workshop/stats/heads"],
+    "input": { "passcode": { "$regex": "^ad" } }
+  },
+  "mongo-053": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/stats/sample", "/api/workshop/stats/size"],
+    "input": "of=people"
+  },
+  "mongo-054": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/stats/export", "/api/workshop/stats/snapshot"],
+    "input": { "name": "people" }
+  },
+  "mongo-055": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/stats/amount", "/api/workshop/stats/sum"],
+    "input": { "start": "0 + 6 * 7" }
+  },
+  "mongo-056": {
+    "method": "GET",
+    "endpoints": ["/api/workshop/stats/options", "/api/workshop/stats/values"],
+    "input": "by=supplier"
+  },
+  "mongo-057": {
+    "method": "POST",
+    "endpoints": ["/api/workshop/stats/loads", "/api/workshop/stats/weights"],
+    "input": { "factor": "0 + 6 * 7" }
+  }
+}

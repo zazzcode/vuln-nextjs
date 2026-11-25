@@ -175,7 +175,9 @@ export const behaviours = {
 
 const name = (source) => source.replace(/^pages\/api\/mongo\//, '').replace(/\.js$/, '');
 
-export const scenarios = catalog.filter((entry) => entry.id.startsWith('MONGO-')).map((entry) => {
+// The first batch only: the second MongoDB batch (MONGO-028 and up, the
+// workshop routes) has its own module, tests/workshop-cases.mjs.
+export const scenarios = catalog.filter((entry) => entry.id.startsWith('MONGO-') && Number(entry.id.slice(6)) <= 27).map((entry) => {
   const { method, endpoints, input } = inputs[entry.id.toLowerCase()];
   const behaviour = behaviours[entry.id];
   const vulnerable = name(entry.source);

@@ -17,6 +17,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { methods, scenarios as mongoScenarios } from '../mongo-cases.mjs';
+import { methods as workshopMethods, scenarios as workshopScenarios } from '../workshop-cases.mjs';
 
 // -- small helpers: keep the specs about security, not plumbing -------------
 
@@ -301,6 +302,69 @@ test.describe('MONGO · query injection', () => {
   }
 });
 
+// -- WORKSHOP · query injection, second batch ------------------------------------
+
+// Literal IDs: tests/unit/catalog.test.mjs looks for each one in this file.
+const workshopIds = [
+  'MONGO-028', 'MONGO-029', 'MONGO-030', 'MONGO-031', 'MONGO-032', 'MONGO-033',
+  'MONGO-034', 'MONGO-035', 'MONGO-036', 'MONGO-037', 'MONGO-038', 'MONGO-039',
+  'MONGO-040', 'MONGO-041', 'MONGO-042', 'MONGO-043', 'MONGO-044', 'MONGO-045',
+  'MONGO-046', 'MONGO-047', 'MONGO-048', 'MONGO-049', 'MONGO-050', 'MONGO-051',
+  'MONGO-052', 'MONGO-053', 'MONGO-054', 'MONGO-055', 'MONGO-056', 'MONGO-057',
+];
+
+test.describe('WORKSHOP · query injection (second batch)', () => {
+  test.beforeEach(async ({ request }) => resetLab(request));
+
+  test('the suite covers every registered scenario', () => {
+    expect(workshopScenarios.map(({ id }) => id)).toEqual(workshopIds);
+  });
+
+  for (const { id, title, vulnerable, controls, attacks, exploited, attacksOn, ordinaryFor } of workshopScenarios) {
+    const sender = (request) => async (route, input) => {
+      const path = `/api/workshop/${route}`;
+      let response;
+      if (input.body !== undefined) {
+        response = await postJson(request, path, input.body);
+      } else {
+        const cookie = input.cookies ? Object.entries(input.cookies).map(([name, value]) => `${name}=${encodeURIComponent(value)}`).join('; ') : undefined;
+        response = await request.get(`${path}${input.query ? `?${input.query}` : ''}`, { headers: { ...input.headers, ...(cookie ? { cookie } : {}) } });
+      }
+      return { status: response.status(), data: await response.json() };
+    };
+
+    test(`${id} ${title}: VULNERABLE shows the effect`, async ({ request }) => {
+      const send = sender(request);
+      for (const input of attacks) {
+        await resetLab(request);
+        expect(await exploited(await send(vulnerable, input), send), JSON.stringify(input)).toBe(true);
+      }
+    });
+
+    test(`${id} ${title}: PROTECTED keeps the identical input inert`, async ({ request }) => {
+      const send = sender(request);
+      for (const route of controls) {
+        for (const input of attacksOn(route)) {
+          await resetLab(request);
+          const result = await send(route, input);
+          expect(await exploited(result, send), `${route} ${JSON.stringify(input)} ${JSON.stringify(result.data)}`).toBe(false);
+        }
+      }
+    });
+
+    test(`${id} ${title}: every route accepts ordinary input`, async ({ request }) => {
+      const send = sender(request);
+      for (const route of [vulnerable, ...controls]) {
+        await resetLab(request);
+        const [input, ok] = ordinaryFor(route);
+        const result = await send(route, input);
+        expect(result.status, `${route} ordinary input`).toBe(200);
+        expect(ok(result), `${route} ${JSON.stringify(result.data)}`).toBe(true);
+      }
+    });
+  }
+});
+
 // -- every page renders ---------------------------------------------------------
 
 test('all lab pages return 200', async ({ request }) => {
@@ -315,7 +379,8 @@ test('all lab pages return 200', async ({ request }) => {
     '/secure/command-execution', '/secure/file-access',
     '/cookies/script-readable', '/cookies/plain-transport', '/cookies/misleading-name', '/cookies/several-cookies',
     '/cookies/overridden-options', '/cookies/attribute-in-name', '/cookies/replaced-header',
-    ...mongoIds.map((id) => `/mongo/${id.toLowerCase()}`)];
+    ...mongoIds.map((id) => `/mongo/${id.toLowerCase()}`),
+    ...workshopIds.map((id) => `/workshop/${id.toLowerCase()}`)];
   for (const route of routes) {
     expect((await request.get(route)).status(), route).toBe(200);
   }
