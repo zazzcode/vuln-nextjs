@@ -59,6 +59,10 @@ Agents: each row links directly to the scenario's compact [expected-finding bloc
 
 Demonstrations are negative controls: scanners should **not** report them. Defense patterns across all protected routes: [validation-and-sanitization.md](../validation-and-sanitization.md).
 
+## Work in progress
+
+[Workshop routes](workshop.md) is the second MongoDB batch. Its routes have no labels yet.
+
 ## Vulnerable dependencies
 
 [Vulnerable dependencies](dependencies.md) lists the vulnerable packages that are installed and the ones that are planned.
