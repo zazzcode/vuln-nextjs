@@ -66,6 +66,7 @@ const ordinary = {
   'people/others': [post({}), some('people')],
   'people/recent': [get({}, { cookies: { view: '{"team":"floor"}' } }), some('people')],
   'people/roster': [get({ login: 'alice' }), alice],
+  'people/sheet': [post({ email: 'alice.l@lab.test' }), is('changed', 1)],
   'people/teams': [post({ teams: ['floor'] }), some('people')],
   'people/units': [post({ teams: ['floor'] }), some('people')],
   'stats/amount': [post({ start: 1 }), is('total', 7)],

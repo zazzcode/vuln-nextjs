@@ -10,7 +10,7 @@ export default post(async (req, res) => {
   if (!code || typeof next !== 'string' || next.length < 8) return problem(res, 400, 'code and next are required.');
   client ??= new MongoClient(await address());
   const people = client.db('zazzles_workshop').collection('people');
-  const found = await people.findOne({ resetHash: digest(code) });
+  const found = await people.findOne({ resetHash: digest(String(code)) });
   if (found) await people.updateOne({ _id: found._id }, { $set: { passcode: next } });
   return person(res, found);
 });
