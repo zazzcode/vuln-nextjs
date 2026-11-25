@@ -59,6 +59,7 @@ const ordinary = {
   'parts/overview': [get(), some('rows')],
   'parts/select': [post({ terms: [{ name: 'Hex key' }] }), some('parts')],
   'people/card': [post({ email: 'alice.l@lab.test' }), is('changed', 1)],
+  'people/bureau': [post({ view: 'floor' }), some('people')],
   'people/crew': [post({ login: 'alice' }), some('people')],
   'people/finder': [get({ login: 'alice' }), alice],
   'people/group': [post({ login: 'alice' }), some('people')],
