@@ -2,11 +2,13 @@
 
 A deliberately vulnerable Next.js testbed for validating **SAST and SCA tools**. Every scenario has a stable ID, a documented expected finding, an automated test proving the flaw is exploitable, and — where meaningful — a paired safe control that handles the identical payload without executing it.
 
+It covers SQL and NoSQL injection, shell command and `eval` injection, XSS, SSRF, open redirect, cookie attributes, file read, unsafe deserialization, prototype pollution, and vulnerable dependencies.
+
 > ⚠️ **This application is intentionally vulnerable.** Run it only in isolated local environments against synthetic data. Never deploy or expose it. Both apps bind `127.0.0.1` only.
 
 ## Attribution and license
 
-Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-vulsite) — credit for the original scenarios and documentation belongs to the original author (see Git history and the footer of every lab page). This fork adds SQL (PGlite), XSS scenarios, safe controls, the React2Shell SCA fixture, an automated test suite, CI, and full per-scenario documentation. MIT licensed — see [LICENSE](LICENSE).
+Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-vulsite) — credit for the original scenarios and documentation belongs to the original author (see Git history and the footer of every lab page). This fork adds SQL injection (PGlite), NoSQL injection against a real in-memory MongoDB, XSS, SSRF, open-redirect and cookie scenarios, safe controls for the identical payloads, prototype-pollution and unsafe-deserialization fixtures for offline scanners, vulnerable dependencies as SCA targets including the React2Shell fixture, an automated test suite, CI, and full per-scenario documentation. MIT licensed — see [LICENSE](LICENSE).
 
 ## Scenarios
 
@@ -101,6 +103,14 @@ For the vulnerable packages that a dependency scanner must report, see
 For application-code CWE-502 coverage and offline scanner fixtures, see the
 [unsafe deserialization guide](docs/vulnerabilities/unsafe-deserialization.md).
 
+### MongoDB: NoSQL injection (MONGO-001 to MONGO-057)
+
+The queries run on a real in-memory MongoDB through the native driver. The flaws are operator injection, request-chosen field names and field paths, `$where` and `$function` text, patterns, sort and projection, and whole update documents (CWE-915). There are two batches, and both use neutral route names, so the source does not say which route is vulnerable. [mongodb.md](docs/vulnerabilities/mongodb.md) is the answer key for MONGO-001 to 027 and [workshop.md](docs/vulnerabilities/workshop.md) for MONGO-028 to 057. To try one, open [/mongo/mongo-001](http://127.0.0.1:3000/mongo/mongo-001) or [/workshop/mongo-028](http://127.0.0.1:3000/workshop/mongo-028), send the same input to every route, and compare the responses.
+
+### Prototype pollution (CWE-1321)
+
+These are source files for offline scans, not runnable routes, so they have no scenario IDs: Lodash calls at the affected and at the patched version, `dset` and `merge-deep` calls that a dependency audit reports, and write shapes in application code for both routers. The [prototype pollution guide](docs/vulnerabilities/prototype-pollution.md) lists every source with its payload and the expected result. The fixture table and how to run the regressions are under [Tests](#prototype-pollution-scanner-fixtures).
+
 ## Setup
 
 Requires Node.js `>= 24.0.0` (24 LTS) (see `engines`). pnpm is pinned via `packageManager` and supplied by corepack:
@@ -141,7 +151,7 @@ For production-mode testing (what CI does): `pnpm build && pnpm start`. Both app
 ### Prototype pollution scanner fixtures
 
 These CWE-1321 fixtures are TypeScript text files for offline scans. They exercise both Next.js
-routing conventions without adding runnable lab endpoints.
+routing conventions without adding runnable lab endpoints, so they have no scenario IDs.
 
 | Fixture | Expected scanner result |
 | --- | --- |
@@ -154,7 +164,7 @@ routing conventions without adding runnable lab endpoints.
 | Lodash `set`, `defaultsDeep` and `zipObjectDeep` at 4.17.4 and 4.17.21 | Raw candidates at the affected pin and none at the patched pin |
 | `dset` 3.1.3 (CVE-2024-21529) and `merge-deep` 3.0.2 (CVE-2021-26707) | Exploitable, with no source-analysis record: a known gap that a dependency audit covers |
 
-[Prototype pollution guide](docs/vulnerabilities/prototype-pollution.md) · [Run the scanner regressions](tests/scanner/README.md).
+[Prototype pollution guide](docs/vulnerabilities/prototype-pollution.md) · [Run the scanner regressions](tests/scanner/README.md). They are not part of CI: they need a Zazzles scanner binary.
 
 Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 
@@ -169,22 +179,28 @@ Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 
 ```
 ├── pages/                  # main lab (Pages Router, Next 13)
-│   ├── api/sql/{safe,unsafe}/   # SQL scenario pairs (PGlite)
-│   ├── api/mongo/          # MongoDB scenarios, neutral route names (native driver)
-│   ├── api/secure/         # safe exec + allowlisted file read
-│   ├── xss/{safe,unsafe}/  # reflected/stored XSS pairs
+│   ├── api/sql/{safe,unsafe,zod}/ # SQL scenario pairs (PGlite)
+│   ├── api/mongo/          # MongoDB batch one, MONGO-001 to 027 (neutral route names, native driver)
+│   ├── api/workshop/       # MongoDB batch two, MONGO-028 to 057 (neutral route names)
+│   ├── api/cookies/{safe,unsafe}/ # cookie attribute pairs
+│   ├── api/xss/, api/secure/      # stored XSS pairs, safe exec + allowlisted file read
+│   ├── mongo/, workshop/          # consoles: one input to every route of a MongoDB case
+│   ├── xss/{safe,sanitized,unsafe}/ # reflected/stored XSS pairs
 │   └── vulnerable/, secure/
 ├── targets/react2shell/    # SCA-001: pinned next@15.0.4 App Router fixture
 ├── lib/catalog.json        # scenario metadata (single source of truth)
-├── tests/unit/             # Vitest
-├── tests/browser/          # Playwright
-├── scripts/                # HTTP, RSC, audit + integrity checks
-└── docs/                   # this documentation
+├── tests/unit/             # Vitest: handlers in-process against real PGlite and MongoDB
+├── tests/api/              # Playwright API suite (request fixture, no browser)
+├── tests/browser/          # Playwright in Chromium
+├── tests/scanner/          # prototype-pollution fixtures for offline scans
+├── scripts/                # RSC probe, audit and scenario checks, fixture export
+├── docs/                   # this documentation
+└── .zazz/project/notes/    # dated working notes for maintaining the lab
 ```
 
 ## CI
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and PR: frozen install → lint → unit tests → scenario check → builds → API tests → browser tests → React2Shell runtime probe, plus a non-blocking raw audit for visibility. `audit:check` is a separate job, because new upstream advisories change its result at any time and must not stop the tests. All required checks are expected green.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and on every pull request: frozen install → lint → unit tests → scenario check → builds → API tests → browser tests → React2Shell runtime probe, plus a non-blocking raw audit for visibility. `audit:check` is a separate job, because new upstream advisories change its result at any time and must not stop the tests. All required checks are expected green.
 
 ## AI coding agents
 
