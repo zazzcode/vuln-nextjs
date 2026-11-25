@@ -16,13 +16,14 @@ pnpm build:react2shell && pnpm start:react2shell   # → http://127.0.0.1:3001
 
 1. Open <http://127.0.0.1:3000/sql/login> — press **Load injection example**, run the **unsafe** mode (login bypassed as `admin`), then switch to **safe** (401 for the same payload).
 2. Open <http://127.0.0.1:3000/xss/unsafe/reflected> — press **Load XSS sample** and **Render payload**, then run `window.__zazzlesXss` in the browser console (it says `reflected-marker`). The same payload on `/xss/safe/reflected` is inert text.
-3. Browse <http://127.0.0.1:3000/vulnerabilities> for the full index; per-scenario exploit commands are in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md).
+3. Open <http://127.0.0.1:3000/mongo/mongo-001>: send the same input to each MongoDB sign-in route and compare. The answers are in [`mongodb.md`](docs/vulnerabilities/mongodb.md). The first request downloads `mongod` once (about 80 MB).
+4. Browse <http://127.0.0.1:3000/vulnerabilities> for the full index; per-scenario exploit commands are in [`docs/vulnerabilities/`](docs/vulnerabilities/index.md).
 
 ## Run the test suite
 
 ```bash
 pnpm lint             # ESLint
-pnpm test             # Vitest unit suite (real PGlite, direct handler imports)
+pnpm test             # Vitest unit suite (real PGlite and in-memory MongoDB, direct handler imports)
 pnpm scenario:check   # scenario sources match the committed hash manifest
 pnpm audit:check      # pnpm audit --prod matches the committed snapshot
 
@@ -40,7 +41,7 @@ pnpm test:react2shell               # RSC runtime execution marker
 
 ## Reset the lab
 
-`POST /api/lab/reset` (buttons on the SQL/XSS pages) re-seeds the in-memory database. Restarting the server resets it too.
+`POST /api/lab/reset` (buttons on the SQL/XSS pages) re-seeds the in-memory databases. Restarting the server resets it too.
 
 ---
 

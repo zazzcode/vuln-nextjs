@@ -80,7 +80,7 @@ pnpm install
 pnpm exec playwright install chromium   # once, for the browser test suite
 ```
 
-pnpm is project-scoped: packages live in a global content-addressable store and are hard-linked into this repository's `node_modules` only. Other projects on your machine are not affected — which is what makes it safe to keep deliberately vulnerable versions pinned here. Lab credentials are synthetic (`alice / alice-lab-only`, `admin / admin-lab-only`); `POST /api/lab/reset` re-seeds the in-memory database at any time.
+pnpm is project-scoped: packages live in a global content-addressable store and are hard-linked into this repository's `node_modules` only. Other projects on your machine are not affected — which is what makes it safe to keep deliberately vulnerable versions pinned here. Lab credentials are synthetic (`alice / alice-lab-only`, `admin / admin-lab-only`); `POST /api/lab/reset` re-seeds the in-memory databases at any time. The MongoDB scenarios download a `mongod` binary once, at the first MongoDB request (about 80 MB).
 
 ## Run
 
@@ -95,7 +95,7 @@ For production-mode testing (what CI does): `pnpm build && pnpm start`. Both app
 
 | Command | Proves |
 | --- | --- |
-| `pnpm test` | Vitest unit suite — handlers import directly against real in-memory PGlite; exploitable outcomes and safe rejections for identical payloads |
+| `pnpm test` | Vitest unit suite — handlers import directly against real in-memory PGlite and MongoDB; exploitable outcomes and safe rejections for identical payloads |
 | `pnpm test:api` | Playwright **API** suite (`request` fixture — no browser needed) against the running server: every vulnerable/safe pair, SSR markup, redirect headers, route sweep |
 | `pnpm test:browser` | Playwright/Chromium (separate suite, needs `playwright install chromium` once) — XSS and eval payloads **actually execute** on unsafe pages and provably **do not** on safe pages |
 | `pnpm test:react2shell` | Server-side execution inside the affected RSC decoder, via a marker computed on the server |
@@ -137,6 +137,7 @@ Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 ```
 ├── pages/                  # main lab (Pages Router, Next 13)
 │   ├── api/sql/{safe,unsafe}/   # SQL scenario pairs (PGlite)
+│   ├── api/mongo/          # MongoDB scenarios, neutral route names (native driver)
 │   ├── api/secure/         # safe exec + allowlisted file read
 │   ├── xss/{safe,unsafe}/  # reflected/stored XSS pairs
 │   └── vulnerable/, secure/
@@ -150,7 +151,7 @@ Full details: [docs/setup-and-testing.md](docs/setup-and-testing.md).
 
 ## CI
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and PR: frozen install → lint → unit tests → ground-truth checks → builds → HTTP probe → browser tests → React2Shell runtime probe, plus a non-blocking raw audit for visibility. All required checks are expected green.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and PR: frozen install → lint → unit tests → scenario check → builds → API tests → browser tests → React2Shell runtime probe, plus a non-blocking raw audit for visibility. `audit:check` is a separate job, because new upstream advisories change its result at any time and must not stop the tests. All required checks are expected green.
 
 ## AI coding agents
 

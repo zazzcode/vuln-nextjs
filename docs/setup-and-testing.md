@@ -70,7 +70,7 @@ corepack pnpm exec playwright install chromium
 
 ## CI
 
-`.github/workflows/ci.yml` runs the full matrix on every push and pull request: frozen install → lint → unit tests → builds → Playwright API tests (no browser) → Chromium install → browser tests (separate step) → React2Shell runtime probe, plus an informational (non-blocking) `pnpm audit --prod` so the intended findings stay visible. All required checks are expected green.
+`.github/workflows/ci.yml` runs the full matrix on every push and pull request: frozen install → lint → unit tests → builds → Playwright API tests (no browser) → Chromium install → browser tests (separate step) → React2Shell runtime probe, plus an informational (non-blocking) `pnpm audit --prod` so the intended findings stay visible. `audit:check` runs in a separate job, because new upstream advisories change its result at any time and must not stop the tests. All required checks are expected green.
 
 ## Resetting state
 
