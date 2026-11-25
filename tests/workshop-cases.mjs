@@ -8,6 +8,10 @@
 //              reads the effect back where the response does not show it.
 //   ordinary   per route that must work, so a safe route is not safe only
 //              because it rejects everything.
+//   attacks    further inputs, each with its effect on the vulnerable route.
+//              Where a control reads a key the documented input does not
+//              carry, the input adds it, so the attack reaches the control's
+//              own query: its safety is then shown by the pattern, not by a 400.
 // A request descriptor is either { body } (POST) or
 // { query, headers?, cookies? } (GET, query as text).
 import { readFileSync } from 'node:fs';
@@ -136,10 +140,20 @@ const behaviours = {
     attacks: [body({ badge: 'B-77.ADM' })],
   },
   'MONGO-038': { exploited: isAdmin },
-  'MONGO-039': { exploited: changedOtherLoan },
+  'MONGO-039': {
+    exploited: changedOtherLoan,
+    // bundle never reads "where": the number is added at the item's top level,
+    // where bundle does read it, as a well-formed request for another loan.
+    attacks: [body({ items: [{ where: { number: 202 }, number: 202, state: 'in' }] })],
+  },
   'MONGO-040': { exploited: is('gone', 202) },
   'MONGO-041': { exploited: ({ data }) => data.loan?.number === 202 },
-  'MONGO-042': { exploited: ({ data }) => (data.rows ?? []).some((row) => row.extra?.[0]?.passcode === 'alice-lab-only') },
+  'MONGO-042': {
+    exploited: ({ data }) => (data.rows ?? []).some((row) => row.extra?.[0]?.passcode === 'alice-lab-only'),
+    // linked reads "link" instead of from/mine/theirs; "person" makes it join
+    // people too, through its constant projection.
+    attacks: [body({ from: 'people', mine: 'borrower', theirs: 'login', link: 'person' })],
+  },
   'MONGO-043': { exploited: ({ data }) => (data.loans ?? []).some((loan) => loan.number === 202) },
   'MONGO-044': { exploited: ({ data }) => (data.parts ?? []).some((part) => part.sku === 'P-9') },
   'MONGO-045': { exploited: ({ data }) => JSON.stringify(data.rows ?? '').includes('admin-lab-only') },
@@ -153,7 +167,14 @@ const behaviours = {
   'MONGO-050': { exploited: includes('admin', 'people') },
   'MONGO-051': {
     exploited: includes('admin', 'people'),
-    attacks: [body({ teams: { $ne: 'floor' } })],
+    // $in and $nin as request objects. others reads "without" instead of
+    // "teams", so the attack is repeated through that key: as a name it can
+    // only exclude, and as an operator the server refuses it.
+    attacks: [
+      body({ teams: { $ne: 'floor' } }),
+      body({ teams: { $in: ['board'] }, without: ['floor'] }),
+      body({ teams: { $nin: ['floor'] }, without: [{ $ne: 'board' }] }),
+    ],
   },
   'MONGO-052': {
     exploited: is('total', 1),

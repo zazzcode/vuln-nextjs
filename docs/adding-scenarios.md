@@ -24,7 +24,7 @@ Format `<CATEGORY>-<number>`: `JS-`, `OS-`, `FS-`, `SQL-`, `XSS-`, `COOKIE-`, `M
 - Unsafe source and safe control live in separate files under the matching area (`pages/api/…`, `pages/xss/…`), following the existing pairs.
 - The safe control must accept the **identical payload** and keep it data (parameterized SQL, `execFile` argument vectors, React text nodes, exact-string allowlists). Scope it to the flaw under test; do not present it as universally secure.
 - Mark the sink with a comment naming the scenario: `// XSS-001 / CWE-79: …`.
-- The `MONGO-` scenarios are different on purpose: neutral route names under `pages/api/mongo/`, no sink comments, inputs in `lib/mongo-cases.json` and behaviours in `tests/mongo-cases.mjs`. Keep that form when you add one.
+- The `MONGO-` scenarios are different on purpose: neutral route names, no sink comments, inputs in a cases file and behaviours in a matching test module. The first batch is under `pages/api/mongo/` (`lib/mongo-cases.json`, `tests/mongo-cases.mjs`); the second is under `pages/api/workshop/`, with its helpers in `lib/workshop/` (`lib/workshop-cases.json`, `tests/workshop-cases.mjs`). Keep the form of the batch you extend. The next free ID is `MONGO-058`; `tests/mongo-cases.mjs` selects MONGO-001 to MONGO-027 and `tests/workshop-cases.mjs` every later ID.
 - UI pages use `components/LabLayout` and `components/ApiConsole`, and cross-link the vulnerable/safe pair.
 - Input validation (methods, types, lengths) belongs on **both** sides and must not neutralize the attack payload — the exploit must still work on the unsafe side.
 
@@ -63,6 +63,7 @@ Every scenario needs positive *and* negative assertions:
 - **Unit** (`tests/unit/*.test.mjs`): import handlers directly; assert the exploitable outcome on the unsafe side and inert handling of the same payload on the safe side.
 - **HTTP** (`tests/api/lab.api.test.mjs`): repeat the pair against the running server; add page routes to the status sweep.
 - **Browser** (only for runtime `browser`): extend `tests/browser/xss.browser.test.mjs` — assert a marker property is set on the unsafe page and provably unset on the safe page.
+- **A control is tested only by an input that reaches its query.** Send the vulnerable route's payload to the control. If the control reads a key that payload lacks, a 400 proves nothing: add an input that carries both keys, then break the control and confirm the test fails.
 
 The Playwright coverage is **enforced by `tests/unit/catalog.test.mjs`**: an active SAST scenario whose runtime-appropriate suite is missing from its catalog `test` references (or no longer names the scenario ID) fails the unit suite and CI. A new vuln or safe route without its matching Playwright pair cannot land green.
 

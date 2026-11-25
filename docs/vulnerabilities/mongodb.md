@@ -1,6 +1,6 @@
 # Module: MongoDB query injection (CWE-943, CWE-915)
 
-A MongoDB query is a document. A request value that becomes a part of that document can add an operator, a field path, JavaScript or a pattern. 27 vulnerable routes are paired with 37 safe routes. Many safe routes are near twins of a vulnerable route, so a tool cannot pass by always reporting or never reporting.
+A MongoDB query is a document. A request value that becomes a part of that document can add an operator, a field path, JavaScript or a pattern. 27 vulnerable routes are paired with 37 safe routes. Many safe routes are near twins of a vulnerable route, so a tool cannot pass by always reporting or never reporting. A second batch of 30 vulnerable and 34 safe routes, under neutral names, is in [workshop.md](workshop.md).
 
 The routes use the native `mongodb` driver. `lib/mongo.cjs` starts one in-memory MongoDB server for each server process with `mongodb-memory-server`, on loopback, with synthetic data. `POST /api/lab/reset` seeds it again when it is running.
 

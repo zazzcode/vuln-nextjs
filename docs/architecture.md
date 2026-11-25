@@ -20,7 +20,8 @@ Both apps bind `127.0.0.1` only. The lab is for local, isolated testing.
 - Seeded synthetic data: users `admin / admin-lab-only` and `alice / alice-lab-only`, two public products, one hidden `Internal prototype`, one note, and two guestbook comments.
 - The `password_demo` plaintext column exists **only** so SQL-001's unsafe login can interpolate it; the safe login verifies a salted scrypt hash instead. This is a lab-only comparison, not production authentication. No sessions or cookies are created.
 - MongoDB scenarios use the native `mongodb` driver with `mongodb-memory-server`. `lib/mongo.cjs` starts one `mongod` per server process on loopback at the first MongoDB request and keeps synthetic data in memory. The binary (MongoDB 8.2.6, about 80 MB) is downloaded once.
-- `POST /api/lab/reset` drops and re-seeds all tables on the same instance, and re-seeds MongoDB when it is running. It is intentionally unauthenticated lab tooling.
+- The second MongoDB batch (`pages/api/workshop/`) uses the same `mongod` through a connection of its own: `lib/workshop/client.js` takes the address from `mongo.serverUri()`, and `lib/workshop/seed.js` seeds the `zazzles_workshop` database (two people, three parts, two loans) once per process.
+- `POST /api/lab/reset` drops and re-seeds all tables on the same instance, and re-seeds both MongoDB databases (`zazzles_lab`, `zazzles_workshop`) when the server is running. It is intentionally unauthenticated lab tooling.
 
 `next.config.js` marks `@electric-sql/pglite` as a server webpack external so its WASM assets load from the installed package instead of being bundled.
 

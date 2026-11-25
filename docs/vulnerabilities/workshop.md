@@ -37,6 +37,48 @@
 
 Every input uses harmless markers only (`42`, `zazzles-*`, seeded lab data). Read an effect back with a second request when the response does not show it.
 
+A safe route gets the input of its vulnerable twin. Three controls read a key the twin does not send (`bundle`, `linked`, `others`), so their row also gives the input that adds it: the attack then reaches the control's own query, and the tests send that input to both routes.
+
+## Technique coverage
+
+Every technique of the batch has at least one vulnerable route and one safe route. To plan a scanner evaluation, read each row as: a finding is expected on the vulnerable route and none on the safe ones.
+
+| Technique | Vulnerable route | Safe route |
+| --- | --- | --- |
+| Whole body or query as the filter | `people/group` (MONGO-049) | `people/finder`, `people/roster` |
+| Reset code or one-time code looked up without a password | `desk/arrive` (MONGO-028), `desk/renew` (MONGO-036) | `desk/checkin`, `desk/refresh` |
+| Request-chosen top-level `$or`, `$and` or `$nor` | `parts/combine` (MONGO-044), `loans/mine` (MONGO-043), `parts/select` (MONGO-046) | `parts/blend`, `loans/ours`, `parts/choose` |
+| `$in` or `$nin` sent as the request object | `people/teams` (MONGO-051) | `people/units`, `people/others`, `desk/unlock`, `loans/bundle` |
+| Blind `$regex` probe on a secret field | `desk/hint` (MONGO-032), `stats/headcount` (MONGO-052) | `desk/verify`, `stats/heads` |
+| Request text in `mapReduce` or `$accumulator` code | `stats/weights` (MONGO-057), `stats/sum` (MONGO-055) | `stats/loads`, `stats/amount` |
+| Request data in `$lookup`, `$out`, `$unionWith` or `$merge` | `loans/joined` (MONGO-042), `stats/snapshot` (MONGO-054), `parts/everything` (MONGO-045) | `loans/linked`, `stats/export`, `parts/overview` |
+| `findOneAndUpdate`, `findOneAndDelete`, `replaceOne`, `bulkWrite` | `loans/hand-back` (MONGO-041), `loans/cancel` (MONGO-040), `people/card` (MONGO-048), `loans/batch` (MONGO-039) | `loans/give-back`, `loans/withdraw`, `people/sheet`, `loans/bundle` |
+| `distinct`, `count`, `estimatedDocumentCount` | `stats/values` (MONGO-056), `stats/headcount` (MONGO-052), `stats/sample` (MONGO-053) | `stats/options`, `stats/heads`, `stats/size` |
+| Value from a header, a cookie or a token payload | `desk/context` (MONGO-030), `people/recent` (MONGO-050), `desk/pass` (MONGO-035) | `desk/terminal`, `people/latest`, `desk/permit` |
+| Filter built in a loop or merged with `Object.assign` | `desk/enter` (MONGO-031), `loans/hand-back` (MONGO-041) | `desk/unlock`, `loans/give-back` |
+| `$`-key filter that misses nested arrays | `parts/select` (MONGO-046) | `parts/choose` |
+| Text through `JSON.parse` with a reviver | `desk/import` (MONGO-033) | `desk/accept`, `desk/load` |
+| Regular expression built from user text | `desk/scan` (MONGO-037), `desk/import` (MONGO-033) | `desk/tap`, `desk/wave` |
+| A check on the string form, not the type | `desk/arrive` (MONGO-028) | `desk/checkin` |
+| `$eq` on one field of a pair | `desk/open-up` (MONGO-034) | `desk/start` |
+| One field coerced, its pair raw | `desk/shift` (MONGO-038) | `desk/begin` |
+| Zod schema | `desk/badge-in` (MONGO-029) | `desk/clock-in` |
+| Constant map | `people/bureau` (MONGO-047) | `parts/blend`, `loans/linked`, `parts/overview`, `stats/options`, `people/units` |
+| Field allowlist with text conversion (`pick`) | `people/group` (MONGO-049), `people/bureau` (MONGO-047) | `people/crew`, `people/sheet` |
+
+The same techniques are written in several code shapes, each with both sides:
+
+| Code shape | Vulnerable route | Safe route |
+| --- | --- | --- |
+| Client helper (`database()`) | `desk/badge-in`, `desk/scan` | `desk/clock-in`, `desk/tap` |
+| Client built in the route (`new MongoClient`) | `desk/renew` | `desk/refresh` |
+| `db` or collection from the raw client (`connect()`) | `stats/weights` | `people/finder`, `people/roster`, `stats/loads` |
+| Repository class (`PeopleRepository`) | `desk/open-up`, `people/card` | `desk/start`, `people/sheet` |
+| Destructured collections (`collections()`) | `loans/mine` | `loans/ours` |
+| Bound methods (`findOne.bind`) | `desk/enter` | `desk/unlock` |
+| Helper that takes the filter (`first`, `drop`, `advance`, `listParts`) | `desk/hint`, `loans/cancel`, `loans/hand-back`, `parts/select` | `desk/verify`, `loans/withdraw`, `loans/give-back`, `parts/choose` |
+| `for await` cursor | `parts/combine`, `parts/select` | `parts/blend`, `parts/choose` |
+
 ## The key — sign-in, codes, badges and passes
 
 | ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
@@ -71,13 +113,13 @@ Every input uses harmless markers only (`42`, `zazzles-*`, seeded lab data). Rea
 | ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | MONGO-039 | `POST /api/workshop/loans/batch` · `loans/batch.js` | vulnerable | CWE-943 | body `items[].where` → `bulkWrite` `updateOne` filters | Each item's `where` object is the update filter as it arrives; the fixed `$set` does not constrain the filter. | `{"items":[{"where":{"number":{"$ne":101}}}]}` | `changed: 1` for a row that is not the caller's own loan — the ordinary batch on loan 101 still reports `changed: 1` afterwards, so 101 was untouched and the changed row is 202, the admin loan. |
-| — | `POST /api/workshop/loans/bundle` · `loans/bundle.js` | safe (for MONGO-039) | — | body `items` → `{number, state}` → fixed borrower + `$in:[number]` + fixed state choice → `bulkWrite` | The filter names the fixed borrower, the number is an element of `$in`, and the state is a fixed two-way choice. Catches: reporting `bulkWrite` because a request array is near the filter. | `{"items":[{"where":{"number":{"$gt":0}}}]}` | `changed: 0` — the `where` key is never read. |
+| — | `POST /api/workshop/loans/bundle` · `loans/bundle.js` | safe (for MONGO-039) | — | body `items` → `{number, state}` → fixed borrower + `$in:[number]` + fixed state choice → `bulkWrite` | The filter names the fixed borrower, the number is an element of `$in`, and the state is a fixed two-way choice. Catches: reporting `bulkWrite` because a request array is near the filter. | `{"items":[{"where":{"number":{"$ne":101}}}]}`, then `{"items":[{"where":{"number":202},"number":202,"state":"in"}]}` | `changed: 0` twice — the `where` key is never read, and a well-formed request for loan 202 finds no loan of the fixed borrower. |
 | MONGO-040 | `POST /api/workshop/loans/cancel` · `loans/cancel.js` | vulnerable | CWE-943 | body `number` → `findOneAndDelete` filter | `number` is not coerced; an operator object selects which loan is deleted. | `{"number":{"$ne":101}}` | `gone: 202` — another person's loan is removed. |
 | — | `POST /api/workshop/loans/withdraw` · `loans/withdraw.js` | safe (for MONGO-040) | — | body `number` → `Number.parseInt` → fixed borrower → `findOneAndDelete` filter | `parseInt` leaves an integer or `NaN`, and the borrower is fixed; an object becomes `NaN` and matches nothing. Catches: reporting a delete because a request value names the row. | `{"number":{"$ne":101}}` | `gone: null`. |
 | MONGO-041 | `POST /api/workshop/loans/hand-back` · `loans/hand-back.js` | vulnerable | CWE-943 | body `loan` spread after the fixed borrower (`Object.assign`) → `findOneAndUpdate` filter | The body is merged after `{borrower:'alice'}`, so it can replace the owner and pick another row to update. | `{"loan":{"number":202,"borrower":"admin"}}` | `loan` `{number:202, state:'in'}` — the admin loan is changed. |
 | — | `POST /api/workshop/loans/give-back` · `loans/give-back.js` | safe (for MONGO-041) | — | body `loan.number` → `Number()` → `Object.assign` with the fixed borrower last → `findOneAndUpdate` filter | The number is coerced (`NaN` for objects) and the fixed borrower is assigned after the body, so the body cannot widen the filter. Catches: reporting every `Object.assign` merge without reading the order. | `{"loan":{"number":202,"borrower":"admin"}}` | `loan` `null`. |
 | MONGO-042 | `POST /api/workshop/loans/joined` · `loans/joined.js` | vulnerable | CWE-943 | body `from`/`mine`/`theirs` → `$lookup {from, localField, foreignField}` | All three `$lookup` settings come from the request; the caller chooses which collection is joined and on which fields. The lookup has no pipeline, so whole documents of that collection are embedded in the rows. | `{"from":"people","mine":"borrower","theirs":"login"}` | The rows' `extra` arrays hold complete `people` documents — passcode, reset code and one-time code included. |
-| — | `POST /api/workshop/loans/linked` · `loans/linked.js` | safe (for MONGO-042) | — | body `link` → own key of a constant map → constant `$lookup` | The lookup document is one of two constants; the request only chooses between them. Catches: reporting a `$lookup` because the request chooses a name. | `{"from":"people","mine":"borrower","theirs":"login"}` | Status 400 — those keys are not read. |
+| — | `POST /api/workshop/loans/linked` · `loans/linked.js` | safe (for MONGO-042) | — | body `link` → own key of a constant map → constant `$lookup` | The lookup document is one of two constants; the request only chooses between them. Catches: reporting a `$lookup` because the request chooses a name. | `{"from":"people","mine":"borrower","theirs":"login"}`, then the same with `"link":"person"` | Status 400 — those keys are not read; with `link` added it joins `people`, and `extra` holds `{email}` only, no passcode. |
 | MONGO-043 | `POST /api/workshop/loans/mine` · `loans/mine.js` | vulnerable | CWE-943 | body `also[]` spread into a top-level `$or` → `find` | The fixed first `$or` clause is joined with request-written clauses; an operator object in one of them widens the query to rows that are not the caller's. | `{"also":[{"borrower":{"$ne":"alice"}}]}` | `loans` `101` and `202` — the admin loan is listed. |
 | — | `POST /api/workshop/loans/ours` · `loans/ours.js` | safe (for MONGO-043) | — | body `also[]` → mapped to `{number: Number(...), borrower:'alice'}` → `$or` | Each request entry is rebuilt as a fixed shape with a coerced number and the fixed borrower, so an operator object cannot survive the mapping. Catches: reporting every spread into `$or` without reading what is spread. | `{"also":[{"borrower":{"$ne":"alice"}}]}` | `loans` `101` only. |
 
@@ -105,9 +147,9 @@ Every input uses harmless markers only (`42`, `zazzles-*`, seeded lab data). Rea
 | — | `GET /api/workshop/people/roster` · `people/roster.js` | safe (for MONGO-049) | — | `req.query` → own-keyed filter to `{login, email}` → 400 if empty → `findOne` | Only two named fields survive and their values are flat strings. Catches: reporting a query-built filter without reading the key allowlist. | `?team[$ne]=floor` | Status 400 — the key is not in the set. |
 | MONGO-050 | `GET /api/workshop/people/recent` · `people/recent.js` | vulnerable | CWE-943 | `view` cookie → `JSON.parse` → `view.team` (behind a `===` guard) → `find` filter | The cookie is parsed as JSON and its team goes to the filter as it arrives; the `===` guard only catches the exact string `board`. | cookie `view={"team":{"$ne":"floor"}}` | `people` include `admin`. |
 | — | `GET /api/workshop/people/latest` · `people/latest.js` | safe (for MONGO-050) | — | `view` cookie → `JSON.parse` → template string of `view.team` → `find` filter | `` `${view?.team ?? 'floor'}` `` runs the value through text conversion; an object becomes `[object Object]` and matches no team. Catches: reporting every parsed cookie in a filter without reading the coercion. | cookie `view={"team":{"$ne":"floor"}}` | `people`: none. |
-| MONGO-051 | `POST /api/workshop/people/teams` · `people/teams.js` | vulnerable | CWE-943 | body `teams` → array branch filtered for `$in`, scalar branch kept as it is → `find` filter | The scalar branch keeps the value's shape and the `board` refusal is a string comparison, so an operator object passes it and matches the restricted team. | `{"teams":{"$regex":".*"}}` | `people` include `admin` — the team the route refuses by name is listed by pattern. |
+| MONGO-051 | `POST /api/workshop/people/teams` · `people/teams.js` | vulnerable | CWE-943 | body `teams` → array branch filtered for `$in`, scalar branch kept as it is → `find` filter | The scalar branch keeps the value's shape and the `board` refusal is a string comparison, so an operator object passes it and matches the restricted team. | `{"teams":{"$regex":".*"}}`; also `{"teams":{"$in":["board"]}}` and `{"teams":{"$nin":["floor"]}}` | `people` include `admin` — the team the route refuses by name is listed by pattern, or selected by an `$in`/`$nin` the caller sends as the object. |
 | — | `POST /api/workshop/people/units` · `people/units.js` | safe (for MONGO-051) | — | body `teams` → array filtered to a constant `OPEN` list for `$in`, scalar matched against the same list → `find` filter | Both branches keep only the two constant names; anything else falls to `$in []` or `'none'`. Catches: reading the array branch and missing the scalar branch — or the reverse. | `{"teams":{"$regex":".*"}}` | `people`: none. |
-| — | `POST /api/workshop/people/others` · `people/others.js` | safe (for MONGO-051) | — | body `without[]` → concat onto `['board']` → `$nin` → `find` filter | The operator is fixed and the values are elements of `$nin`; the server refuses an operator object inside the array (measured), and strings are compared literally. Catches: reporting `$nin` because a request array feeds it. | `{"teams":{"$regex":".*"}}` | `without` is absent, so the board team stays excluded: `alice` only. |
+| — | `POST /api/workshop/people/others` · `people/others.js` | safe (for MONGO-051) | — | body `without[]` → concat onto `['board']` → `$nin` → `find` filter | The operator is fixed and the values are elements of `$nin`; the server refuses an operator object inside the array (measured), and strings are compared literally. Catches: reporting `$nin` because a request array feeds it. | `{"teams":{"$regex":".*"}}`; then `{"teams":{"$in":["board"]},"without":["floor"]}` and `{"teams":{"$nin":["floor"]},"without":[{"$ne":"board"}]}` | `alice` only (`without` is absent, so the board team stays excluded); with `without` sent, `people`: none — a name can only exclude — and status 500 for the operator, which the server refuses. |
 
 ## The key — reports and counts
 
