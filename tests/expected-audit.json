@@ -1650,19 +1650,94 @@
       "cwe": "CWE-770",
       "github_advisory_id": "GHSA-mrhx-c7xc-m3w5",
       "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5"
+    },
+    "1248079": {
+      "findings": [
+        {
+          "version": "15.0.4",
+          "paths": [
+            "targets__react2shell>next"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1248079,
+      "title": "Next.js: SVG rejection bypass in the image optimization",
+      "module_name": "next",
+      "vulnerable_versions": ">=15.0.0 <=15.5.28",
+      "patched_versions": ">=15.5.29",
+      "severity": "moderate",
+      "cwe": "CWE-1287",
+      "github_advisory_id": "GHSA-7qx7-33qx-rqx2",
+      "url": "https://github.com/advisories/GHSA-7qx7-33qx-rqx2"
+    },
+    "1248081": {
+      "findings": [
+        {
+          "version": "15.0.4",
+          "paths": [
+            "targets__react2shell>next"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1248081,
+      "title": "Next.js: HttpOnly cookie exposure through internal response header on Next.js Edge runtime routes",
+      "module_name": "next",
+      "vulnerable_versions": ">=15.0.0 <=15.5.28",
+      "patched_versions": ">=15.5.29",
+      "severity": "moderate",
+      "cwe": "CWE-200, CWE-201",
+      "github_advisory_id": "GHSA-f3mh-rxg3-f5g2",
+      "url": "https://github.com/advisories/GHSA-f3mh-rxg3-f5g2"
+    },
+    "1248082": {
+      "findings": [
+        {
+          "version": "13.4.19",
+          "paths": [
+            ".>next"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "version": "15.0.4",
+          "paths": [
+            "targets__react2shell>next"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1248082,
+      "title": "Next.js: Cross-client response injection and disclosure in self-hosted Next.js applications forwarding fetched responses",
+      "module_name": "next",
+      "vulnerable_versions": "<=15.5.28",
+      "patched_versions": ">=15.5.29",
+      "severity": "moderate",
+      "cwe": "CWE-444",
+      "github_advisory_id": "GHSA-pc58-hwjq-p385",
+      "url": "https://github.com/advisories/GHSA-pc58-hwjq-p385"
     }
   },
   "metadata": {
     "vulnerabilities": {
       "info": 0,
       "low": 7,
-      "moderate": 27,
+      "moderate": 30,
       "high": 24,
       "critical": 6
     },
-    "dependencies": 63,
+    "dependencies": 111,
     "devDependencies": 0,
-    "optionalDependencies": 50,
-    "totalDependencies": 113
+    "optionalDependencies": 51,
+    "totalDependencies": 162
   }
 }
