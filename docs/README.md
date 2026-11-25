@@ -18,6 +18,7 @@ Suggested reading order — each module is self-contained:
 | 5b | [cookies.md](vulnerabilities/cookies.md) | COOKIE-001 to COOKIE-007 session cookie attributes, with tricky safe cases |
 | 5c | [mongodb.md](vulnerabilities/mongodb.md) | MONGO-001 to MONGO-027 query injection with the native MongoDB driver, with tricky safe cases |
 | 6 | [react2shell.md](vulnerabilities/react2shell.md) | SCA-001 dependency vulnerability (CVE-2025-66478) |
+| 6b | [dependencies.md](vulnerabilities/dependencies.md) | Vulnerable dependencies: installed now, and planned |
 | 7 | [demonstrations.md](vulnerabilities/demonstrations.md) | DEMO-001/002 negative controls (no findings expected) |
 
 Quick-reference table with agent links: [vulnerabilities/index.md](vulnerabilities/index.md).

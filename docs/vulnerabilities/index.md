@@ -59,6 +59,10 @@ Agents: each row links directly to the scenario's compact [expected-finding bloc
 
 Demonstrations are negative controls: scanners should **not** report them. Defense patterns across all protected routes: [validation-and-sanitization.md](../validation-and-sanitization.md).
 
+## Vulnerable dependencies
+
+[Vulnerable dependencies](dependencies.md) lists the vulnerable packages that are installed and the ones that are planned.
+
 ## Offline scanner fixtures
 
 - [Prototype pollution (CWE-1321)](prototype-pollution.md) covers affected and patched Lodash
