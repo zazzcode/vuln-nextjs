@@ -74,7 +74,7 @@
   "pages/api/mongo/sign-in/front-desk.js": "2b96a638516f0c8c5825b3d77ac13d1bd15cd9b7460a05856d05b3f9252dcb1a",
   "pages/api/mongo/sign-in/gateway.js": "7b0a9eb1361628db5c85d0d7108e1e6da675456b24af211366612d03cae3ebcd",
   "pages/api/mongo/sign-in/kiosk.js": "fdc6760545f84bbb1464302536179d97233f63f65b9cd9268052eeb95f0146ca",
-  "pages/api/mongo/sign-in/lobby.js": "03be84eac02a598c93ee2a9327486376258493be6b3ee8cae4251b2f30ee0e52",
+  "pages/api/mongo/sign-in/lobby.js": "981bd96d43b51a2c7ec6a886be8b5db88c026a6d70ff0df678b3dd2de8c4b9e1",
   "pages/api/mongo/sign-in/mobile.js": "2acbd58c8f76477690e2751afcb4c94dba965568df34336cce822e92b82477b1",
   "pages/api/mongo/sign-in/partner.js": "7d738bc8180704b48b0639e6d0864ab7c905ee149942874d43cd5d30635680d5",
   "pages/api/mongo/sign-in/portal.js": "f739c76ccfb33581ef07d6ddfd610751293e4a2d41f57d07c5461645b22758bd",

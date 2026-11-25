@@ -23,7 +23,7 @@ const signIn = (send) => send('sign-in/kiosk', credentials);
 const promoted = async (_result, send) => isAdmin(await signIn(send));
 const all = (path, input, ok) => ({ '*': [input, ok], ...path });
 
-const MUG = '64b000000000000000000001';
+const MUG = '64b000000000000000000002';
 const code = { code: 'zz-alice-17' };
 
 export const behaviours = {
@@ -46,7 +46,7 @@ export const behaviours = {
       'directory/badge': ['username=alice&inviteCode=zz-alice-17', account('alice')],
       'directory/locker': ['username=alice&pin=2046', account('alice')],
       'directory/desk': ['username=alice&inviteCode=zz-alice-17', account('alice')],
-      'articles/shelf': ['category=home&category=office&category=lab', lists('Security notebook', 'Zazzles mug')],
+      'articles/shelf': ['category=home&category=books&category=lab', lists('Security notebook', 'Zazzles mug')],
     },
     controlExploited: { 'articles/shelf': ({ data }) => data.articles?.length !== 0 },
   },
@@ -115,13 +115,13 @@ export const behaviours = {
   'MONGO-017': {
     exploited: lists('Zazzles mug'),
     attacks: [{ only: { $expr: { $eq: [{ $substrCP: ['$reviewerNote', 0, 14] }, 'zazzles-note-a'] } } }],
-    normal: all({}, { only: { category: 'office' } }, lists('Security notebook')),
+    normal: all({}, { only: { category: 'books' } }, lists('Security notebook')),
     controlAttacks: { 'reports/overview': [{ only: { category: '$category' } }] },
   },
   'MONGO-018': {
     exploited: ({ data }) => JSON.stringify(data.rows ?? '').includes('zazzles-note-'),
     attacks: ['by=$ROOT'],
-    normal: all({}, 'by=category', ({ data }) => data.rows?.map((row) => row._id).join() === 'home,office'),
+    normal: all({}, 'by=category', ({ data }) => data.rows?.map((row) => row._id).join() === 'books,home'),
   },
   'MONGO-019': {
     exploited: promoted,
@@ -147,7 +147,7 @@ export const behaviours = {
     exploited: lists('Zazzles mug', 'Security notebook'),
     normal: {
       'articles/ordered': ['order=title', lists('Security notebook', 'Zazzles mug')],
-      'articles/sorted': ['order=newest', lists('Security notebook', 'Zazzles mug')],
+      'articles/sorted': ['order=newest', lists('Zazzles mug', 'Security notebook')],
     },
     controlAttacks: { 'articles/sorted': ['order=constructor', 'order=__proto__'] },
   },

@@ -100,7 +100,7 @@ Scanners should report none of these for CWE-943 or CWE-915. The claim is scoped
 | `pages/api/mongo/members/preferences.js` (MONGO-020) | `delete` of the protected keys | The route deletes `access`, but `access.role` is a different key, and MongoDB reads it as a path. A report of CWE-943 for the same flow is also correct. |
 | `pages/api/mongo/members/nickname.js` (MONGO-022) | A `typeof` check and a fixed filter | The value must be a string. The update is a pipeline (an array), so a string that starts with `$` is a field path and copies a secret into a visible field. |
 | `pages/api/mongo/invites/redeem.js` (MONGO-026) | `String()` | `String()` keeps operators out, but the text is a pattern. `.*` matches every code. A slow pattern (CWE-1333) is the same flow. |
-| `pages/api/mongo/invites/accept.js` (MONGO-027) | An escape with `replace` | The two `replace` calls take a string, so each escapes the first occurrence only, and they cover only `.` and `*`. Brackets and `+` stay active. |
+| `pages/api/mongo/invites/accept.js` (MONGO-027) | An escape with `replace` | The two `replace` calls take a string, so each escapes the first occurrence only, and they cover only `.` and `*`. Brackets and `+` stay active. The usual probe `.*` is escaped, so it does not show the flaw. |
 
 Shared code: `lib/mongo.cjs` (connection and seed), `lib/query-tree.cjs` (nested query parameters) and `lib/request-keys.cjs` (removal of `$` keys). Not covered: Mongoose and other object mappers, the App Router, change streams, time-series and search stages, `mapReduce`, bulk writes, and MongoDB-compatible services such as Amazon DocumentDB.
 
@@ -1584,13 +1584,13 @@ Run `curl -s -X POST http://127.0.0.1:3000/api/lab/reset` first. Send the same i
 
 ```bash
 curl -s 'http://127.0.0.1:3000/api/mongo/articles/ordered?order=reviewerNote'
-# the two articles change places: the order follows the hidden notes
+# the two articles change places: the order follows the hidden notes. No other field gives this ascending order
 
 curl -s 'http://127.0.0.1:3000/api/mongo/articles/sorted?order=reviewerNote'
 # none of that
 ```
 
-**Observation that proves exploitation:** the two articles change places: the order follows the hidden notes.
+**Observation that proves exploitation:** the two articles change places: the order follows the hidden notes. No other field gives this ascending order.
 
 <a id="mongo-023-safe"></a>
 ### Vulnerable vs protected — and why
@@ -1822,7 +1822,7 @@ The control is scoped to this flaw.
 <a id="mongo-027-student"></a>
 ### Student guide
 
-The two `replace` calls take a string, so each escapes the first occurrence only, and they cover only `.` and `*`. Brackets and `+` stay active.
+The two `replace` calls take a string, so each escapes the first occurrence only, and they cover only `.` and `*`. Brackets and `+` stay active. The usual probe `.*` is escaped, so it does not show the flaw.
 
 <a id="mongo-027-exploit"></a>
 ### Exploit lab
@@ -1852,7 +1852,7 @@ curl -s -X POST http://127.0.0.1:3000/api/mongo/invites/join -H 'Content-Type: a
 
 | Route | Side | Why |
 | --- | --- | --- |
-| `pages/api/mongo/invites/accept.js` | vulnerable | The two `replace` calls take a string, so each escapes the first occurrence only, and they cover only `.` and `*`. Brackets and `+` stay active. |
+| `pages/api/mongo/invites/accept.js` | vulnerable | The two `replace` calls take a string, so each escapes the first occurrence only, and they cover only `.` and `*`. Brackets and `+` stay active. The usual probe `.*` is escaped, so it does not show the flaw. |
 | `pages/api/mongo/invites/join.js` | protected | One `replace` with a global pattern escapes every character that is not a letter or a digit. |
 
 The control is scoped to this flaw.
