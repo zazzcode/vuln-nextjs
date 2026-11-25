@@ -32,11 +32,8 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Unit tests (Vitest, real PGlite)
+      - name: Unit tests (Vitest, real PGlite and in-memory MongoDB)
         run: pnpm test
-
-      - name: Audit ground truth (pnpm audit --prod vs snapshot)
-        run: pnpm audit:check
 
       - name: Scenario integrity (route sources vs hash manifest)
         run: pnpm scenario:check
@@ -82,3 +79,27 @@ jobs:
 
       - name: Raw audit visibility (expected findings, never blocking)
         run: pnpm audit:lab || echo "::notice::pnpm audit reports the intentional vulnerable pins (see docs/vulnerabilities/react2shell.md)"
+
+  # Its own job: the result depends on advisories published upstream, so drift
+  # must be visible here and must not stop the tests above.
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit ground truth (pnpm audit --prod vs snapshot)
+        run: pnpm audit:check
