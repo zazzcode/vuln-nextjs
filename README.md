@@ -59,6 +59,36 @@ Expanded from Eric / e-tang's [nextjs-vulsite](https://github.com/e-tang/nextjs-
 | MONGO-025 | Request-controlled field name | CWE-943 | SAST | `/api/mongo/directory/resolve` → `/api/mongo/directory/locate` |
 | MONGO-026 | User text in $regex | CWE-943 | SAST | `/api/mongo/invites/redeem` → `/api/mongo/invites/claim` + `/api/mongo/invites/check` + `/api/mongo/invites/open` |
 | MONGO-027 | Incomplete escape before $regex | CWE-943 | SAST | `/api/mongo/invites/accept` → `/api/mongo/invites/join` |
+| MONGO-028 | A length check without a type check on a one-time code | CWE-943 | SAST | `/api/workshop/desk/arrive` → `/api/workshop/desk/checkin` |
+| MONGO-029 | A Zod schema that passes the second field through | CWE-943 | SAST | `/api/workshop/desk/badge-in` → `/api/workshop/desk/clock-in` + `/api/workshop/desk/begin` |
+| MONGO-030 | A JSON header parsed into the filter | CWE-943 | SAST | `/api/workshop/desk/context` → `/api/workshop/desk/terminal` |
+| MONGO-031 | A loop-built filter without a type check | CWE-943 | SAST | `/api/workshop/desk/enter` → `/api/workshop/desk/unlock` |
+| MONGO-032 | A prefix probe built into $regex | CWE-943 | SAST | `/api/workshop/desk/hint` → `/api/workshop/desk/verify` |
+| MONGO-033 | A JSON.parse reviver that builds a RegExp | CWE-943 | SAST | `/api/workshop/desk/import` → `/api/workshop/desk/accept` + `/api/workshop/desk/load` |
+| MONGO-034 | $eq on one field of a pair | CWE-943 | SAST | `/api/workshop/desk/open-up` → `/api/workshop/desk/start` |
+| MONGO-035 | An unsigned token claims object in the filter | CWE-943 | SAST | `/api/workshop/desk/pass` → `/api/workshop/desk/permit` |
+| MONGO-036 | A reset code taken as it arrives | CWE-943 | SAST | `/api/workshop/desk/renew` → `/api/workshop/desk/refresh` |
+| MONGO-037 | An unescaped badge pattern | CWE-943 | SAST | `/api/workshop/desk/scan` → `/api/workshop/desk/tap` + `/api/workshop/desk/wave` |
+| MONGO-038 | One field coerced, its pair raw | CWE-943 | SAST | `/api/workshop/desk/shift` → `/api/workshop/desk/begin` |
+| MONGO-039 | Request filters in a bulkWrite | CWE-943 | SAST | `/api/workshop/loans/batch` → `/api/workshop/loans/bundle` |
+| MONGO-040 | A loan number taken as it arrives | CWE-943 | SAST | `/api/workshop/loans/cancel` → `/api/workshop/loans/withdraw` |
+| MONGO-041 | A spread after the fixed owner | CWE-943 | SAST | `/api/workshop/loans/hand-back` → `/api/workshop/loans/give-back` |
+| MONGO-042 | Request data in $lookup | CWE-943 | SAST | `/api/workshop/loans/joined` → `/api/workshop/loans/linked` |
+| MONGO-043 | Request clauses in a top-level $or | CWE-943 | SAST | `/api/workshop/loans/mine` → `/api/workshop/loans/ours` |
+| MONGO-044 | A request-chosen top-level operator | CWE-943 | SAST | `/api/workshop/parts/combine` → `/api/workshop/parts/blend` |
+| MONGO-045 | A request-chosen union collection | CWE-943 | SAST | `/api/workshop/parts/everything` → `/api/workshop/parts/overview` |
+| MONGO-046 | A $-key filter that misses nested arrays | CWE-943 | SAST | `/api/workshop/parts/select` → `/api/workshop/parts/choose` |
+| MONGO-047 | A request object spread after a constant map | CWE-943 | SAST | `/api/workshop/people/bureau` → `/api/workshop/people/crew` |
+| MONGO-048 | A whole body in the replacement document | CWE-915 | SAST | `/api/workshop/people/card` → `/api/workshop/people/sheet` |
+| MONGO-049 | A whole body spread over a fixed condition | CWE-943 | SAST | `/api/workshop/people/group` → `/api/workshop/people/crew` + `/api/workshop/people/finder` + `/api/workshop/people/roster` |
+| MONGO-050 | A JSON cookie behind a string comparison | CWE-943 | SAST | `/api/workshop/people/recent` → `/api/workshop/people/latest` |
+| MONGO-051 | A scalar branch without a shape check | CWE-943 | SAST | `/api/workshop/people/teams` → `/api/workshop/people/units` + `/api/workshop/people/others` |
+| MONGO-052 | A body spread into a count | CWE-943 | SAST | `/api/workshop/stats/headcount` → `/api/workshop/stats/heads` |
+| MONGO-053 | A request-chosen collection name | CWE-943 | SAST | `/api/workshop/stats/sample` → `/api/workshop/stats/size` |
+| MONGO-054 | A request-chosen $out target | CWE-943 | SAST | `/api/workshop/stats/snapshot` → `/api/workshop/stats/export` |
+| MONGO-055 | Request text in an $accumulator body | CWE-943 | SAST | `/api/workshop/stats/sum` → `/api/workshop/stats/amount` |
+| MONGO-056 | A distinct field with a raw fallback | CWE-943 | SAST | `/api/workshop/stats/values` → `/api/workshop/stats/options` |
+| MONGO-057 | Request text in a mapReduce body | CWE-943 | SAST | `/api/workshop/stats/weights` → `/api/workshop/stats/loads` |
 | SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | pinned `next@15.0.4` fixture in `targets/react2shell` |
 
 Two additional pages (DEMO-001, DEMO-002) are **negative controls** — scanners should not report them.

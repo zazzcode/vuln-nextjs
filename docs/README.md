@@ -17,6 +17,7 @@ Suggested reading order — each module is self-contained:
 | 5 | [ssr.md](vulnerabilities/ssr.md) | SSRF-001 request forgery · REDIR-001 open redirect |
 | 5b | [cookies.md](vulnerabilities/cookies.md) | COOKIE-001 to COOKIE-007 session cookie attributes, with tricky safe cases |
 | 5c | [mongodb.md](vulnerabilities/mongodb.md) | MONGO-001 to MONGO-027 query injection with the native MongoDB driver, with tricky safe cases |
+| 5d | [workshop.md](vulnerabilities/workshop.md) with its five family pages | MONGO-028 to MONGO-057, the second MongoDB batch under `pages/api/workshop/` with neutral names: the answer key plus per-scenario sections (sign-in, loans, parts, people, stats) |
 | 6 | [react2shell.md](vulnerabilities/react2shell.md) | SCA-001 dependency vulnerability (CVE-2025-66478) |
 | 6b | [dependencies.md](vulnerabilities/dependencies.md) | Vulnerable dependencies: installed now, and planned |
 | 7 | [demonstrations.md](vulnerabilities/demonstrations.md) | DEMO-001/002 negative controls (no findings expected) |

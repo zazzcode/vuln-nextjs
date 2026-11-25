@@ -53,15 +53,45 @@ Agents: each row links directly to the scenario's compact [expected-finding bloc
 | MONGO-025 | Request-controlled field name | CWE-943 | SAST | [ref](mongodb.md#mongo-025-agent) | `pages/api/mongo/directory/resolve.js` | `directory/locate.js` |
 | MONGO-026 | User text in $regex | CWE-943 | SAST | [ref](mongodb.md#mongo-026-agent) | `pages/api/mongo/invites/redeem.js` | `invites/claim.js` · `invites/check.js` · `invites/open.js` |
 | MONGO-027 | Incomplete escape before $regex | CWE-943 | SAST | [ref](mongodb.md#mongo-027-agent) | `pages/api/mongo/invites/accept.js` | `invites/join.js` |
+| MONGO-028 | A length check without a type check on a one-time code | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-028-agent) | `pages/api/workshop/desk/arrive.js` | `desk/checkin.js` |
+| MONGO-029 | A Zod schema that passes the second field through | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-029-agent) | `pages/api/workshop/desk/badge-in.js` | `desk/clock-in.js · desk/begin.js` |
+| MONGO-030 | A JSON header parsed into the filter | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-030-agent) | `pages/api/workshop/desk/context.js` | `desk/terminal.js` |
+| MONGO-031 | A loop-built filter without a type check | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-031-agent) | `pages/api/workshop/desk/enter.js` | `desk/unlock.js` |
+| MONGO-032 | A prefix probe built into $regex | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-032-agent) | `pages/api/workshop/desk/hint.js` | `desk/verify.js` |
+| MONGO-033 | A JSON.parse reviver that builds a RegExp | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-033-agent) | `pages/api/workshop/desk/import.js` | `desk/accept.js · desk/load.js` |
+| MONGO-034 | $eq on one field of a pair | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-034-agent) | `pages/api/workshop/desk/open-up.js` | `desk/start.js` |
+| MONGO-035 | An unsigned token claims object in the filter | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-035-agent) | `pages/api/workshop/desk/pass.js` | `desk/permit.js` |
+| MONGO-036 | A reset code taken as it arrives | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-036-agent) | `pages/api/workshop/desk/renew.js` | `desk/refresh.js` |
+| MONGO-037 | An unescaped badge pattern | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-037-agent) | `pages/api/workshop/desk/scan.js` | `desk/tap.js · desk/wave.js` |
+| MONGO-038 | One field coerced, its pair raw | CWE-943 | SAST | [ref](workshop-sign-in.md#mongo-038-agent) | `pages/api/workshop/desk/shift.js` | `desk/begin.js` |
+| MONGO-039 | Request filters in a bulkWrite | CWE-943 | SAST | [ref](workshop-loans.md#mongo-039-agent) | `pages/api/workshop/loans/batch.js` | `loans/bundle.js` |
+| MONGO-040 | A loan number taken as it arrives | CWE-943 | SAST | [ref](workshop-loans.md#mongo-040-agent) | `pages/api/workshop/loans/cancel.js` | `loans/withdraw.js` |
+| MONGO-041 | A spread after the fixed owner | CWE-943 | SAST | [ref](workshop-loans.md#mongo-041-agent) | `pages/api/workshop/loans/hand-back.js` | `loans/give-back.js` |
+| MONGO-042 | Request data in $lookup | CWE-943 | SAST | [ref](workshop-loans.md#mongo-042-agent) | `pages/api/workshop/loans/joined.js` | `loans/linked.js` |
+| MONGO-043 | Request clauses in a top-level $or | CWE-943 | SAST | [ref](workshop-loans.md#mongo-043-agent) | `pages/api/workshop/loans/mine.js` | `loans/ours.js` |
+| MONGO-044 | A request-chosen top-level operator | CWE-943 | SAST | [ref](workshop-parts.md#mongo-044-agent) | `pages/api/workshop/parts/combine.js` | `parts/blend.js` |
+| MONGO-045 | A request-chosen union collection | CWE-943 | SAST | [ref](workshop-parts.md#mongo-045-agent) | `pages/api/workshop/parts/everything.js` | `parts/overview.js` |
+| MONGO-046 | A $-key filter that misses nested arrays | CWE-943 | SAST | [ref](workshop-parts.md#mongo-046-agent) | `pages/api/workshop/parts/select.js` | `parts/choose.js` |
+| MONGO-047 | A request object spread after a constant map | CWE-943 | SAST | [ref](workshop-people.md#mongo-047-agent) | `pages/api/workshop/people/bureau.js` | `people/crew.js` |
+| MONGO-048 | A whole body in the replacement document | CWE-915 | SAST | [ref](workshop-people.md#mongo-048-agent) | `pages/api/workshop/people/card.js` | `people/sheet.js` |
+| MONGO-049 | A whole body spread over a fixed condition | CWE-943 | SAST | [ref](workshop-people.md#mongo-049-agent) | `pages/api/workshop/people/group.js` | `people/crew.js · people/finder.js · people/roster.js` |
+| MONGO-050 | A JSON cookie behind a string comparison | CWE-943 | SAST | [ref](workshop-people.md#mongo-050-agent) | `pages/api/workshop/people/recent.js` | `people/latest.js` |
+| MONGO-051 | A scalar branch without a shape check | CWE-943 | SAST | [ref](workshop-people.md#mongo-051-agent) | `pages/api/workshop/people/teams.js` | `people/units.js · people/others.js` |
+| MONGO-052 | A body spread into a count | CWE-943 | SAST | [ref](workshop-stats.md#mongo-052-agent) | `pages/api/workshop/stats/headcount.js` | `stats/heads.js` |
+| MONGO-053 | A request-chosen collection name | CWE-943 | SAST | [ref](workshop-stats.md#mongo-053-agent) | `pages/api/workshop/stats/sample.js` | `stats/size.js` |
+| MONGO-054 | A request-chosen $out target | CWE-943 | SAST | [ref](workshop-stats.md#mongo-054-agent) | `pages/api/workshop/stats/snapshot.js` | `stats/export.js` |
+| MONGO-055 | Request text in an $accumulator body | CWE-943 | SAST | [ref](workshop-stats.md#mongo-055-agent) | `pages/api/workshop/stats/sum.js` | `stats/amount.js` |
+| MONGO-056 | A distinct field with a raw fallback | CWE-943 | SAST | [ref](workshop-stats.md#mongo-056-agent) | `pages/api/workshop/stats/values.js` | `stats/options.js` |
+| MONGO-057 | Request text in a mapReduce body | CWE-943 | SAST | [ref](workshop-stats.md#mongo-057-agent) | `pages/api/workshop/stats/weights.js` | `stats/loads.js` |
 | SCA-001 | React2Shell (CVE-2025-66478) | CWE-502 | SCA | [ref](react2shell.md#sca-001-agent) | `targets/react2shell/package.json` | pinned on purpose |
 | DEMO-001 | Header reflection (no sink) | — | none | [ref](demonstrations.md#demo-001-agent) | `pages/vulnerable/header-injection.js` | — |
 | DEMO-002 | Dynamic import (no sink) | — | none | [ref](demonstrations.md#demo-002-agent) | `pages/vulnerable/dynamic-import.js` | — |
 
 Demonstrations are negative controls: scanners should **not** report them. Defense patterns across all protected routes: [validation-and-sanitization.md](../validation-and-sanitization.md).
 
-## Work in progress
+## Workshop (second MongoDB batch)
 
-[Workshop routes](workshop.md) is the second MongoDB batch. Its routes have no labels yet.
+[Workshop routes](workshop.md) — MONGO-028 to MONGO-057 — is the second MongoDB batch: 30 vulnerable routes and 34 safe ones under `pages/api/workshop/`, with neutral names. The answer key and the disputable-label record are on that page; the per-scenario sections are in the five family pages ([sign-in](workshop-sign-in.md), [loans](workshop-loans.md), [parts](workshop-parts.md), [people](workshop-people.md), [stats](workshop-stats.md)).
 
 ## Vulnerable dependencies
 
