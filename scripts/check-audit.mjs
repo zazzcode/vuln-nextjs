@@ -4,14 +4,20 @@
 // Any drift fails the check: a changed pin, a newly published advisory, or
 // advisory metadata updates. Review the difference, then re-snapshot with:
 //   pnpm audit:update
+// An advisory that is no longer reported is not drift to re-snapshot: a
+// vulnerable dependency was fixed. The update refuses to drop one unless that
+// advisory is retired by name:
+//   pnpm audit:update --retire=<id>[,<id>]
 // A nonzero audit exit is expected (findings exist); only a mismatch between
 // output and snapshot, or an audit that cannot run, is a failure.
 import { spawn } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { unretiredDrops } from './audit-snapshot.mjs';
 
 const snapshotPath = path.join(import.meta.dirname, '../tests/expected-audit.json');
 const update = process.argv.includes('--update');
+const retired = (process.argv.find((arg) => arg.startsWith('--retire=')) ?? '').slice('--retire='.length).split(',').filter(Boolean);
 
 function run(command, args) {
   return new Promise((resolve, reject) => {
@@ -42,8 +48,18 @@ const actual = JSON.stringify(parsed, null, 2) + '\n';
 const count = Object.keys(parsed.advisories ?? {}).length;
 
 if (update) {
+  let previous = {};
+  try { previous = JSON.parse(await readFile(snapshotPath, 'utf8')); } catch { /* no snapshot yet: nothing can be lost */ }
+  const dropped = unretiredDrops(previous, parsed, retired);
+  if (dropped.length) {
+    console.error(`FAIL: the update would remove ${dropped.length} advisor${dropped.length === 1 ? 'y' : 'ies'} from the snapshot. Each one is a finding the SCA tools must report.`);
+    for (const { id, module_name, vulnerable_versions, title } of dropped) console.error(`  ${id}  ${module_name} ${vulnerable_versions}  ${title}`);
+    console.error('  Restore the vulnerable version. To retire an advisory on purpose, name it: pnpm audit:update --retire=<id>[,<id>]');
+    process.exit(1);
+  }
   await writeFile(snapshotPath, actual);
   console.log(`Snapshot updated: tests/expected-audit.json (${count} advisories, audit exit ${code}).`);
+  if (retired.length) console.log(`Retired by name: ${retired.join(', ')}`);
   process.exit(0);
 }
 
@@ -59,7 +75,10 @@ const added = actualIds.filter((id) => !expectedIds.includes(id));
 const removed = expectedIds.filter((id) => !actualIds.includes(id));
 console.error(`FAIL: audit output drifted from tests/expected-audit.json (raw audit exit ${code}).`);
 if (added.length) console.error(`  New advisory IDs: ${added.join(', ')}`);
-if (removed.length) console.error(`  No longer reported: ${removed.join(', ')}`);
+if (removed.length) {
+  console.error(`  No longer reported: ${removed.join(', ')}`);
+  console.error('  That is a vulnerable dependency fixed. Restore the version. To retire one on purpose: pnpm audit:update --retire=<id>[,<id>]');
+}
 if (!added.length && !removed.length) console.error('  Advisory metadata changed; diff the JSON for details.');
-console.error('  Review the change, then re-snapshot with: pnpm audit:update');
+if (!removed.length) console.error('  Review the change, then re-snapshot with: pnpm audit:update');
 process.exit(1);

@@ -7,7 +7,7 @@ Deep references when needed: [docs/adding-scenarios.md](docs/adding-scenarios.md
 ## Invariants (violating any of these is a bad change, however green the tests)
 
 1. Never "fix" a vulnerable route — the flaws are the product. A test proving a flaw stopped being exploitable is a **regression**: restore it.
-2. Never upgrade pinned vulnerable dependencies (`targets/react2shell` next 15.0.4 / React 19.0.0; main app Next 13.4.19 / React 18.2.0). Retiring a scenario is a dedicated change.
+2. Never upgrade or remove a vulnerable dependency. **Every advisory in `tests/expected-audit.json` is a finding the SCA tools must report** — today `next` 13.4.19 in the main app (React 18.2.0) and `next` 15.0.4 in `targets/react2shell` (React 19.0.0), with the `postcss`, `sharp` and `zod` releases they pull in. Fixing one removes a scenario: restore the version. Retiring one is a dedicated change that names the advisory, `pnpm audit:update --retire=<id>`; the snapshot loses one no other way.
 3. Safe controls are **scoped claims** — "this pattern defeats this flaw for identical input", never "secure in general". Validation complements parameterization; it never replaces it.
 4. Safety rails stay: loopback-only, synthetic data, harmless markers (`42`, `zazzles-*-marker`), no real credentials/sensitive files.
 5. Generated ground truth is never hand-edited (see [Ground truth](#ground-truth)).
@@ -21,7 +21,7 @@ Deep references when needed: [docs/adding-scenarios.md](docs/adding-scenarios.md
 | API handlers / lib | `pnpm test` (unit suite imports handlers directly against real PGlite and an in-memory MongoDB server — no web server needed) | Exploitable outcome + safe rejection per scenario |
 | API routes / pages | `pnpm build`, then against a running `pnpm start`: `pnpm test:api` (Playwright `request` fixture — no browser needed); `pnpm test:browser` for anything executing client-side | Vulnerable/protected pairs over real HTTP; real-browser execution/non-execution |
 | `lib/catalog.json` or any scenario source | `pnpm scenario:check` — expect it to fail until you re-snapshot (below) | Ground truth must move with the change |
-| Dependencies / lockfile | `pnpm audit:check` — expect drift until `pnpm audit:update` | Audit snapshot is the SCA scenario |
+| Dependencies / lockfile | `pnpm audit:check` — a new advisory is drift to re-snapshot; a missing one is a fixed vulnerability, to restore | Every advisory in the snapshot is an SCA finding |
 | Anything | `pnpm lint` | Style/import health |
 
 Always, before pushing: the full matrix from [docs/setup-and-testing.md](docs/setup-and-testing.md). CI runs exactly that set and must stay green.
@@ -31,6 +31,7 @@ Always, before pushing: the full matrix from [docs/setup-and-testing.md](docs/se
 - A vuln-side assertion failing usually means someone hardened a flaw — restore the vulnerability, don't weaken the test.
 - A safe-side assertion failing means a control stopped neutralizing the identical payload — fix the control, not the test.
 - `scenario:check` / `audit:check` failing after an intentional change is expected — re-snapshot and put the manifest update in the **same commit** with a justification. A manifest update with no source change is the anti-pattern reviewers reject.
+- `audit:check` reporting an advisory as *no longer reported* is not drift: a vulnerable dependency was fixed. Restore the version. Re-snapshot to pick up new advisories, or to retire one on purpose (`pnpm audit:update --retire=<id>`, in the commit that retires the scenario).
 - Browser "non-execution" assertions include a settle window and check marker properties (`window.__zazzlesXss`, `window.__labData`) — use `expect.poll` for execution, `waitForTimeout` + `toBeUndefined` for non-execution. Scope markup assertions to the rendered container (`#xss-output`, `.comment-body`): `__NEXT_DATA__` legitimately carries raw props.
 
 ## Ground truth
@@ -41,7 +42,7 @@ Always, before pushing: the full matrix from [docs/setup-and-testing.md](docs/se
 - `tests/expected-scanner-findings.json` — per-source must-find / must-not-flag + CWE for scanner evaluations (same command)
 - `tests/expected-audit.json` — `pnpm audit --prod --json` snapshot (`pnpm audit:update`)
 
-`pnpm audit --prod` exiting nonzero is correct. Only drift from the snapshot fails a check.
+`pnpm audit --prod` exiting nonzero is correct. Only drift from the snapshot fails a check. `pnpm audit:update` adds advisories freely and removes one only when it is retired by name (`--retire=<id>`).
 
 ## Creating a vulnerability example
 

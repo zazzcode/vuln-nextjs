@@ -6,6 +6,8 @@ This page lists the vulnerable packages that the lab installs now, and the packa
 
 [`tests/expected-audit.json`](../../tests/expected-audit.json) is the complete answer: 67 advisories (6 critical, 24 high, 30 moderate, 7 low). `pnpm audit:check` compares it with `pnpm audit --prod --json`. The table is a summary of that snapshot on 2026-11-25. One advisory can affect more than one version, so the rows add up to more than 67.
 
+None of these versions may be upgraded or removed: each advisory is a finding a scanner must report. `pnpm audit:update` adds newly published advisories, and removes one only when it is retired by name (`pnpm audit:update --retire=<id>`).
+
 | Package | Version | How it gets in | Advisories | Severity |
 | --- | --- | --- | --- | --- |
 | `next` | 13.4.19 | direct, main app | 39 | 4 critical, 14 high, 16 moderate, 5 low |
