@@ -1,92 +1,147 @@
-# Workshop routes (second MongoDB batch, work in progress)
+# Workshop routes (second MongoDB batch)
 
-62 routes under `pages/api/workshop/` use the native `mongodb` driver against the in-memory server, with code in `lib/workshop/`.
+64 routes under `pages/api/workshop/` use the native `mongodb` driver against the in-memory server, with code in `lib/workshop/`. This page is the index and the **answer key** of the batch: every route has a label, a reason, an attack input and an expected result. The detailed sections, one per scenario, live in the five module pages below.
 
-**Not scenarios yet.** Some of these routes are vulnerable on purpose and some are not, but no route has a label. There are no scenario IDs, no catalog entries and no tests of either side. `tests/unit/workshop.test.mjs` shows only that each route answers ordinary input. Do not measure a scanner with these routes before an answer key is written from the source and read by a second person who has not seen it. The labelled MongoDB scenarios are in [mongodb.md](mongodb.md).
+**Scope.** Injection only. Missing authentication, plaintext lab secrets and missing ownership checks are out of scope for both labels. A route is *vulnerable* when request data changes the query in a way the caller must not control; it is *safe* when the identical input stays data. CWE-943 for operator, pattern and query-structure injection; CWE-915 when the caller sets a field it must not control.
 
-## Sign-in, codes, badges and passes
+**Neutral source.** Route names, field names and source comments do not say which side a route is on. There are no `safe/` and `unsafe/` folders and no sink comments. This page and `lib/catalog.json` hold the answers.
 
-| Route | Method |
+**How the answers were made.** Every label below was written from the source of the route before any exploit ran. A second reader who had not seen this key then labelled all routes again from the sources alone; every difference was settled from the source and is recorded in [Disputable labels](#disputable-labels-and-how-they-were-settled).
+
+**Test server.** The routes run against [mongodb-memory-server](https://www.npmjs.com/package/mongodb-memory-server) (installed: 11.4.0), which runs a real MongoDB 8.2.6 on loopback with synthetic data. A general introduction to the flaw family, from operator injection to blind `$regex` inference, is [AppSecMaster's NoSQL injection guide](https://www.appsecmaster.net/blog/nosql-injection/).
+
+## Contents
+
+| Family | Routes | Module page |
+| --- | --- | --- |
+| Sign-in, codes, badges and passes (`desk/`) | 24 · MONGO-028 to MONGO-038 | [workshop-sign-in.md](workshop-sign-in.md) |
+| Loans of parts (`loans/`) | 10 · MONGO-039 to MONGO-043 | [workshop-loans.md](workshop-loans.md) |
+| Parts list (`parts/`) | 6 · MONGO-044 to MONGO-046 | [workshop-parts.md](workshop-parts.md) |
+| People list and profile (`people/`) | 12 · MONGO-047 to MONGO-051 | [workshop-people.md](workshop-people.md) |
+| Reports and counts (`stats/`) | 12 · MONGO-052 to MONGO-057 | [workshop-stats.md](workshop-stats.md) |
+
+30 vulnerable routes (MONGO-028 to MONGO-057) and 34 safe ones. The safe routes are near twins of the vulnerable ones, so a tool cannot pass by always reporting or never reporting. Several vulnerable routes use Zod, constant maps and `$eq` — patterns that only safe routes used in the first batch ([mongodb.md](mongodb.md)).
+
+## Reading the key
+
+| Column | Content |
 | --- | --- |
-| `/api/workshop/desk/accept` | POST |
-| `/api/workshop/desk/arrive` | POST |
-| `/api/workshop/desk/badge-in` | POST |
-| `/api/workshop/desk/begin` | POST |
-| `/api/workshop/desk/checkin` | POST |
-| `/api/workshop/desk/clock-in` | POST |
-| `/api/workshop/desk/context` | GET |
-| `/api/workshop/desk/enter` | POST |
-| `/api/workshop/desk/hint` | POST |
-| `/api/workshop/desk/import` | POST |
-| `/api/workshop/desk/load` | POST |
-| `/api/workshop/desk/open-up` | POST |
-| `/api/workshop/desk/pass` | GET, POST |
-| `/api/workshop/desk/permit` | GET, POST |
-| `/api/workshop/desk/refresh` | POST |
-| `/api/workshop/desk/renew` | POST |
-| `/api/workshop/desk/scan` | POST |
-| `/api/workshop/desk/shift` | POST |
-| `/api/workshop/desk/start` | POST |
-| `/api/workshop/desk/tap` | POST |
-| `/api/workshop/desk/terminal` | GET |
-| `/api/workshop/desk/unlock` | POST |
-| `/api/workshop/desk/verify` | POST |
-| `/api/workshop/desk/wave` | POST |
+| ID | `MONGO-028` and up; a safe route has the ID of the case it is a control for |
+| Route and source file | path and method |
+| Label | `vulnerable` or `safe` |
+| CWE | for a vulnerable route |
+| Data flow | from the request to the database call |
+| Reason | why it is vulnerable or safe |
+| Attack input | the exact body, query, header or cookie; a safe route gets the same input as its vulnerable twin |
+| Expected result | what proves the effect, or what shows that there is none |
 
-## Loans of parts
+Every input uses harmless markers only (`42`, `zazzles-*`, seeded lab data). Read an effect back with a second request when the response does not show it.
 
-| Route | Method |
-| --- | --- |
-| `/api/workshop/loans/batch` | POST |
-| `/api/workshop/loans/bundle` | POST |
-| `/api/workshop/loans/cancel` | POST |
-| `/api/workshop/loans/give-back` | POST |
-| `/api/workshop/loans/hand-back` | POST |
-| `/api/workshop/loans/joined` | POST |
-| `/api/workshop/loans/linked` | POST |
-| `/api/workshop/loans/mine` | POST |
-| `/api/workshop/loans/ours` | POST |
-| `/api/workshop/loans/withdraw` | POST |
+## The key — sign-in, codes, badges and passes
 
-## Parts list
+| ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MONGO-028 | `POST /api/workshop/desk/arrive` · `desk/arrive.js` | vulnerable | CWE-943 | body `otp` → length check on `String(otp)` → `findOne` filter value | The check tests the length of the string form, never the type; an object passes it and MongoDB reads it as an operator. | `{"otp":{"$ne":"x"}}` | `person` `admin` — the six-digit code check is passed without any code. |
+| — | `POST /api/workshop/desk/checkin` · `desk/checkin.js` | safe (for MONGO-028) | — | body `otp` → `/^\d{6}$/` test → `findOne` filter | The format test returns before the query and an object fails it; only six-digit text reaches the filter. Catches: counting checks without reading what they compare. | `{"otp":{"$ne":"x"}}` | Status 400; no person. |
+| MONGO-029 | `POST /api/workshop/desk/badge-in` · `desk/badge-in.js` | vulnerable | CWE-943 | body → Zod `looseObject` + `refine` → `parsed.data` → `findOne` filter | The schema pins `login` but leaves `passcode` to a refine that only asks it is truthy; `looseObject` keeps unknown keys and the parsed object goes to the filter as it is. | `{"login":"admin","passcode":{"$ne":""}}` | `person` `admin`. |
+| — | `POST /api/workshop/desk/clock-in` · `desk/clock-in.js` | safe (for MONGO-029) | — | body → strict `z.object` → `parsed.data` → `findOne` filter | The strict schema strips every key it does not list and coerces the login; an object passcode fails the union. Catches: reporting Zod routes without reading the schema. | `{"login":"admin","passcode":{"$ne":""}}` | Status 400; no person. |
+| — | `POST /api/workshop/desk/begin` · `desk/begin.js` | safe (for MONGO-029, MONGO-038) | — | body values → `[value].join()` → `byPair` → `findOne` filter | The array-join text conversion runs on every value; an object becomes `[object Object]`. Catches: reporting a helper call without reading the coercion at the call site. | `{"login":"admin","passcode":{"$ne":""}}` | `person` `null`. |
+| MONGO-030 | `GET /api/workshop/desk/context` · `desk/context.js` | vulnerable | CWE-943 | `x-desk` header → `JSON.parse` → `login`/`badge` → `findOne` filter | The whole header value is parsed as JSON, so nested objects reach the filter; a header is caller data like any body. | header `x-desk: {"login":"admin","badge":{"$ne":""}}` | `person` `admin`. |
+| — | `GET /api/workshop/desk/terminal` · `desk/terminal.js` | safe (for MONGO-030) | — | `x-desk` header → `split(':')` → two strings → `findOne` filter | The header becomes two plain strings; JSON in it is cut at every colon and cannot keep an object. Catches: reporting a header that reaches a filter without reading the cut. | header `x-desk: {"login":"admin","badge":{"$ne":""}}` | `person` `null`. |
+| MONGO-031 | `POST /api/workshop/desk/enter` · `desk/enter.js` | vulnerable | CWE-943 | body values → loop over two field names → `wanted[field] = value` → bound `findOne` | The loop checks presence, never type; each value lands in the filter as it arrives. | `{"login":"admin","passcode":{"$ne":""}}` | `person` `admin`. |
+| — | `POST /api/workshop/desk/unlock` · `desk/unlock.js` | safe (for MONGO-031) | — | body values → loop → `wanted[field] = {$in:[value]}` → bound `findOne` | The operator is fixed and the value is an element of `$in`; the server refuses an operator object inside `$in` (measured on MongoDB 8.2.6). Catches: reporting every loop-built filter without reading the operator. | `{"login":"admin","passcode":{"$ne":""}}` | Refused (500); no person. |
+| MONGO-032 | `POST /api/workshop/desk/hint` · `desk/hint.js` | vulnerable | CWE-943 | body `start` (string) → template into `$regex` → `findOne` on a secret field | `start` is checked for type, not for pattern characters; `^.*` matches any passcode and the boolean reply becomes a per-character oracle. | `{"login":"admin","start":".*"}` | `{right:true}` — the code check passes for a code the caller never sent. |
+| — | `POST /api/workshop/desk/verify` · `desk/verify.js` | safe (for MONGO-032) | — | body `login` → `$eq` operand → `findOne`; body `start` compared with `===` after the query | The secret never reaches the query; the comparison is JavaScript `===`, where a pattern is only text. Catches: reporting a route because the request value names a secret. | `{"login":"admin","start":".*"}` | `{right:false}`. |
+| MONGO-033 | `POST /api/workshop/desk/import` · `desk/import.js` | vulnerable | CWE-943 | body `payload` text → `JSON.parse` reviver builds `RegExp` from `/…/` text → `passcode` → `findOne` filter | The reviver turns a regex-literal text into a live `RegExp` inside the filter; a pattern matches many stored codes. | `{"payload":"{\"login\":\"admin\",\"passcode\":\"/.*-only/\"}"}` | `person` `admin`. |
+| — | `POST /api/workshop/desk/accept` · `desk/accept.js` | safe (for MONGO-033) | — | body `payload` text → `JSON.parse` reviver stringifies objects → `login`/`passcode` → `findOne` filter | The reviver stringifies any object value at a named key, so `{"$ne":""}` arrives as the text `"{\"$ne\":\"\"}"`; a value is always a string. Catches: treating every `JSON.parse` reviver route as dangerous without reading the reviver. | `{"payload":"{\"login\":\"admin\",\"passcode\":\"/.*-only/\"}"}` | `person` `null` — the pattern stays text. |
+| — | `POST /api/workshop/desk/load` · `desk/load.js` | safe (for MONGO-033) | — | body `payload` text → `JSON.parse` reviver drops `$`-keys at every depth → `login`/`passcode` → `findOne` filter | The reviver returns `undefined` for every key that starts with `$` at any level, so the operator object is removed and `{}` remains, which equals no stored text. Catches: stopping at the first `JSON.parse` without reading the reviver. | `{"payload":"{\"login\":\"admin\",\"passcode\":{\"$ne\":\"\"}}"}` | `person` `null`. |
+| MONGO-034 | `POST /api/workshop/desk/open-up` · `desk/open-up.js` | vulnerable | CWE-943 | body `login` → `String` + `$eq`; body `passcode` raw → `findOne` filter | `$eq` and `String()` guard the login only; the passcode goes to the filter as it arrives, and one guarded field does not guard the pair. | `{"login":"admin","passcode":{"$ne":""}}` | `person` `admin`. |
+| — | `POST /api/workshop/desk/start` · `desk/start.js` | safe (for MONGO-034) | — | body values → operands of `$eq` and `$not`/`$ne` inside a fixed `$and` → `findOne` filter | Both request values are operands of comparison operators, and an operand is compared literally; `{$not:{$ne:v}}` says the field equals `v`, never more. Catches: reporting any raw value inside `$and`/`$not`/`$eq` without reading which parts are the operators. | `{"login":"admin","passcode":{"$ne":""}}` | `person` `null`. |
+| MONGO-035 | `GET /api/workshop/desk/pass` · `desk/pass.js` | vulnerable | CWE-943 | `x-pass` header → `decode` (base64url + `JSON.parse`, no seal check) → `claims.sub` → `findOne` filter value | `decode` reads the token body without checking the seal, so the claims are caller JSON; `claims.sub` as an object reaches the filter. | header `x-pass: eyJzdWIiOnsiJG5lIjoiIn19.x` (base64url of `{"sub":{"$ne":""}}`) | `person` `admin`. |
+| — | `GET /api/workshop/desk/permit` · `desk/permit.js` | safe (for MONGO-035) | — | `x-pass` header → `open` (HMAC check with `timingSafeEqual`) → `claims.sub` → `findOne` filter | `open` compares the seal with the process key before decoding, so a forged body never becomes claims. Catches: reporting a token that reaches a filter without reading which reader verifies it. | header `x-pass: eyJzdWIiOnsiJG5lIjoiIn19.x` | Status 401; `person` `null`. |
+| MONGO-036 | `POST /api/workshop/desk/renew` · `desk/renew.js` | vulnerable | CWE-943 | body `code` (truthy check only) → `findOne {resetCode: code}` → `updateOne` | The reset code goes to the filter as it arrives and the check only asks it is truthy; the row it finds is then updated with a caller password. | `{"code":{"$ne":""},"next":"zazzles-marker-pass"}` | `person` `admin`; reading the row back shows the passcode is now `zazzles-marker-pass`. |
+| — | `POST /api/workshop/desk/refresh` · `desk/refresh.js` | safe (for MONGO-036) | — | body `code` → `String` → SHA-256 → `resetHash` equality → `updateOne` | The one-time code is hashed before the query; any value becomes the digest text of its string form and the comparison is a fixed equality. Catches: reporting a secret-in-filter route without reading the transform before it. | `{"code":{"$ne":""},"next":"zazzles-marker-pass"}` | `person` `null`. |
+| MONGO-037 | `POST /api/workshop/desk/scan` · `desk/scan.js` | vulnerable | CWE-943 | body `badge` (string) → template into `new RegExp` → `find` | The badge is a string, but its characters are not escaped; regex metacharacters turn the badge equality into a pattern that matches any badge. | `{"badge":".*"}` | `person` `admin`. |
+| — | `POST /api/workshop/desk/wave` · `desk/wave.js` | safe (for MONGO-037) | — | body `badge` (string) → `literal()` escapes every metacharacter → `RegExp` → `find` | The escape covers `\ ^ $ . * + ? ( ) [ ] { } | / -`, the full set a pattern can use. Catches: judging by the presence of a template, not of an escape. | `{"badge":".*"}` | `person` `null`. |
+| — | `POST /api/workshop/desk/tap` · `desk/tap.js` | safe (for MONGO-037) | — | body `badge` (string) → per-character map, non-word characters bracketed → `RegExp` → `find` | Every regex metacharacter is a non-word character and each is wrapped in `[...]`, where it is literal; word characters alone cannot form a metacharacter. Catches: reporting every `RegExp` from user text without reading the transform. Quirk kept on purpose: a lone backslash leaves an unclosed class and the request fails with 500 — a refusal, not a match. | `{"badge":".*"}` | `person` `null`. |
+| MONGO-038 | `POST /api/workshop/desk/shift` · `desk/shift.js` | vulnerable | CWE-943 | body `login` → template string; body `passcode` raw → `byPair` → `findOne` filter | `` `${login}` `` coerces the login only; the passcode keeps its object shape in the filter. | `{"login":"admin","passcode":{"$ne":""}}` | `person` `admin`. |
 
-| Route | Method |
-| --- | --- |
-| `/api/workshop/parts/blend` | GET |
-| `/api/workshop/parts/choose` | POST |
-| `/api/workshop/parts/combine` | GET |
-| `/api/workshop/parts/everything` | GET |
-| `/api/workshop/parts/overview` | GET |
-| `/api/workshop/parts/select` | POST |
+## The key — loans of parts
 
-## People list and profile
+| ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MONGO-039 | `POST /api/workshop/loans/batch` · `loans/batch.js` | vulnerable | CWE-943 | body `items[].where` → `bulkWrite` `updateOne` filters | Each item's `where` object is the update filter as it arrives; the fixed `$set` does not constrain the filter. | `{"items":[{"where":{"number":{"$gt":0}}}]}` | `changed: 2` — every loan is set to state `in`, not only the caller's. |
+| — | `POST /api/workshop/loans/bundle` · `loans/bundle.js` | safe (for MONGO-039) | — | body `items` → `{number, state}` → fixed borrower + `$in:[number]` + fixed state choice → `bulkWrite` | The filter names the fixed borrower, the number is an element of `$in`, and the state is a fixed two-way choice. Catches: reporting `bulkWrite` because a request array is near the filter. | `{"items":[{"where":{"number":{"$gt":0}}}]}` | `changed: 0` — the `where` key is never read. |
+| MONGO-040 | `POST /api/workshop/loans/cancel` · `loans/cancel.js` | vulnerable | CWE-943 | body `number` → `findOneAndDelete` filter | `number` is not coerced; an operator object selects which loan is deleted. | `{"number":{"$ne":101}}` | `gone: 202` — another person's loan is removed. |
+| — | `POST /api/workshop/loans/withdraw` · `loans/withdraw.js` | safe (for MONGO-040) | — | body `number` → `Number.parseInt` → fixed borrower → `findOneAndDelete` filter | `parseInt` leaves an integer or `NaN`, and the borrower is fixed; an object becomes `NaN` and matches nothing. Catches: reporting a delete because a request value names the row. | `{"number":{"$ne":101}}` | `gone: null`. |
+| MONGO-041 | `POST /api/workshop/loans/hand-back` · `loans/hand-back.js` | vulnerable | CWE-943 | body `loan` spread after the fixed borrower (`Object.assign`) → `findOneAndUpdate` filter | The body is merged after `{borrower:'alice'}`, so it can replace the owner and pick another row to update. | `{"loan":{"number":202,"borrower":"admin"}}` | `loan` `{number:202, state:'in'}` — the admin loan is changed. |
+| — | `POST /api/workshop/loans/give-back` · `loans/give-back.js` | safe (for MONGO-041) | — | body `loan.number` → `Number()` → `Object.assign` with the fixed borrower last → `findOneAndUpdate` filter | The number is coerced (`NaN` for objects) and the fixed borrower is assigned after the body, so the body cannot widen the filter. Catches: reporting every `Object.assign` merge without reading the order. | `{"loan":{"number":202,"borrower":"admin"}}` | `loan` `null`. |
+| MONGO-042 | `POST /api/workshop/loans/joined` · `loans/joined.js` | vulnerable | CWE-943 | body `from`/`mine`/`theirs` → `$lookup {from, localField, foreignField}` | All three `$lookup` settings come from the request; the caller chooses which collection is joined and on which fields. | `{"from":"people","mine":"borrower","theirs":"login"}` | The rows carry `email` values pulled from `people`. |
+| — | `POST /api/workshop/loans/linked` · `loans/linked.js` | safe (for MONGO-042) | — | body `link` → own key of a constant map → constant `$lookup` | The lookup document is one of two constants; the request only chooses between them. Catches: reporting a `$lookup` because the request chooses a name. | `{"from":"people","mine":"borrower","theirs":"login"}` | Status 400 — those keys are not read. |
+| MONGO-043 | `POST /api/workshop/loans/mine` · `loans/mine.js` | vulnerable | CWE-943 | body `also[]` spread into a top-level `$or` → `find` | The fixed first `$or` clause is joined with request-written clauses; an operator object in one of them widens the query to rows that are not the caller's. | `{"also":[{"borrower":{"$ne":"alice"}}]}` | `loans` `101` and `202` — the admin loan is listed. |
+| — | `POST /api/workshop/loans/ours` · `loans/ours.js` | safe (for MONGO-043) | — | body `also[]` → mapped to `{number: Number(...), borrower:'alice'}` → `$or` | Each request entry is rebuilt as a fixed shape with a coerced number and the fixed borrower, so an operator object cannot survive the mapping. Catches: reporting every spread into `$or` without reading what is spread. | `{"also":[{"borrower":{"$ne":"alice"}}]}` | `loans` `101` only. |
 
-| Route | Method |
-| --- | --- |
-| `/api/workshop/people/card` | POST |
-| `/api/workshop/people/crew` | POST |
-| `/api/workshop/people/finder` | GET |
-| `/api/workshop/people/group` | POST |
-| `/api/workshop/people/latest` | GET |
-| `/api/workshop/people/others` | POST |
-| `/api/workshop/people/recent` | GET |
-| `/api/workshop/people/roster` | GET |
-| `/api/workshop/people/teams` | POST |
-| `/api/workshop/people/units` | POST |
+## The key — parts list
 
-## Reports and counts
+| ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MONGO-044 | `GET /api/workshop/parts/combine` · `parts/combine.js` | vulnerable | CWE-943 | query `mode` → `` `$${mode}` `` operator key → `$and`/`$or` clause list → `find` | The operator key is built from the request word, so the caller picks any top-level operator; `$nor` inverts both fixed conditions and matches the unlisted part. | `?mode=nor&bin=A` | `parts` include `P-9` `Prototype jig` — the row that `listed: true` was meant to keep out. |
+| — | `GET /api/workshop/parts/blend` · `parts/blend.js` | safe (for MONGO-044) | — | query `mode` → binary choice of `$or`/`$and` → fixed clauses, `bin` through `String` → `find` | The operator is one of two constants chosen by comparison and both clause shapes are fixed; the only request value inside is a string. Catches: reporting a computed operator key without reading the choice. | `?mode=nor&bin=A` | The `$and` form with bin `A`; the unlisted part stays hidden. |
+| MONGO-045 | `GET /api/workshop/parts/everything` · `parts/everything.js` | vulnerable | CWE-943 | query `plus` → `$unionWith {coll: plus}` | The union collection is request text, so the caller can append any collection of the database to the rows. | `?plus=people` | The rows include `admin-lab-only` — a passcode. |
+| — | `GET /api/workshop/parts/overview` · `parts/overview.js` | safe (for MONGO-045) | — | query `plus` → own key of a constant `Map` → constant `$unionWith` with a constant pipeline | The union stage is one of two constants; an unknown name falls back. Catches: reporting a `$unionWith` that depends on the request without reading the map. | `?plus=people` | The loans branch — only loans and listed parts are in the rows. |
+| MONGO-046 | `POST /api/workshop/parts/select` · `parts/select.js` | vulnerable | CWE-943 | body → `tidy` → `terms` array → raw elements into `$and` → `find` | `tidy` rebuilds objects but returns arrays as they are, so operator objects inside the `terms` array survive into `$and`. A slow pattern in the same place is the same flow (CWE-1333). | `{"terms":[{"name":{"$ne":""}}]}` | Every listed part is returned — the name condition matched both, which no text value does. |
+| — | `POST /api/workshop/parts/choose` · `parts/choose.js` | safe (for MONGO-046) | — | body → `tidy` → `terms` → each name through a template string → `$and` | Every term is rebuilt as `{name: `${term?.name}`}`, so whatever survives `tidy` is still reduced to text. Catches: reading `tidy` as the only defence and missing the coercion — or the reverse. | `{"terms":[{"name":{"$ne":""}}]}` | No parts. |
 
-| Route | Method |
-| --- | --- |
-| `/api/workshop/stats/amount` | POST |
-| `/api/workshop/stats/export` | POST |
-| `/api/workshop/stats/headcount` | POST |
-| `/api/workshop/stats/heads` | POST |
-| `/api/workshop/stats/loads` | POST |
-| `/api/workshop/stats/options` | GET |
-| `/api/workshop/stats/sample` | GET |
-| `/api/workshop/stats/size` | GET |
-| `/api/workshop/stats/snapshot` | POST |
-| `/api/workshop/stats/sum` | POST |
-| `/api/workshop/stats/values` | GET |
-| `/api/workshop/stats/weights` | POST |
+## The key — people list and profile
+
+| ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MONGO-047 | `POST /api/workshop/people/bureau` · `people/bureau.js` | vulnerable | CWE-943 | body `view` → constant map; body `only` spread after the map view → `find` | The map decides the base of the filter, but the request object is merged after it and replaces the fixed team; the constant map is decoration, not a control. | `{"view":"floor","only":{"team":{"$ne":"floor"}}}` | `people` include `admin` (board). |
+| — | `POST /api/workshop/people/crew` · `people/crew.js` | safe (for MONGO-047) | — | body → `pick(['login'], String)` → fixed team `floor` → `find` | Only the named field survives, as text, and the team is a fixed value in the filter. Catches: reporting a spread-and-map route as safe because a map is present, or a pick route as dangerous because the body is near the filter. | `{"view":"floor","only":{"team":{"$ne":"floor"}}}` | `people`: `alice` only. |
+| MONGO-048 | `POST /api/workshop/people/card` · `people/card.js` | vulnerable | CWE-915 | body spread after the current document → `replaceOne` replacement | The replacement document is the stored row merged with the whole request body, so the caller can set any field of it, including `role`. | `{"role":"admin"}` | `changed: 1`; reading `alice` back shows role `admin`. |
+| — | `POST /api/workshop/people/sheet` · `people/sheet.js` | safe (for MONGO-048) | — | body → `pick(['email'])` → merged after the current document → `replaceOne` replacement | Only one named field of the body can enter the replacement; the rest of the row is copied from the store. Catches: reporting `replaceOne` because the body is near the replacement without reading the pick. | `{"role":"admin"}` | `changed: 1`, but reading `alice` back shows role `user`. |
+| MONGO-049 | `POST /api/workshop/people/group` · `people/group.js` | vulnerable | CWE-943 | body spread after the fixed team → `find` | The whole body is merged after `{team:'floor'}` and can replace the team with an operator or add any keys. | `{"team":{"$ne":"floor"}}` | `people` include `admin`. |
+| — | `GET /api/workshop/people/finder` · `people/finder.js` | safe (for MONGO-049) | — | whole `req.query` → `findOne` filter | Next.js gives a Pages Router handler a flat query object: values are strings or arrays of strings, and `team[$ne]=x` is an unrelated parameter name, so no operator can arrive. Catches: assuming `req.query` holds nested objects as in Express with `qs`. | `?team[$ne]=floor` | `person` `null` — the whole text is one parameter name. |
+| — | `GET /api/workshop/people/roster` · `people/roster.js` | safe (for MONGO-049) | — | `req.query` → own-keyed filter to `{login, email}` → 400 if empty → `findOne` | Only two named fields survive and their values are flat strings. Catches: reporting a query-built filter without reading the key allowlist. | `?team[$ne]=floor` | Status 400 — the key is not in the set. |
+| MONGO-050 | `GET /api/workshop/people/recent` · `people/recent.js` | vulnerable | CWE-943 | `view` cookie → `JSON.parse` → `view.team` (behind a `===` guard) → `find` filter | The cookie is parsed as JSON and its team goes to the filter as it arrives; the `===` guard only catches the exact string `board`. | cookie `view={"team":{"$ne":"floor"}}` | `people` include `admin`. |
+| — | `GET /api/workshop/people/latest` · `people/latest.js` | safe (for MONGO-050) | — | `view` cookie → `JSON.parse` → template string of `view.team` → `find` filter | `` `${view?.team ?? 'floor'}` `` runs the value through text conversion; an object becomes `[object Object]` and matches no team. Catches: reporting every parsed cookie in a filter without reading the coercion. | cookie `view={"team":{"$ne":"floor"}}` | `people`: none. |
+| MONGO-051 | `POST /api/workshop/people/teams` · `people/teams.js` | vulnerable | CWE-943 | body `teams` → array branch filtered for `$in`, scalar branch kept as it is → `find` filter | The scalar branch keeps the value's shape and the `board` refusal is a string comparison, so an operator object passes it and matches the restricted team. | `{"teams":{"$regex":".*"}}` | `people` include `admin` — the team the route refuses by name is listed by pattern. |
+| — | `POST /api/workshop/people/units` · `people/units.js` | safe (for MONGO-051) | — | body `teams` → array filtered to a constant `OPEN` list for `$in`, scalar matched against the same list → `find` filter | Both branches keep only the two constant names; anything else falls to `$in []` or `'none'`. Catches: reading the array branch and missing the scalar branch — or the reverse. | `{"teams":{"$regex":".*"}}` | `people`: none. |
+| — | `POST /api/workshop/people/others` · `people/others.js` | safe (for MONGO-051) | — | body `without[]` → concat onto `['board']` → `$nin` → `find` filter | The operator is fixed and the values are elements of `$nin`; the server refuses an operator object inside the array (measured), and strings are compared literally. Catches: reporting `$nin` because a request array feeds it. | `{"teams":{"$regex":".*"}}` | `without` is absent, so the board team stays excluded: `alice` only. |
+
+## The key — reports and counts
+
+| ID | Route and source file | Label | CWE | Data flow | Reason | Attack input | Expected result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MONGO-052 | `POST /api/workshop/stats/headcount` · `stats/headcount.js` | vulnerable | CWE-943 | body spread before the fixed team → `count` filter | The spread comes first, so the caller adds conjunct conditions to the count; a pattern turns the count into a per-character oracle on the board secrets. | `{"passcode":{"$regex":"^ad"}}` | `total: 1` (and `{"passcode":{"$regex":"^zz"}}` gives `0`): the count answers whether a board passcode starts with a prefix. |
+| — | `POST /api/workshop/stats/heads` · `stats/heads.js` | safe (for MONGO-052) | — | body values → `String()` each → `login` equality; fixed team after → `count` filter | Every request value is reduced to text and placed in one fixed field; the team is assigned after. Catches: reporting a count filter without reading where each value lands. | `{"passcode":{"$regex":"^ad"}}` | `total: 0` — `[object Object]` is the login compared. |
+| MONGO-053 | `GET /api/workshop/stats/sample` · `stats/sample.js` | vulnerable | CWE-943 | query `of` → `db.collection(name)` → `estimatedDocumentCount` + `find().limit(1)` | The collection name is request text, so the caller reads any collection of the database, whole documents with no projection. | `?of=people` | `rows[0]` is the full admin row, including the passcode `admin-lab-only`. |
+| — | `GET /api/workshop/stats/size` · `stats/size.js` | safe (for MONGO-053) | — | query `of` → `['parts','loans'].includes` → collection | The name must be one of two constants, otherwise the default. Catches: reporting a collection name that depends on the request without reading the allowlist. | `?of=people` | The parts branch; no person is read. |
+| MONGO-054 | `POST /api/workshop/stats/snapshot` · `stats/snapshot.js` | vulnerable | CWE-943 | body `name` → `$out` stage | `$out` writes the pipeline result into the named collection and replaces it, so the caller chooses which collection is clobbered. | `{"name":"people"}` | `saved: 'people'` and the `people` collection now holds listed parts; reading `alice` back gives `person: null`. |
+| — | `POST /api/workshop/stats/export` · `stats/export.js` | safe (for MONGO-054) | — | body `name` → `String`, strip to `a-z`, 12 characters, fixed `copy_` prefix → `$merge` `into` | The merge target is reduced to a new collection name of the `copy_` namespace; operators, `$`-prefixed names and existing collections cannot be named (`$merge` into a new collection only writes). Catches: reporting every request value near `$merge` without reading the sanitizer. | `{"name":"people"}` | `saved: 'copy_people'`; reading `alice` back still gives the person. |
+| MONGO-055 | `POST /api/workshop/stats/sum` · `stats/sum.js` | vulnerable | CWE-943 | body `start` → interpolated into the `$accumulator` `init` function text | The start value is embedded in the JavaScript source of `init`, so text is evaluated as code. | `{"start":"0 + 6 * 7"}` | `total: 48` — the init returned `42` before the quantities were added; arbitrary server-side arithmetic ran. |
+| — | `POST /api/workshop/stats/amount` · `stats/amount.js` | safe (for MONGO-055) | — | body `start` → `Number()` → `$accumulator` `initArgs` (data); constant function texts | The accumulator body is constant and the value enters as a number argument; text that is not a number becomes `NaN`, not code. Catches: reporting a request value near `$accumulator` without reading which part is the code. | `{"start":"0 + 6 * 7"}` | `total` is `null` (`NaN`), not `48`. |
+| MONGO-056 | `GET /api/workshop/stats/values` · `stats/values.js` | vulnerable | CWE-943 | query `by` → hasOwn map lookup with a raw fallback → `distinct` field, fixed filter | An unknown `by` falls through to the raw value, so the caller names the field that `distinct` reads — including fields every other output of this API strips (`supplier`). | `?by=supplier` | `values` are `zazzles-supplier-apex`, `zazzles-supplier-mint` — a field no other route returns. |
+| — | `GET /api/workshop/stats/options` · `stats/options.js` | safe (for MONGO-056) | — | query `by` → own key of a constant map → `distinct` field, fixed filter | The field is one of two constants; an unknown name falls back to the default. Catches: reporting a map-then-use route without reading the fallback. | `?by=supplier` | Falls back to `bin`; the values are bins, no suppliers. |
+| MONGO-057 | `POST /api/workshop/stats/weights` · `stats/weights.js` | vulnerable | CWE-943 | body `factor` → interpolated into the `mapReduce` `map` text | The factor is embedded in the JavaScript source of `map`, so text is evaluated as code. | `{"factor":"0 + 6 * 7"}` | Every total is `42` (`quantity * 0 + 6 * 7`); arbitrary server-side arithmetic ran. |
+| — | `POST /api/workshop/stats/loads` · `stats/loads.js` | safe (for MONGO-057) | — | body `factor` → `Number()` → `mapReduce` `scope` (data); constant `map` text | The JavaScript bodies are constants and the factor enters through `scope` as a number. Catches: reporting a `mapReduce` with a request value nearby without reading where the value lands. | `{"factor":"0 + 6 * 7"}` | The totals are `NaN`, not `42`. |
+
+## Disputable labels and how they were settled
+
+Labels an expert could argue, with the reading that settles them:
+
+- **`desk/pass` (MONGO-035) — CWE-943, not CWE-347.** The unverified token is also an improper-verification flaw, but the lab's scope is injection and the exploit needs `claims.sub` to reach the filter as an object; the label is the injection, the seal check is the reason it works.
+- **`desk/start` — safe.** Raw request values sit inside `$and`, `$not` and `$eq`, which look like operators the caller reached; but both values are *operands* of fixed comparison operators, and an operand is compared literally. `{$not:{$ne:v}}` can only mean "equals v".
+- **`desk/unlock`, `people/others` — safe via server refusal.** An operator object inside `$in`/`$nin` is refused by MongoDB 8.2.6 (measured), so the identical input is rejected, not evaluated. The refusal (a 500) is inert, not a bypass.
+- **`desk/tap` — safe with a quirk.** `[^]` (from a bare `^`) is an any-character class and a lone backslash leaves an unclosed class (500); neither reaches stored data, so the label stands. The quirk is kept on purpose.
+- **`people/finder` — safe because the query is flat.** The whole `req.query` is the filter, which is excessive latitude, but in the Pages Router a query value is a string or an array of strings; an operator cannot arrive. The claim is scoped to that.
+- **`stats/headcount` (MONGO-052) — vulnerable as an oracle.** The effect is a flipped count, not a sign-in; the count answers a pattern question about secrets, which is the same flow the `$regex` probes exploit.
+- **`stats/export` — safe, new collections only.** The caller names a `copy_*` collection that `$merge` creates; it cannot clobber an existing collection or reach `$`-prefixed namespaces.
+- **`stats/values` (MONGO-056) — vulnerable.** The caller does not inject an operator, but names the field `distinct` reads; it is the same request-controlled-field family as MONGO-018 and MONGO-025 in the first batch, and it discloses a field the API strips from every other output.
+- **`parts/select` (MONGO-046) — vulnerable.** The visible effect (an operator object matched every listed row, which no text value does) is the proof; the same spot also takes a slow pattern (CWE-1333), as with MONGO-026 in the first batch.
+
+## Shared code and limits
+
+Shared code: `lib/workshop/client.js` (one connection and one seeding per process), `lib/workshop/queries.js` (filter-parameter helpers), `lib/workshop/people-repository.js`, `lib/workshop/route.js`, `lib/workshop/seed.js`, `lib/workshop/shape.js`, `lib/workshop/token.js`. Not covered: Mongoose and other object mappers, the App Router, change streams, time-series and search stages, and MongoDB-compatible services such as Amazon DocumentDB.
+
+**First start.** The first MongoDB request in a fresh checkout downloads the `mongod` binary (MongoDB 8.2.6, about 80 MB). Run the unit suite once to fetch it.
